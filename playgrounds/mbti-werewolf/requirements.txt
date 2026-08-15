@@ -1,0 +1,20 @@
+# MBTI人狼シミュレーター 依存パッケージ
+#
+# バージョンは 2026-08-15 に実際にインストールした値。
+# すべてOSSライセンスで、利用に課金を必要としない（要件NF-02）。
+#
+# 経路ごとに必要なものが違う。
+#   CLI + StubBrain          : 追加インストール不要（標準ライブラリのみ）
+#   CLI + Ollama / Gemini    : httpx
+#   操作画面（ui サブコマンド）: fastapi, uvicorn
+#   テスト                   : pytest
+
+# Web層。`python -m mbti_werewolf ui` のときだけ読み込む。
+fastapi==0.128.8          # MIT License
+uvicorn==0.39.0           # BSD-3-Clause License
+
+# HTTP通信。OllamaBrain / GeminiBrain のときだけ読み込む。
+httpx==0.28.1             # BSD-3-Clause License
+
+# テスト。
+pytest==8.4.2             # MIT License

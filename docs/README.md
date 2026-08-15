@@ -17,4 +17,6 @@
 | `requirements.md` | 要求定義書（Confluence正本のマークダウン版） |
 | `system-requirements.md` | 要件定義書。システムが満たすべき要件と受入基準 |
 | `design.md` | 設計書。構成、処理シーケンス、データ構造、実装順序 |
+| `free-stack-check.md` | 無料構成の確認記録。依存のライセンス、課金経路がないことの確認、出力容量の実測 |
+| `diagrams/` | 設計書の図をPNGに書き出したもの。Confluenceから参照している |
 

@@ -1,0 +1,29 @@
+{
+  "player_count": 4,
+  "turn_count": 3,
+  "game_count": 3,
+  "functions": [
+    "Ne",
+    "Ti",
+    "Fe",
+    "Si"
+  ],
+  "role_assignment_mode": "seeded_random",
+  "role_composition": {
+    "werewolf": 1,
+    "villager": 3
+  },
+  "seed": 42,
+  "base_seed": 42,
+  "history_mode": "none",
+  "history_scope": null,
+  "brain": {
+    "provider": "stub",
+    "model": "",
+    "temperature": 0.8,
+    "max_output_chars": 200,
+    "timeout_seconds": 120,
+    "max_retries": 3
+  },
+  "machine_name": "yukawayrounoAir"
+}
