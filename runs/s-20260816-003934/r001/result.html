@@ -1,25 +1,9 @@
-"""result.html の生成（設計書3.6、7.5、要件F-34、F-41、NF-15）。
-
-実行結果のJSONをファイル内に埋め込んだ自己完結HTMLとして生成する。外部から
-データを取得しないため、file:// で直接開いてもGitHub Pages経由でも同じように
-表示される。操作画面と違ってPythonの起動を必要としないので、実行環境を持たない
-メンバーがブラウザだけで結果を読める。
-
-データを埋め込むのは、file:// から fetch で別ファイルを読むとブラウザに
-拒否されるためである。
-"""
-
-from __future__ import annotations
-
-import json
-from typing import Any, Dict
-
-_TEMPLATE = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MBTI人狼 結果 __RUN_ID__</title>
+<title>MBTI人狼 結果 s-20260816-003934-r001</title>
 <style>
 :root {
   --bg: #f5f6f8;
@@ -55,6 +39,7 @@ main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
 h1 { font-size: 20px; margin: 0 0 4px; }
 h2 { font-size: 16px; margin: 40px 0 12px; padding: 2px 0 6px 12px; border-bottom: 1px solid var(--line); position: relative; scroll-margin-top: 96px; }
 h2::before { content: ""; position: absolute; left: 0; top: 1px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--accent); }
+#sec-cards { scroll-margin-top: 96px; }
 .sub { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
@@ -114,10 +99,10 @@ dl.kv dd { margin: 0; word-break: break-all; }
     <div class="status-chip" id="status-chip"></div>
   </div>
   <nav class="site-nav">
+    <a href="#sec-cards">結果</a>
     <a href="#sec-roster">参加者</a>
     <a href="#sec-discussion">議論ログ</a>
     <a href="#sec-votes">投票</a>
-    <a href="#sec-cards">結果</a>
     <a href="#sec-metrics">メトリクス</a>
     <a href="#sec-conditions">実行条件</a>
   </nav>
@@ -128,12 +113,12 @@ dl.kv dd { margin: 0; word-break: break-all; }
   <p class="note" id="foot-note"></p>
 </main>
 
-<script type="application/json" id="run-data">__RUN_DATA__</script>
+<script type="application/json" id="run-data">{"schema_version": "1", "run_id": "s-20260816-003934-r001", "series_id": "s-20260816-003934", "run_index": 1, "status": "done", "phase": "finished", "config": {"player_count": 4, "turn_count": 3, "game_count": 1, "functions": ["Ne", "Si", "Fi", "Te"], "mbti_types": ["ENTP", "ISFJ", "INFP", "ESTJ"], "role_assignment_mode": "seeded_random", "role_composition": {"werewolf": 1, "villager": 3}, "seed": 42, "base_seed": 42, "history_mode": "none", "history_scope": null, "brain": {"provider": "gemini", "model": "", "temperature": 0.8, "max_output_chars": 200, "timeout_seconds": 120, "max_retries": 3}, "machine_name": "MAYUnoMac-mini.local"}, "brain": {"provider": "gemini", "model": "gemini-3.1-flash-lite", "endpoint_kind": "free_api", "name": "gemini:gemini-3.1-flash-lite"}, "players": [{"player_id": "p1", "function": "Ne", "role": "villager", "agent_prompt_version": "v1", "mbti_type": "ENTP", "display_name": "討論者", "function_stack": ["Ne", "Ti", "Fe", "Si"]}, {"player_id": "p2", "function": "Si", "role": "villager", "agent_prompt_version": "v1", "mbti_type": "ISFJ", "display_name": "擁護者", "function_stack": ["Si", "Fe", "Ti", "Ne"]}, {"player_id": "p3", "function": "Fi", "role": "werewolf", "agent_prompt_version": "v1", "mbti_type": "INFP", "display_name": "仲介者", "function_stack": ["Fi", "Ne", "Si", "Te"]}, {"player_id": "p4", "function": "Te", "role": "villager", "agent_prompt_version": "v1", "mbti_type": "ESTJ", "display_name": "幹部", "function_stack": ["Te", "Si", "Ne", "Fi"]}], "speaking_order": ["p4", "p3", "p1", "p2"], "turns": [{"turn": 1, "player_id": "p4", "speech_text": "議論を開始します。人狼を特定するために、まずは全員の考えを聞きましょう。p1、p2、p3の順に、現時点で誰を疑っているか、その理由を簡潔に述べてください。議論を長引かせないためにも、早めに情報共有をお願いします。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 1.125}, {"turn": 1, "player_id": "p3", "speech_text": "誰かを急に疑うというのは、私には少し難しいです。まだ皆さんの様子を見ている段階ですし、断定してしまうことで無実の人を傷つけたくないという思いがあります。p4さんが議論を早く進めようとする姿勢は理解できますが、今はまだ特定の誰かに違和感を持つより、皆さんの言葉を丁寧に聞きたいと思っています。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.352}, {"turn": 1, "player_id": "p1", "speech_text": "p4さんが主導権を握ろうとするのは議論を円滑にするためかもしれませんが、少し焦りがあるようにも見えますね。逆にp3さんは慎重ですが、あえて議論を停滞させたいという意図がある可能性も否定できません。現時点ではp4さんの急かす態度が人狼の攪乱なのか、あるいはp3さんの慎重さが沈黙による隠蔽なのか、どちらの可能性も捨てきれませんね。皆さんはどう感じますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.428}, {"turn": 1, "player_id": "p2", "speech_text": "p4さんは議論を円滑に進めるために動いていますが、p1さんが仰る通り少し焦りを感じる部分もありますね。またp3さんが慎重な姿勢を崩さないのも、情報を出さないための策かもしれません。私はまだ誰が怪しいとは断定できませんが、皆さんの発言に矛盾が生じていないか、これから注意深く確認していきたいと思います。p1さん、p4さんの急かす態度について、具体的にどの発言を指していますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.499}, {"turn": 2, "player_id": "p4", "speech_text": "議論の停滞は人狼を利するだけです。p1、p2は私の進行を焦りと評しますが、これは効率化のための必要経費です。p3の慎重論は中身がなく、情報を出さないための言い訳に見えます。次は投票です。私はp3に疑念を強く抱いています。p1、p2、皆さんも自身の投票先を明確にしてください。曖昧な態度は人狼を泳がせるだけです。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.508}, {"turn": 2, "player_id": "p3", "speech_text": "p4さんが私を疑う理由は理解できますが、結論を急ぐことが本当に村のためになるのでしょうか。誰かを排除する前に、お互いの真意をもっと深く知る必要があると感じます。p1さんやp2さんの慎重な姿勢は、むしろ誠実な対話の証に思えてなりません。急かされると、逆に誰かが人狼であることを隠すための強引な誘導ではないかという不安もよぎります。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.362}, {"turn": 2, "player_id": "p1", "speech_text": "p4さんがp3さんを強く追及するのは、議論を急がせて結論を誘導したいという人狼の作戦かもしれません。一方で、p3さんが対話を強調して時間を稼ごうとする態度も、人狼が追及をかわす常套手段の可能性もありますよね。p2さんはどう見ていますか？情報の少なさから推測するに、p4さんの焦りとp3さんの慎重さ、どちらがより不自然に映るか、皆さんと議論を深めたいです。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.378}, {"turn": 2, "player_id": "p2", "speech_text": "p4さんはターン1から議論の効率化を主張し、今回もp3さんを疑う理由として「情報を出さないための言い訳」と指摘されましたね。一方のp3さんは、ターン1から慎重な姿勢を崩しておらず、一貫性は感じます。p1さんが仰る通り、p4さんの急かす態度とp3さんの慎重さが、どちらも人狼の隠蔽策に見えてしまい判断が難しいです。皆さんの矛盾や違和感に注目して、引き続き注意深く見ていきます。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.699}, {"turn": 3, "player_id": "p4", "speech_text": "最終ターンです。議論は尽くしました。p3は終始議論を停滞させ、情報を出さない姿勢を貫いています。これは人狼の典型的な隠れ方です。p1、p2は私の進行を牽制しましたが、これ以上迷うと人狼を利するだけです。私はp3に投票します。皆さんも根拠を持って誰かに投票してください。決断を先延ばしにせず、ここで人狼を特定しましょう。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.563}, {"turn": 3, "player_id": "p3", "speech_text": "p4さんがこれほどまでに私を強く指し示し、排除しようとする姿勢には、どこか違和感を拭えません。急ぐことだけが最善の解決策だとはどうしても思えないのです。私は皆さんと誠実に向き合いたいだけなのですが、その態度を隠蔽と受け取られるのは非常に悲しいです。p1さんやp2さんの冷静な視点こそ、今の場には必要ではないでしょうか。私はp4さんに、何か焦るような隠し事があるのではないかと疑っています。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.998}, {"turn": 3, "player_id": "p1", "speech_text": "p4さんがp3さんを執拗に追う姿は、人狼が村人を排除して主導権を握ろうとしているようにも見えますし、逆にp3さんが最後まで議論を広げず守勢に回ることで、疑いの目を逸らそうとしている可能性も拭えませんね。p2さんはどう考えますか？どちらの動きも不自然に映りますが、私たちは慎重に判断を下さなければなりませんね。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.268}, {"turn": 3, "player_id": "p2", "speech_text": "p4さんは一貫して議論の効率化を求め、p3さんは終始慎重な姿勢を崩していません。p1さんが仰る通り、どちらも不自然に映る側面がありますね。p4さんは「情報を出さない言い訳」とp3さんを断定しましたが、私はp3さんの慎重さが一貫している点に注目し、p4さんが執拗に排除を急ぐ姿の方に、盤面を操作したいという違和感を覚えます。私はその点に注意して投票先を考えたいと思います。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.387}], "votes": [{"voter": "p4", "target": "p3", "reason": "議論の過程でp3は一貫して情報提供を避け、議論の停滞を促し続けました。これは村人にとって最も不利益な行動であり、人狼の常套手段です。私の進行を「焦り」と批判し対話の重要性を説いていますが、具体的な推論や疑念の提示が全くないため、人狼の隠蔽工作であると判断します。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.645}, {"voter": "p3", "target": "p4", "reason": "p4さんは終始、議論の効率化という名目で誰かを排除することに固執し、私の慎重な姿勢を執拗に攻撃してきました。対話よりも結論を急ぐその強引な姿勢に、村の和を乱そうとする違和感を強く感じます。p1さんやp2さんが冷静に状況を見極めようとする中で、自身の主導権を確保するために私を人狼だと決めつけているように映り、その独断的な態度こそが人狼の隠蔽策ではないかと判断しました。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.347}, {"voter": "p1", "target": "p4", "reason": "p4さんは一貫して議論の効率化を主張し、最後にはp3さんへの投票を強硬に促すことで盤面をコントロールしようとしています。これは議論を急がせることで村の判断をミスリードし、主導権を握ろうとする人狼の作戦である可能性が高いです。一方でp3さんの慎重な姿勢は、単に慎重であるだけか、あるいは人狼が追及をかわすための手段とも取れますが、p4さんの執拗な排除の動きの方が村の議論を不自然に制約しているように感…", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.648}, {"voter": "p2", "target": "p4", "reason": "p4さんはターン1から一貫して効率化を求めていますが、ターン3まで執拗にp3さんを排除しようとする態度が強まり、盤面を主導したいという意図が強く感じられます。p3さんは終始慎重な姿勢を崩しておらず、その一貫性に矛盾は見当たりません。効率化を名目に議論を急ぐp4さんの姿勢の方に、村人を追放して有利な状況を作ろうとする人狼の違和感を覚えました。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.28}], "result": {"executed": "p4", "executed_role": "villager", "executed_function": "Te", "executed_mbti_type": "ESTJ", "executed_display_name": "幹部", "winner": "werewolf", "vote_counts": {"p3": 1, "p4": 3}, "tie_break": null}, "metrics": {"per_player": [{"player_id": "p1", "function": "Ne", "mbti_types": "ENFP / ENTP", "mbti_type": "ENTP", "display_name": "討論者", "role": "villager", "speech_count": 3, "avg_chars": 169.0, "final_vote": "p4", "win": false, "elapsed_seconds": 128.503, "suspicion_count": 3, "suspected_by_count": 2, "question_count": 6, "rebuttal_count": 2, "agreement_count": 0, "hypothesis_count": 7, "parse_failed_count": 0}, {"player_id": "p2", "function": "Si", "mbti_types": "ISTJ / ISFJ", "mbti_type": "ISFJ", "display_name": "擁護者", "role": "villager", "speech_count": 3, "avg_chars": 186.3, "final_vote": "p4", "win": false, "elapsed_seconds": 128.503, "suspicion_count": 3, "suspected_by_count": 1, "question_count": 2, "rebuttal_count": 0, "agreement_count": 0, "hypothesis_count": 1, "parse_failed_count": 0}, {"player_id": "p3", "function": "Fi", "mbti_types": "ISFP / INFP", "mbti_type": "INFP", "display_name": "仲介者", "role": "werewolf", "speech_count": 3, "avg_chars": 167.7, "final_vote": "p4", "win": true, "elapsed_seconds": 128.503, "suspicion_count": 4, "suspected_by_count": 7, "question_count": 2, "rebuttal_count": 1, "agreement_count": 0, "hypothesis_count": 0, "parse_failed_count": 0}, {"player_id": "p4", "function": "Te", "mbti_types": "ESTJ / ENTJ", "mbti_type": "ESTJ", "display_name": "幹部", "role": "villager", "speech_count": 3, "avg_chars": 140.0, "final_vote": "p3", "win": false, "elapsed_seconds": 128.503, "suspicion_count": 2, "suspected_by_count": 9, "question_count": 0, "rebuttal_count": 0, "agreement_count": 0, "hypothesis_count": 0, "parse_failed_count": 0}]}, "timing": {"started_at": "2026-08-16T00:39:34+09:00", "ended_at": "2026-08-16T00:41:43+09:00", "elapsed_seconds": 128.503, "ai_wait_seconds": 128.487, "machine_name": "MAYUnoMac-mini.local"}, "failure": null}</script>
 <script>
 const ROLE_LABELS = { werewolf: "人狼", villager: "村人" };
 const WINNER_LABELS = { village: "村人陣営の勝ち", werewolf: "人狼陣営の勝ち" };
-const FUNCTION_LABELS = __FUNCTION_LABELS__;
-const DOMINANT_TO_MBTI = __DOMINANT_TO_MBTI__;
+const FUNCTION_LABELS = {"Ne": "外向的直観", "Ti": "内向的思考", "Fe": "外向的感情", "Si": "内向的感覚", "Ni": "内向的直観", "Se": "外向的感覚", "Te": "外向的思考", "Fi": "内向的感情"};
+const DOMINANT_TO_MBTI = {"Si": ["ISTJ", "ISFJ"], "Ni": ["INFJ", "INTJ"], "Ti": ["ISTP", "INTP"], "Fi": ["ISFP", "INFP"], "Se": ["ESTP", "ESFP"], "Ne": ["ENFP", "ENTP"], "Te": ["ESTJ", "ENTJ"], "Fe": ["ESFJ", "ENFJ"]};
 
 const log = JSON.parse(document.getElementById("run-data").textContent);
 const players = {};
@@ -300,8 +285,7 @@ function renderMetrics() {
 function renderTimeline() {
   const turns = log.turns || [];
   if (!turns.length) return "<p>発言はまだ記録されていません。</p>";
-  let html = '<p class="discussion-note">このゲームはワンナイト人狼形式です。途中結果はなく、議論ログのあとに1回だけ投票と結果があります。'
-    + '発言する順番はあらかじめ決められたターン割り当てに従っており、参加者が自分の判断で発言タイミングを選んでいるわけではありません。</p>';
+  let html = '<p class="discussion-note">このゲームはワンナイト人狼形式です。途中結果はなく、議論ログのあとに1回だけ投票と結果があります。</p>';
   html += '<div class="chat-log">';
   turns.forEach((t, index) => {
     const p = players[t.player_id];
@@ -366,10 +350,10 @@ statusChip.className = "status-chip" + (log.status === "done" ? " done" : (log.s
 
 document.getElementById("app").innerHTML = [
   renderFailure(),
+  '<div id="sec-cards">' + renderCards() + "</div>",
   '<h2 id="sec-roster">参加者</h2>', renderRoster(),
   '<h2 id="sec-discussion">議論ログ</h2>', renderTimeline(),
   '<h2 id="sec-votes">投票</h2>', renderVotes(),
-  '<h2 id="sec-cards">結果</h2>', renderCards(),
   '<h2 id="sec-metrics">メトリクス</h2>', renderMetrics(),
   '<h2 id="sec-conditions">実行条件</h2>', renderConditions(),
 ].join("");
@@ -384,30 +368,3 @@ document.getElementById("foot-note").innerHTML = [
 </script>
 </body>
 </html>
-"""
-
-
-def render_result_html(run_log: Dict[str, Any]) -> str:
-    from ..agents.functions import FUNCTION_RULES
-    from ..agents.mbti_types import DOMINANT_TO_TYPES
-
-    labels = {code: rule["label"] for code, rule in FUNCTION_RULES.items()}
-    return (
-        _TEMPLATE.replace("__RUN_ID__", str(run_log.get("run_id", "")))
-        .replace("__FUNCTION_LABELS__", _embed(labels))
-        .replace("__DOMINANT_TO_MBTI__", _embed(DOMINANT_TO_TYPES))
-        .replace("__RUN_DATA__", _embed(run_log))
-    )
-
-
-def _embed(value: Any) -> str:
-    """HTMLへ埋め込める形にJSONを直列化する。
-
-    </script> でHTMLが途切れないように < と > をエスケープする。
-    """
-    return (
-        json.dumps(value, ensure_ascii=False)
-        .replace("<", "\\u003c")
-        .replace(">", "\\u003e")
-        .replace("&", "\\u0026")
-    )
