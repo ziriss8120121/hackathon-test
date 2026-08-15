@@ -45,7 +45,8 @@ def test_default_config(client):
 
     assert config["player_count"] == 4
     assert config["turn_count"] == 3
-    assert config["functions"] == ["Ne", "Ti", "Fe", "Si"]
+    assert config["functions"] == ["Ne", "Si", "Fi", "Te"]
+    assert config["mbti_types"] == ["ENTP", "ISFJ", "INFP", "ESTJ"]
     assert config["brain"]["provider"] in ("stub", "ollama", "gemini")
     assert "machine_name" in config
 

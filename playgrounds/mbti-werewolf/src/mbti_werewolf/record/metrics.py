@@ -157,6 +157,8 @@ def compute_metrics(
                 "player_id": pid,
                 "function": player.function,
                 "mbti_types": mbti_candidates_text(player.function),
+                "mbti_type": getattr(player, "mbti_type", None),
+                "display_name": getattr(player, "display_name", None),
                 "role": player.role,
                 "speech_count": len(texts),
                 "avg_chars": round(sum(char_counts) / len(char_counts), 1)

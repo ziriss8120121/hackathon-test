@@ -342,6 +342,10 @@ class Runner:
         write_text(run_path / "timeline.md", render_timeline(run_log))
         write_text(run_path / "result.html", render_result_html(run_log))
         _write_metrics_csv(run_path / "metrics.csv", run_log)
+        write_text(
+            self.runs_dir / "latest.html",
+            _render_latest_redirect(run_id, "{}/{}/result.html".format(series_id, run_dir_name(run_index))),
+        )
 
         write_status(
             status,
@@ -417,6 +421,36 @@ class Runner:
                 if len(items) >= limit:
                     return items
         return items
+
+
+_LATEST_TEMPLATE = """<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=./__TARGET__">
+<title>MBTI人狼 最新の結果</title>
+<style>
+body { font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; background: #12141a; color: #e6e8ee;
+  display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 24px; }
+a { color: #7aa2f7; }
+</style>
+</head>
+<body>
+<p>最新の実行結果（<code>__RUN_ID__</code>）へ移動します。自動で切り替わらない場合は
+<a href="./__TARGET__">こちらをタップ</a>してください。</p>
+</body>
+</html>
+"""
+
+
+def _render_latest_redirect(run_id: str, target: str) -> str:
+    """最新の result.html への自己完結リダイレクトページ（v1改善：スマホからの共有用）。
+
+    メタリフレッシュに対応しないブラウザ（LINEアプリ内ブラウザなど）向けに、
+    手動リンクも必ず添える。
+    """
+    return _LATEST_TEMPLATE.replace("__TARGET__", target).replace("__RUN_ID__", run_id)
 
 
 def _partial(engine: Any, fallback: GameRecord) -> GameRecord:

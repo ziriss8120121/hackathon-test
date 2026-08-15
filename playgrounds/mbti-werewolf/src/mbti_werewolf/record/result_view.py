@@ -65,6 +65,20 @@ td.wrap, th.wrap { white-space: normal; }
 dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; font-size: 13px; }
 dl.kv dt { color: var(--muted); }
 dl.kv dd { margin: 0; word-break: break-all; }
+.card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+.roster-card { display: flex; flex-direction: column; gap: 10px; }
+.roster-card-top { display: flex; align-items: center; gap: 12px; }
+.mbti-icon { width: 56px; height: 56px; border-radius: 12px; background: #12141a; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.mbti-icon-fallback { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+.roster-card-title { min-width: 0; }
+.roster-card-title .value { font-size: 15px; word-break: break-word; }
+.roster-card-title .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.roster-badges, .roster-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.badge.role-badge.village { border-color: var(--village); color: var(--village); }
+.badge.role-badge.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.badge.result-badge.win { border-color: var(--village); color: var(--village); }
+.badge.result-badge.lose { border-color: var(--werewolf); color: var(--werewolf); }
+.stat-pill { font-size: 11px; color: var(--muted); background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
 </style>
 </head>
 <body>
@@ -72,11 +86,7 @@ dl.kv dd { margin: 0; word-break: break-all; }
   <h1>MBTI人狼 実行結果</h1>
   <p class="sub" id="head-sub"></p>
   <div id="app"></div>
-  <p class="note">
-    MBTIおよび心理機能は、実在人物の診断や評価ではない。AIエージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
-    MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。<br>
-    このファイルは実行結果を埋め込んだ自己完結HTMLで、外部との通信を行わない。
-  </p>
+  <p class="note" id="foot-note"></p>
 </main>
 
 <script type="application/json" id="run-data">__RUN_DATA__</script>
@@ -89,6 +99,8 @@ const DOMINANT_TO_MBTI = __DOMINANT_TO_MBTI__;
 const log = JSON.parse(document.getElementById("run-data").textContent);
 const players = {};
 (log.players || []).forEach((p) => { players[p.player_id] = p; });
+const metricsByPlayer = {};
+((log.metrics && log.metrics.per_player) || []).forEach((r) => { metricsByPlayer[r.player_id] = r; });
 
 function esc(value) {
   return String(value === undefined || value === null ? "" : value)
@@ -100,12 +112,26 @@ function mbtiOf(fn) {
   return types.length ? types.join(" / ") : "—";
 }
 
+// MBTIタイプが確定しているプレイヤー（v1改善のMVPロースター）はタイプ名を、
+// 確定していない（旧ログ、functions直接指定など）場合は候補2タイプを表示する。
+function identityOf(entry) {
+  if (!entry) return "—";
+  if (entry.mbti_type) {
+    return entry.mbti_type + (entry.display_name ? "（" + entry.display_name + "）" : "");
+  }
+  return mbtiOf(entry.function);
+}
+
+function hasConfirmedMbti() {
+  return (log.players || []).some((p) => p.mbti_type);
+}
+
 function winningMbti() {
   const winner = (log.result || {}).winner;
   const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
   if (!wanted) return "決着なし";
   const parts = (log.players || []).filter((p) => p.role === wanted)
-    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function));
+    .map((p) => p.player_id + "（" + p.function + "）→ " + identityOf(p));
   return parts.join("、") || "—";
 }
 
@@ -113,7 +139,7 @@ function who(id) {
   const p = players[id];
   if (!p) return esc(id || "—");
   const fn = FUNCTION_LABELS[p.function] ? p.function + "／" + FUNCTION_LABELS[p.function] : p.function;
-  return esc(id) + "（" + esc(fn) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(mbtiOf(p.function)) + "）";
+  return esc(id) + "（" + esc(fn) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(identityOf(p)) + "）";
 }
 
 function topOf(key) {
@@ -122,7 +148,48 @@ function topOf(key) {
   const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
   if (!top) return "該当なし";
   return rows.filter((r) => (r[key] || 0) === top)
-    .map((r) => r.player_id + "（" + r.function + "）→ " + mbtiOf(r.function)).join("、") + " — " + top;
+    .map((r) => r.player_id + "（" + r.function + "）→ " + identityOf(r)).join("、") + " — " + top;
+}
+
+// このファイルは自己完結HTML（外部通信なし、F-41/NF-15）が前提のため、
+// アイコンは画像ではなく文字タイル（MBTIタイプ、無ければ主機能コード）にする。
+// 画像化したくなったら、このHTMLへ data URI として埋め込む形にすること。
+// 外部ファイルを指すimgタグは絶対に入れない。
+function mbtiIconHtml(p) {
+  const text = p.mbti_type ? p.mbti_type : p.function;
+  return '<div class="mbti-icon"><div class="mbti-icon-fallback">' + esc(text) + '</div></div>';
+}
+
+function renderRoster() {
+  const list = log.players || [];
+  if (!list.length) return "";
+  const cards = list.map((p) => {
+    const stack = (p.function_stack && p.function_stack.length ? p.function_stack : [p.function]).join(" / ");
+    const roleKey = p.role === "werewolf" ? "werewolf" : "village";
+    const m = metricsByPlayer[p.player_id] || {};
+    const winLabel = m.win === true ? "勝ち" : (m.win === false ? "負け" : "—");
+    const winKey = m.win === true ? "win" : (m.win === false ? "lose" : "");
+    const speechCount = m.speech_count === undefined || m.speech_count === null ? "—" : m.speech_count;
+    const suspectedCount = m.suspected_by_count === undefined || m.suspected_by_count === null ? "—" : m.suspected_by_count;
+    return '<div class="card roster-card">'
+      + '<div class="roster-card-top">'
+      + mbtiIconHtml(p)
+      + '<div class="roster-card-title">'
+      + '<div class="value">' + esc(identityOf(p)) + '</div>'
+      + '<div class="label">' + esc(p.player_id) + '</div>'
+      + '</div></div>'
+      + '<div class="roster-badges">'
+      + '<span class="badge role-badge ' + roleKey + '">' + esc(ROLE_LABELS[p.role] || p.role) + '</span>'
+      + '<span class="badge result-badge ' + winKey + '">' + esc(winLabel) + '</span>'
+      + '</div>'
+      + '<div class="sub">4心理機能 ' + esc(stack) + '</div>'
+      + '<div class="roster-stats">'
+      + '<span class="stat-pill">発言 ' + esc(speechCount) + '</span>'
+      + '<span class="stat-pill">疑われ ' + esc(suspectedCount) + '</span>'
+      + '</div>'
+      + '</div>';
+  }).join("");
+  return '<div class="cards">' + cards + '</div>';
 }
 
 function renderFailure() {
@@ -137,7 +204,7 @@ function renderCards() {
   const r = log.result || {};
   const winnerClass = r.winner === "village" ? "village" : (r.winner === "werewolf" ? "werewolf" : "");
   const wolves = (log.players || []).filter((p) => p.role === "werewolf")
-    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function)).join("、") || "—";
+    .map((p) => p.player_id + "（" + p.function + "）→ " + identityOf(p)).join("、") || "—";
   const cards = [
     ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[r.winner] || "決着なし") + "</span>"],
     ["勝ったMBTI", esc(winningMbti())],
@@ -155,11 +222,11 @@ function renderCards() {
 function renderMetrics() {
   const rows = (log.metrics && log.metrics.per_player) || [];
   if (!rows.length) return "<p>集計はありません。</p>";
-  const head = ["ID", "心理機能", "MBTI候補", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
+  const head = ["ID", "心理機能", "MBTI", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
   const body = rows.map((r) => "<tr>" + [
     r.player_id,
     r.function + (FUNCTION_LABELS[r.function] ? "（" + FUNCTION_LABELS[r.function] + "）" : ""),
-    mbtiOf(r.function),
+    identityOf(r),
     ROLE_LABELS[r.role] || r.role,
     r.speech_count, r.avg_chars, r.final_vote || "—",
     r.win === null || r.win === undefined ? "—" : (r.win ? "勝ち" : "負け"),
@@ -231,11 +298,20 @@ document.getElementById("head-sub").textContent =
 document.getElementById("app").innerHTML = [
   renderFailure(),
   renderCards(),
+  "<h2>参加者</h2>", renderRoster(),
   "<h2>会話タイムライン</h2>", renderTimeline(),
   "<h2>投票</h2>", renderVotes(),
   "<h2>メトリクス</h2>", renderMetrics(),
   "<h2>実行条件</h2>", renderConditions(),
 ].join("");
+
+document.getElementById("foot-note").innerHTML = [
+  "MBTIおよび心理機能は、実在人物の診断や評価ではない。AIエージェントの振る舞いを分けるためのフィクション設定として扱っている。",
+  hasConfirmedMbti()
+    ? "MBTIタイプが確定しているプレイヤーはそのタイプ名で表示している。確定していないプレイヤーは主機能からの候補2タイプ（要求定義書6.5）を表示している。"
+    : "MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。",
+  "このファイルは実行結果を埋め込んだ自己完結HTMLで、外部との通信を行わない。",
+].map(esc).join("<br>");
 </script>
 </body>
 </html>

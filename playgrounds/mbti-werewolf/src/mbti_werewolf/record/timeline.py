@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from ..agents.functions import function_label
-from ..agents.mbti_types import mbti_candidates_text
+from ..agents.mbti_types import mbti_candidates_text, mbti_type_label
 
 ROLE_LABELS = {"werewolf": "人狼", "villager": "村人"}
 WINNER_LABELS = {"village": "村人陣営の勝ち", "werewolf": "人狼陣営の勝ち"}
@@ -29,16 +29,22 @@ def render_timeline(run_log: Dict[str, Any]) -> str:
         "",
         "## 参加者",
         "",
-        "| ID | 心理機能 | MBTI候補 | 役職 |",
+        "| ID | 心理機能 | MBTI | 役職 |",
         "| --- | --- | --- | --- |",
     ]
     for player in run_log.get("players") or []:
+        mbti_type = player.get("mbti_type")
+        mbti_text = (
+            mbti_type_label(mbti_type, player.get("display_name"))
+            if mbti_type
+            else mbti_candidates_text(player["function"])
+        )
         lines.append(
             "| {} | {}（{}） | {} | {} |".format(
                 player["player_id"],
                 player["function"],
                 function_label(player["function"]),
-                mbti_candidates_text(player["function"]),
+                mbti_text,
                 ROLE_LABELS.get(player["role"], player["role"]),
             )
         )
@@ -103,8 +109,10 @@ def _who(players: Dict[str, Dict[str, Any]], player_id: str) -> str:
     player = players.get(player_id)
     if not player:
         return player_id or "（不明）"
+    display_name = player.get("display_name")
+    function_part = "{}・{}".format(display_name, player["function"]) if display_name else player["function"]
     return "{}（{} / {}）".format(
         player_id,
-        player["function"],
+        function_part,
         ROLE_LABELS.get(player["role"], player["role"]),
     )

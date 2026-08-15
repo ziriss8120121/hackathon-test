@@ -98,3 +98,15 @@ def function_label(code: str) -> str:
 
 def function_rule(code: str) -> str:
     return FUNCTION_RULES.get(code, {}).get("rule", "- 自然に振る舞う。")
+
+
+def function_gist(code: str) -> str:
+    """行動ルールの要点を1行で返す（4機能スタックの短い説明表示用）。
+
+    rule の先頭の箇条書き1行を流用する。新しい文面を別に持たないことで、
+    主機能として使うときの行動ルールと、補助/第三/劣等として触れるときの
+    説明が食い違わないようにする。
+    """
+    rule = FUNCTION_RULES.get(code, {}).get("rule", "")
+    first_line = rule.split("\n", 1)[0].strip()
+    return first_line[2:].strip() if first_line.startswith("- ") else first_line

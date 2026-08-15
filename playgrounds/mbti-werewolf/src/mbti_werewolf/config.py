@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .agents.functions import FUNCTION_CODES
+from .agents.mbti_types import TYPE_STACKS
 
 SCHEMA_VERSION = "1"
 PROMPT_VERSION = "v1"
@@ -92,6 +93,10 @@ class Config:
     turn_count: int = 3
     game_count: int = 1
     functions: List[str] = field(default_factory=lambda: ["Ne", "Ti", "Fe", "Si"])
+    #: プレイヤーをMBTIタイプそのもので定義する場合の指定（設計書4.3、v1改善）。
+    #: 指定が無い、または functions と主機能が食い違う場合は player 側で
+    #: 黙って旧来の「候補2タイプ」表示にフォールバックする（要件: 旧指定を壊さない）。
+    mbti_types: Optional[List[str]] = None
     role_assignment_mode: str = "seeded_random"
     role_composition: Dict[str, int] = field(
         default_factory=lambda: {"werewolf": 1, "villager": 3}
@@ -109,6 +114,7 @@ class Config:
             "turn_count": self.turn_count,
             "game_count": self.game_count,
             "functions": list(self.functions),
+            "mbti_types": list(self.mbti_types) if self.mbti_types is not None else None,
             "role_assignment_mode": self.role_assignment_mode,
             "role_composition": dict(self.role_composition),
             "seed": self.seed,
@@ -153,6 +159,15 @@ class Config:
                     len(self.functions), self.player_count
                 )
             )
+
+        if self.mbti_types is not None:
+            unknown_types = [t for t in self.mbti_types if t not in TYPE_STACKS]
+            if unknown_types:
+                raise ConfigError(
+                    "未知のMBTIタイプです: {}。使えるのは {} です。".format(
+                        ", ".join(unknown_types), ", ".join(sorted(TYPE_STACKS))
+                    )
+                )
 
         unknown_roles = [r for r in self.role_composition if r not in ROLES]
         if unknown_roles:
