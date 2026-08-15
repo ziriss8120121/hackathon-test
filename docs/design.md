@@ -388,7 +388,7 @@ sequenceDiagram
     R->>FS: runs/{series_id}/series.json を作成
 
     loop run_index = 1..100
-        R->>R: この試合のseed = base_seed + run_index
+        R->>R: この試合のseed = base_seed + run_index - 1
         R->>E: 1試合を進行
         alt 成功
             E-->>R: 試合結果
@@ -403,7 +403,7 @@ sequenceDiagram
     CLI-->>U: series_id、成功数、失敗数、保存先を表示
 ```
 
-多試合実行では1試合の失敗で全体を止めない。100試合のうち数試合が無料枠やタイムアウトで落ちても、残りの結果から傾向を読めるようにする。試合ごとのseedを `base_seed + run_index` で決めるため、同じ `base_seed` を指定すれば100試合の並びごと再現できる（F-21、F-22）。
+多試合実行では1試合の失敗で全体を止めない。100試合のうち数試合が無料枠やタイムアウトで落ちても、残りの結果から傾向を読めるようにする。試合ごとのseedを `base_seed + run_index - 1` で決めるため、1試合目は指定した `base_seed` がそのまま使われ、同じ `base_seed` を指定すれば100試合の並びごと再現できる（F-21、F-22）。
 
 ### 3.6 実行環境を持たないメンバーが結果を見る
 
@@ -475,6 +475,8 @@ stateDiagram-v2
 
 `Ne` と `Ti` は攻めの向きが違い、`Fe` と `Ti` は判断軸が対立する。ログを読んだときに差が見えるかどうかがこのテストの目的なので、似た機能を並べないことを優先した。使用した機能は `config.functions` とログに残るため、後から4種を変えて比較できる。
 
+8種すべて（`Ne` / `Ni` / `Se` / `Si` / `Te` / `Ti` / `Fe` / `Fi`）は `agents/functions.py` に定義済みである。既定は上記4種だが、設定の `functions` と人数を変えるだけで8人版を試せる（要件F-08）。
+
 ### 4.4 役職の割り当て
 
 seed付きランダムとする。
@@ -483,6 +485,7 @@ seed付きランダムとする。
 | --- | --- |
 | 方式 | `random.Random(seed)` で生存プレイヤーから人狼を選ぶ |
 | 記録 | `role_assignment_mode: "seeded_random"` と `seed` を `config` に残す |
+| 発言順 | 同じseedで並べ替え、`run_log.speaking_order` に残す。順番を固定すると先頭の心理機能だけが常に文脈なしで話すことになり、機能ごとの発言量の比較に偏りが入る |
 | 再現性 | 同じseedなら心理機能の割当、役職、発言順がすべて一致する（F-22） |
 
 固定割当にしなかったのは、心理機能と役職の組み合わせを試合ごとに変えたいからである。要求定義書8.1が見たい差分として「同じ心理機能の役職差」を挙げているため、seedを変えるだけで組み合わせが動く方式が適している。
@@ -510,15 +513,23 @@ class BrainError(Exception):
     kind: str  # unreachable / rate_limited / timeout / invalid_response
 
 
+class Request:
+    system: str
+    user: str
+    expect_keys: tuple[str, ...]  # 例: ("speech",) または ("target", "reason")
+    choices: tuple[str, ...]      # 投票先など、値が限られる項目の候補
+    tag: str                      # 呼び出しの識別。StubBrainの出力切替と調査に使う
+
+
 class Brain(Protocol):
     name: str          # ログに残す識別名。例: "ollama:gemma3:4b"
     endpoint_kind: str # "local" / "free_api" / "stub"
 
-    def generate(self, system: str, user: str) -> BrainResponse:
+    def generate(self, request: Request) -> BrainResponse:
         """1回の推論。失敗時は BrainError を送出する。"""
 ```
 
-`BrainResponse` は生成テキスト、待機時間、リトライ回数、`parse_failed` を持つ。JSONの解析とリトライはBrain側の責務とし、Agentは解釈済みの結果だけを扱う。
+`BrainResponse` は生成テキスト、待機時間、リトライ回数、`parse_failed` を持つ。JSONの解析とリトライはBrain側の責務とし、Agentは解釈済みの結果だけを扱う。期待するキーと選択肢を `Request` にまとめたのは、今後の追加で `generate` の署名が変わらないようにするためである。
 
 ### 5.2 プロンプトの構成とバージョン管理
 
@@ -527,7 +538,7 @@ class Brain(Protocol):
 | system | ゲームのルール、プレイヤー数、自分の `player_id`、自分の役職、心理機能の行動ルール、出力形式（JSONのみ）、字数上限 |
 | user | 公開ビュー（生存者一覧、これまでの発言）、現在のターン、今回の指示（発言または投票） |
 
-プロンプトは `agents/prompts/v1/` にファイルとして置き、`agent_prompt_version: "v1"` をログに残す（F-14）。文面を変えたら `v2` として新しいディレクトリを作り、古い版を残す。過去の実行結果と比較するときに、どの文面で得た結果かを特定できる状態にする。
+プロンプトは `agents/prompts/v1/` に4ファイルとして置き、`agent_prompt_version: "v1"` をログに残す（F-14）。`system_speak.md` / `user_speak.md` / `system_vote.md` / `user_vote.md`。user側の文面もコードから出し、版として比較できるようにする。文面を変えたら `v2` として新しいディレクトリを作り、古い版を残す。
 
 ### 5.3 役職の非対称性の担保
 
@@ -593,6 +604,7 @@ flowchart LR
 playgrounds/mbti-werewolf/
   README.md
   requirements.txt
+  pyproject.toml                # pip install -e . で python -m mbti_werewolf を使えるようにする
   config/
     default.json                # 既定の実験条件
   src/mbti_werewolf/
@@ -609,9 +621,11 @@ playgrounds/mbti-werewolf/
       functions.py              # 心理機能の行動ルール
       prompts/v1/
         system_speak.md
+        user_speak.md
         system_vote.md
+        user_vote.md
     brains/
-      base.py                   # Brain / BrainError
+      base.py                   # Brain / BrainError / Request
       stub.py
       ollama.py
       gemini.py
@@ -634,6 +648,10 @@ playgrounds/mbti-werewolf/
     test_reproducibility.py
     test_role_isolation.py
     test_brain_parse.py
+    test_tiebreak.py
+    test_failure_record.py
+    test_web_api.py
+    test_cli.py
 
 runs/
   s-20260815-170000/            # series
@@ -671,20 +689,22 @@ runs/
   "role_assignment_mode": "seeded_random",
   "role_composition": { "werewolf": 1, "villager": 3 },
   "seed": 42,
+  "base_seed": 42,
   "history_mode": "none",
   "history_scope": null,
   "brain": {
-    "provider": "ollama",
-    "model": "gemma3:4b",
+    "provider": "stub",
+    "model": "",
     "temperature": 0.8,
     "max_output_chars": 200,
-    "timeout_seconds": 120
+    "timeout_seconds": 120,
+    "max_retries": 3
   },
   "machine_name": "yuujirou-mba-m2"
 }
 ```
 
-`machine_name` は環境変数または設定で与える。要件のF-36が求める実行環境の記録であり、誰のPCで回した結果かを後から比較するために使う。
+`base_seed` は試合ごとにseedをずらした際の元の値である。1試合目の `seed` は `base_seed` そのものになる。`machine_name` は環境変数または設定で与える。要件のF-36が求める実行環境の記録であり、誰のPCで回した結果かを後から比較するために使う。既定の `provider` は `stub` である。Ollamaが未導入でもclone直後に1試合が完走し、出力と画面を確認できる。実際の観察は `--brain ollama` で行う。
 
 ### 6.4 実行状態（status.json）
 
@@ -693,6 +713,7 @@ runs/
 ```json
 {
   "run_id": "s-20260815-170000-r001",
+  "series_id": "s-20260815-170000",
   "status": "running",
   "phase": "day_discussion",
   "turn": 2,
@@ -728,6 +749,7 @@ runs/
     { "player_id": "p3", "function": "Fe", "role": "villager", "agent_prompt_version": "v1" },
     { "player_id": "p4", "function": "Si", "role": "villager", "agent_prompt_version": "v1" }
   ],
+  "speaking_order": ["p4", "p3", "p1", "p2"],
   "turns": [
     {
       "turn": 1,
@@ -848,6 +870,7 @@ run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,e
 | `GET` | `/api/runs` | 実行の一覧（`runs/` を走査） | `run_id`、`status`、開始時刻、勝敗の配列 |
 | `GET` | `/api/runs/{run_id}` | 状態と進捗 | `status.json` の内容 |
 | `GET` | `/api/runs/{run_id}/log` | 結果の全データ | `run_log.json` |
+| `GET` | `/api/series/{series_id}` | 連続実行の進捗と集計 | `series.json` |
 | `GET` | `/health` | 起動確認 | `{"status": "ok"}` |
 
 一覧をディレクトリの走査で作るため、コマンドから実行した結果も画面の一覧に現れる。要件のAC-16が求める「両経路で同じ実行と出力」を、別々の登録処理を持たない形で満たしている。
@@ -959,6 +982,8 @@ v1はルールベースで数える。AI分類はv2以降とする。
 | `test_brain_parse` | 前置き付き応答、JSON崩れ、生存者以外への投票を与え、試合が完走して `parse_failed` が記録される | F-17、AC-11 |
 | `test_tiebreak` | 得票が同数になる状況で試合が終了し、`tie_break` が記録される | F-06 |
 | `test_failure_record` | 通信失敗を模して、部分ログと `error.kind` が残る | F-37、NF-07、AC-11 |
+| `test_web_api` | 画面から実行するAPIの契約。条件設定、202応答、完了後の結果取得 | F-50〜F-56、AC-13〜AC-16 |
+| `test_cli` | コマンド起動と、設定だけでの条件変更（8人版を含む） | IF-07、F-23、AC-10、AC-16 |
 
 `test_reproducibility` はStubで実行する。実際のLLMは同じseedでも出力が揺れるため、再現性の対象は割当と進行順序に限る（NF-05の「脳の出力揺れは許容する」に対応）。
 
@@ -977,6 +1002,8 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M4 | Web層、操作画面、`status.json` による進捗 | AC-13〜AC-15を満たす |
 | M5 | テスト一式、無料であることの確認記録 | AC-07〜AC-11を満たす |
 | M6 | `GeminiBrain`、GitHub Pages公開 | 品質比較ができる、URLで共有できる |
+
+コードはM0からM6まで実装済みである。残っているのは、M2の実機確認（Ollama導入とモデル規約の記録）と、M6のGitHub Pages公開である。`GeminiBrain` のコードはあるが、APIキー未発行のため実機での品質比較は未実施。
 
 M0からM1までを推論なしで作る理由は、出力形式と画面の判断を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M2でモデルの品質が期待に届かなかった場合も、出力とテストを作り直さずにモデルだけを差し替えて再実行できる。
 
@@ -1024,7 +1051,7 @@ M0からM1までを推論なしで作る理由は、出力形式と画面の判�
 | 発言が長すぎて待機時間が伸びる | プロンプトでの字数指示と実装側の切り詰めの二重で抑える（5.4）。 |
 | 応答形式が安定せず集計できない | 段階的な解析とリトライ、最終フォールバックを持つ。`parse_failed` を残す（5.4）。 |
 | 画面の作り込みに時間を取られる | APIを先に固定し、画面は3ファイルに閉じる。作り直しても実行側を触らない（7.1）。 |
-| 出力が増えてリポジトリが重くなる | `schema_version` を持たせて古い結果を残せる形にし、100試合実行後に容量を実測して保存方針を決める（6.5）。 |
+| 出力が増えてリポジトリが重くなる | `schema_version` を持たせて古い結果を残せる形にする。stub実測で1試合あたり約32KB、100試合で約3.2MB。実LLMでは発言が長くなるため増えるが桁は変わらない。当面は出力をそのままcommitする（6.5、[無料構成の確認記録](./free-stack-check.md)）。 |
 | 性能の閾値が決まらない | `elapsed_seconds` と `ai_wait_seconds` を必ず記録し、初回実測後に上位文書へ反映する（6.5）。 |
 
 ---
