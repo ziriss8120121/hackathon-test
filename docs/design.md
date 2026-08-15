@@ -10,6 +10,7 @@ MBTI人狼AI先行テストについて、要件定義書の要件をどう実�
 | 最終更新 | 2026-08-15 |
 | 作成者 | ゆうじろう（Engineer） |
 | 上位文書 | [要件定義書](./system-requirements.md) / [要求定義書](./requirements.md) |
+| Confluence版 | [AIテスト_設計書](https://mayuun2.atlassian.net/wiki/spaces/hackathon/pages/1998901)（章ごとに子ページへ分割。図は`docs/diagrams/`のPNGを参照している） |
 | 本書の役割 | 要件定義書の「システムが何を満たすべきか」を、「どう実現するか」として確定する。 |
 | 本書の読者 | 実装担当（Engineer）。画面の見せ方はDesignerも参照する。 |
 
