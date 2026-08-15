@@ -83,9 +83,9 @@ ollama pull gemma3:4b
 python -m mbti_werewolf run --brain ollama --model gemma3:4b
 ```
 
-1試合あたりの推論回数は 発言12回 + 投票4回 = 16回。Gemini無料枠は1日あたりの上限が
-あるため、100試合以上の実行はOllamaで行う。無料枠の上限に達した場合は自動で
-切り替えず、`rate_limited` として失敗を記録する。設定を変えて人が再実行する。
+1試合あたりの推論回数は 発言12回 + 投票4回 = 16回。Geminiの既定モデルは
+`gemini-3.1-flash-lite`。無料枠は分間・1日の上限があるため、100試合以上はOllamaで行う。
+上限に達した場合は自動で切り替えず、`rate_limited` として失敗を記録する。
 
 ---
 

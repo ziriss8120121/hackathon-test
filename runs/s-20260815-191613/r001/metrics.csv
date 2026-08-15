@@ -1,5 +1,5 @@
-run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
-s-20260815-191613-r001,s-20260815-191613,p1,Ne,villager,3,60.3,p2,false,0.01,2,2,0,0,0,4
-s-20260815-191613-r001,s-20260815-191613,p2,Ti,villager,3,48.3,p4,false,0.01,2,2,2,0,0,0
-s-20260815-191613-r001,s-20260815-191613,p3,Fe,werewolf,3,45.0,p4,true,0.01,0,0,0,0,5,0
-s-20260815-191613-r001,s-20260815-191613,p4,Si,villager,3,40.3,p3,false,0.01,0,0,0,0,0,0
+run_id,series_id,player_id,function,mbti_types,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
+s-20260815-191613-r001,s-20260815-191613,p1,Ne,ENFP / ENTP,villager,3,60.3,p2,false,0.01,2,2,0,0,0,4
+s-20260815-191613-r001,s-20260815-191613,p2,Ti,ISTP / INTP,villager,3,48.3,p4,false,0.01,2,2,2,0,0,0
+s-20260815-191613-r001,s-20260815-191613,p3,Fe,ESFJ / ENFJ,werewolf,3,45.0,p4,true,0.01,0,0,0,0,5,0
+s-20260815-191613-r001,s-20260815-191613,p4,Si,ISTJ / ISFJ,villager,3,40.3,p3,false,0.01,0,0,0,0,0,0

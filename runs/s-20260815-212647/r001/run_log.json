@@ -1,0 +1,318 @@
+{
+  "schema_version": "1",
+  "run_id": "s-20260815-212647-r001",
+  "series_id": "s-20260815-212647",
+  "run_index": 1,
+  "status": "done",
+  "phase": "finished",
+  "config": {
+    "player_count": 4,
+    "turn_count": 3,
+    "game_count": 1,
+    "functions": [
+      "Ne",
+      "Ti",
+      "Fe",
+      "Si"
+    ],
+    "role_assignment_mode": "seeded_random",
+    "role_composition": {
+      "werewolf": 1,
+      "villager": 3
+    },
+    "seed": 42,
+    "base_seed": 42,
+    "history_mode": "none",
+    "history_scope": null,
+    "brain": {
+      "provider": "gemini",
+      "model": "gemini-3.1-flash-lite",
+      "temperature": 0.8,
+      "max_output_chars": 200,
+      "timeout_seconds": 120,
+      "max_retries": 3
+    },
+    "machine_name": "yukawayrounoAir"
+  },
+  "brain": {
+    "provider": "gemini",
+    "model": "gemini-3.1-flash-lite",
+    "endpoint_kind": "free_api",
+    "name": "gemini:gemini-3.1-flash-lite"
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "function": "Ne",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p2",
+      "function": "Ti",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p3",
+      "function": "Fe",
+      "role": "werewolf",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p4",
+      "function": "Si",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    }
+  ],
+  "speaking_order": [
+    "p4",
+    "p3",
+    "p1",
+    "p2"
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "player_id": "p4",
+      "speech_text": "p1、p2、p3の皆さんは、現時点でまだ発言をされていませんね。まずは皆さんの考えを聞かせてほしいです。議論の最初のターンなので、誰が怪しいか、あるいはどう進めるべきか、現状の認識を共有しましょう。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 1.387
+    },
+    {
+      "turn": 1,
+      "player_id": "p3",
+      "speech_text": "p4さん、議論のきっかけを作ってくれてありがとうございます。おっしゃる通り、まずは皆さんの考えを聞いて、慎重に話し合いたいですね。今のところ誰が怪しいとは断定できませんが、皆さんと協力して、村人として正しく推理できるように頑張りたいです。皆さんはどう思われますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.182
+    },
+    {
+      "turn": 1,
+      "player_id": "p1",
+      "speech_text": "p4さん、p3さん、議論の提案ありがとうございます。まだ状況が動いていないので判断が難しいですね。p2さんが静かなのが慎重なだけなのか、あるいは人狼として様子を見ている可能性も考えられます。一方で、あえて議論を促すことで場をコントロールしようとしているp4さんが、実は人狼という可能性もゼロではない気がしますね。皆さんはどう感じますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.428
+    },
+    {
+      "turn": 1,
+      "player_id": "p2",
+      "speech_text": "p1さんが私を疑っていますが、まだ議論開始直後で静観していることが人狼の根拠になるという指摘は論理的ではありません。逆にp1さんは、p4さんを誘導する形で人狼候補として挙げていますが、その推論の根拠が曖昧です。現状では、情報を出そうとするp4さんより、他者を牽制するp1さんの方が思考が不透明に感じられます。皆さんの発言の整合性を今後も注視します。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.528
+    },
+    {
+      "turn": 2,
+      "player_id": "p4",
+      "speech_text": "p1さんはターン1でp2さんを疑い、同時に私を誘導役と指摘していましたね。一方でp2さんはp1さんの推論の根拠が曖昧だと反論していました。お二人の主張は対立していますが、これまでの発言内容に矛盾はありません。p3さんは慎重な姿勢を維持されています。皆さんの発言を振り返ると、現状ではp1さんとp2さんのやり取りに注目し、引き続き情報の整理を優先すべきだと考えます。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.565
+    },
+    {
+      "turn": 2,
+      "player_id": "p3",
+      "speech_text": "p4さん、議論の整理をしてくださりありがとうございます。おっしゃる通り、p1さんとp2さんの議論を注意深く見守るのが今の私たちには大切ですね。お二人の意見の食い違いは気になりますが、今は焦らず、皆さんの考えをもう少し深く聞いてみたいです。p1さんやp2さんは、今の状況についてさらに何か感じていることはありますか？皆で協力して、良い判断ができるようにしたいですね。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.398
+    },
+    {
+      "turn": 2,
+      "player_id": "p1",
+      "speech_text": "p2さんの指摘通り、私の推論には飛躍があったかもしれませんね。しかし、p2さんが私を牽制することで議論の焦点を逸らそうとしている可能性も考えられます。また、p3さんが慎重な姿勢を保つことで、あえて議論の輪から外れ、人狼としての疑いを避けようとしているという可能性も否定しきれません。皆さんは、この議論の停滞が誰にとって都合が良いものだと感じますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.568
+    },
+    {
+      "turn": 2,
+      "player_id": "p2",
+      "speech_text": "p1さんは私の指摘を認めつつ、今度はp3さんを疑う対象に変えましたね。私が議論を逸らそうとしているという主張ですが、私は一貫して論理的な整合性を求めているだけであり、それは人狼を探すために必要な作業です。停滞を理由に次々と疑う対象を変えるp1さんの行動こそ、ヘイトを分散させる人狼の戦術に見えます。p3さんは慎重な姿勢を崩していませんが、それは現状では妥当な反応でしょう。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.544
+    },
+    {
+      "turn": 3,
+      "player_id": "p4",
+      "speech_text": "p1さんはターン1で私とp2さんを、ターン2ではp3さんを疑い、対象を次々と変えていますね。p2さんはターン1から一貫して論理的な整合性を求めていると述べており、その主張に変化はありません。p1さんの「議論の停滞が誰に都合が良いか」という問いかけに対し、自身の疑いを分散させる行動が目立っているように見受けられます。これまでの発言を振り返ると、一貫性のあるp2さんより、対象を変えるp1さんを注視す…",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.662
+    },
+    {
+      "turn": 3,
+      "player_id": "p3",
+      "speech_text": "p4さん、最後までの整理ありがとうございます。確かにp1さんの発言には少し迷いが見えるかもしれませんね。ですが、p2さんも鋭い指摘を続けていますし、皆で慎重に考えたいです。誰を投票すべきか非常に悩みますが、ここは皆さんの意見を尊重して、納得のいく結論を出せればと思います。誰か特定の個人を強く責めるよりも、全員の整合性を最後まで見極めていきたいですね。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.639
+    },
+    {
+      "turn": 3,
+      "player_id": "p1",
+      "speech_text": "議論も終盤ですが、皆さんの意見を聞いて迷いが増しています。p4さんが私の挙動を怪しむのも分かりますが、逆に議論を誘導しようとする意図があるのかも。また、p3さんの慎重さが人狼の隠れ蓑という可能性も依然として捨てきれません。誰が人狼でもおかしくない状況ですが、全体の動きをもう一度見直して、慎重に投票先を検討するべきではないでしょうか。皆さんは最後にどう判断されますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.671
+    },
+    {
+      "turn": 3,
+      "player_id": "p2",
+      "speech_text": "p1さんは最後まで根拠の薄い疑いを他者に分散させることに終始しており、議論を攪乱する人狼の動きに見えます。対してp4さんは客観的な分析を継続しており、p3さんも中立的な姿勢を崩していません。私は一貫して論理的な整合性を追求してきましたが、p1さんの行動は村人陣営の利益になりません。投票先はp1さんで固定すべきだと考えます。皆さんの最終的な判断を聞かせてください。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.65
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p4",
+      "target": "p1",
+      "reason": "p1さんはターン1で私とp2さん、ターン2ではp3さん、と疑う対象を次々と変えています。これまでの発言を振り返ると、p2さんはターン1から一貫して論理的な整合性を求めており、言動に矛盾が見られません。議論の停滞を理由に疑う対象を分散させるp1さんの動きは、人狼の戦術として非常に怪しいと感じます。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.553
+    },
+    {
+      "voter": "p3",
+      "target": "p1",
+      "reason": "p1さんは議論の途中で疑う対象を次々と変えており、その行動が場の混乱を招いていると感じました。p4さんやp2さんが指摘しているように、一貫性に欠ける点は村人として不安を感じます。皆さんの意見を尊重し、議論をこれ以上停滞させないためにも、最も疑いの目が向けられているp1さんに投票することで、村の皆様と協力し、慎重に結論を出したいと考えます。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.546
+    },
+    {
+      "voter": "p1",
+      "target": "p2",
+      "reason": "p2さんは一貫して私の疑いをヘイト分散と断定し、投票を強く誘導しています。この論理的な誘導こそが、村人の視点を固定しようとする人狼の戦術である可能性も否定できません。一方で、p3さんが慎重さを装いながら静観している可能性や、p4さんが議論の主導権を握ることで場をコントロールしている可能性も捨てきれず、誰に投票すべきか判断が難しい状況ですが、今回は強く誘導を行うp2さんを疑ってみます。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.559
+    },
+    {
+      "voter": "p2",
+      "target": "p1",
+      "reason": "p1は議論の過程で、疑う対象をp2、p3、p4と頻繁に変えており、自身の発言の整合性よりもヘイトの分散を優先しているように見受けられます。これは人狼が村の議論を攪乱し、自分への追及を逸らす際によく見られる戦術です。対して、私は一貫して論理的な整合性を求めており、p4も客観的な視点を維持しています。論理的な矛盾と攪乱を繰り返すp1を処刑対象とすべきです。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.699
+    }
+  ],
+  "result": {
+    "executed": "p1",
+    "executed_role": "villager",
+    "executed_function": "Ne",
+    "winner": "werewolf",
+    "vote_counts": {
+      "p1": 3,
+      "p2": 1
+    },
+    "tie_break": null
+  },
+  "metrics": {
+    "per_player": [
+      {
+        "player_id": "p1",
+        "function": "Ne",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 175.3,
+        "final_vote": "p2",
+        "win": false,
+        "elapsed_seconds": 129.594,
+        "suspicion_count": 2,
+        "suspected_by_count": 8,
+        "question_count": 7,
+        "rebuttal_count": 4,
+        "agreement_count": 0,
+        "hypothesis_count": 6,
+        "parse_failed_count": 0,
+        "mbti_types": "ENFP / ENTP"
+      },
+      {
+        "player_id": "p2",
+        "function": "Ti",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 180.7,
+        "final_vote": "p1",
+        "win": false,
+        "elapsed_seconds": 129.594,
+        "suspicion_count": 5,
+        "suspected_by_count": 2,
+        "question_count": 0,
+        "rebuttal_count": 1,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0,
+        "mbti_types": "ISTP / INTP"
+      },
+      {
+        "player_id": "p3",
+        "function": "Fe",
+        "role": "werewolf",
+        "speech_count": 3,
+        "avg_chars": 163.3,
+        "final_vote": "p1",
+        "win": true,
+        "elapsed_seconds": 129.594,
+        "suspicion_count": 0,
+        "suspected_by_count": 3,
+        "question_count": 4,
+        "rebuttal_count": 1,
+        "agreement_count": 1,
+        "hypothesis_count": 1,
+        "parse_failed_count": 0,
+        "mbti_types": "ESFJ / ENFJ"
+      },
+      {
+        "player_id": "p4",
+        "function": "Si",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 160.3,
+        "final_vote": "p1",
+        "win": false,
+        "elapsed_seconds": 129.594,
+        "suspicion_count": 3,
+        "suspected_by_count": 2,
+        "question_count": 0,
+        "rebuttal_count": 1,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0,
+        "mbti_types": "ISTJ / ISFJ"
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-08-15T21:26:47+09:00",
+    "ended_at": "2026-08-15T21:28:57+09:00",
+    "elapsed_seconds": 129.594,
+    "ai_wait_seconds": 129.578,
+    "machine_name": "yukawayrounoAir"
+  },
+  "failure": null
+}

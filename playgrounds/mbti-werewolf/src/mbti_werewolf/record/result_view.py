@@ -74,6 +74,7 @@ dl.kv dd { margin: 0; word-break: break-all; }
   <div id="app"></div>
   <p class="note">
     MBTIおよび心理機能は、実在人物の診断や評価ではない。AIエージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
+    MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。<br>
     このファイルは実行結果を埋め込んだ自己完結HTMLで、外部との通信を行わない。
   </p>
 </main>
@@ -83,6 +84,7 @@ dl.kv dd { margin: 0; word-break: break-all; }
 const ROLE_LABELS = { werewolf: "人狼", villager: "村人" };
 const WINNER_LABELS = { village: "村人陣営の勝ち", werewolf: "人狼陣営の勝ち" };
 const FUNCTION_LABELS = __FUNCTION_LABELS__;
+const DOMINANT_TO_MBTI = __DOMINANT_TO_MBTI__;
 
 const log = JSON.parse(document.getElementById("run-data").textContent);
 const players = {};
@@ -93,11 +95,25 @@ function esc(value) {
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function mbtiOf(fn) {
+  const types = DOMINANT_TO_MBTI[fn] || [];
+  return types.length ? types.join(" / ") : "—";
+}
+
+function winningMbti() {
+  const winner = (log.result || {}).winner;
+  const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
+  if (!wanted) return "決着なし";
+  const parts = (log.players || []).filter((p) => p.role === wanted)
+    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function));
+  return parts.join("、") || "—";
+}
+
 function who(id) {
   const p = players[id];
   if (!p) return esc(id || "—");
   const fn = FUNCTION_LABELS[p.function] ? p.function + "／" + FUNCTION_LABELS[p.function] : p.function;
-  return esc(id) + "（" + esc(fn) + " / " + esc(ROLE_LABELS[p.role] || p.role) + "）";
+  return esc(id) + "（" + esc(fn) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(mbtiOf(p.function)) + "）";
 }
 
 function topOf(key) {
@@ -106,7 +122,7 @@ function topOf(key) {
   const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
   if (!top) return "該当なし";
   return rows.filter((r) => (r[key] || 0) === top)
-    .map((r) => r.player_id + "（" + r.function + "）").join("、") + " — " + top;
+    .map((r) => r.player_id + "（" + r.function + "）→ " + mbtiOf(r.function)).join("、") + " — " + top;
 }
 
 function renderFailure() {
@@ -121,10 +137,11 @@ function renderCards() {
   const r = log.result || {};
   const winnerClass = r.winner === "village" ? "village" : (r.winner === "werewolf" ? "werewolf" : "");
   const wolves = (log.players || []).filter((p) => p.role === "werewolf")
-    .map((p) => p.function + "（" + p.player_id + "）").join("、") || "—";
+    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function)).join("、") || "—";
   const cards = [
     ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[r.winner] || "決着なし") + "</span>"],
-    ["人狼だった心理機能", esc(wolves)],
+    ["勝ったMBTI", esc(winningMbti())],
+    ["人狼だったMBTI", esc(wolves)],
     ["処刑された人", r.executed ? who(r.executed) : "—"],
     ["最も疑われた人", esc(topOf("suspected_by_count"))],
     ["最も発言した人", esc(topOf("speech_count"))],
@@ -138,10 +155,11 @@ function renderCards() {
 function renderMetrics() {
   const rows = (log.metrics && log.metrics.per_player) || [];
   if (!rows.length) return "<p>集計はありません。</p>";
-  const head = ["ID", "心理機能", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
+  const head = ["ID", "心理機能", "MBTI候補", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
   const body = rows.map((r) => "<tr>" + [
     r.player_id,
     r.function + (FUNCTION_LABELS[r.function] ? "（" + FUNCTION_LABELS[r.function] + "）" : ""),
+    mbtiOf(r.function),
     ROLE_LABELS[r.role] || r.role,
     r.speech_count, r.avg_chars, r.final_vote || "—",
     r.win === null || r.win === undefined ? "—" : (r.win ? "勝ち" : "負け"),
@@ -226,11 +244,13 @@ document.getElementById("app").innerHTML = [
 
 def render_result_html(run_log: Dict[str, Any]) -> str:
     from ..agents.functions import FUNCTION_RULES
+    from ..agents.mbti_types import DOMINANT_TO_TYPES
 
     labels = {code: rule["label"] for code, rule in FUNCTION_RULES.items()}
     return (
         _TEMPLATE.replace("__RUN_ID__", str(run_log.get("run_id", "")))
         .replace("__FUNCTION_LABELS__", _embed(labels))
+        .replace("__DOMINANT_TO_MBTI__", _embed(DOMINANT_TO_TYPES))
         .replace("__RUN_DATA__", _embed(run_log))
     )
 

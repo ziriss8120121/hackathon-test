@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from ..agents.functions import function_label
+from ..agents.mbti_types import mbti_candidates_text, winning_mbti_text
 
 WINNER_LABELS = {"village": "村人陣営", "werewolf": "人狼陣営"}
 
@@ -52,15 +53,16 @@ def render_series_summary(series: Dict[str, Any], run_logs: List[Dict[str, Any]]
         lines += ["", "## 心理機能別の集計", ""]
         lines += _function_table(done)
 
-    lines += ["", "## 試合ごとの結果", "", "| # | run_id | 状態 | 勝敗 | 処刑 | 所要秒 |", "| --- | --- | --- | --- | --- | --- |"]
+    lines += ["", "## 試合ごとの結果", "", "| # | run_id | 状態 | 勝敗 | 勝ったMBTI | 処刑 | 所要秒 |", "| --- | --- | --- | --- | --- | --- | --- |"]
     for log in run_logs:
         result = log.get("result") or {}
         lines.append(
-            "| {} | `{}` | {} | {} | {} | {} |".format(
+            "| {} | `{}` | {} | {} | {} | {} | {} |".format(
                 log.get("run_index", ""),
                 log.get("run_id", ""),
                 log.get("status", ""),
                 WINNER_LABELS.get(result.get("winner"), "—"),
+                winning_mbti_text(log.get("players") or [], result.get("winner")),
                 result.get("executed", "—") or "—",
                 (log.get("timing") or {}).get("elapsed_seconds", ""),
             )
@@ -110,16 +112,17 @@ def _function_table(logs: List[Dict[str, Any]]) -> List[str]:
             bucket["suspected"] += entry.get("suspected_by_count", 0)
 
     rows = [
-        "| 心理機能 | 登場 | 勝ち | 勝率 | 人狼だった回数 | 平均発言数 | 平均文字数 | 平均疑われ数 |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| 心理機能 | MBTI候補 | 登場 | 勝ち | 勝率 | 人狼だった回数 | 平均発言数 | 平均文字数 | 平均疑われ数 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for code in sorted(stats):
         bucket = stats[code]
         games = int(bucket["games"]) or 1
         rows.append(
-            "| {}（{}） | {} | {} | {} | {} | {} | {} | {} |".format(
+            "| {}（{}） | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                 code,
                 function_label(code),
+                mbti_candidates_text(code),
                 int(bucket["games"]),
                 int(bucket["wins"]),
                 _rate(int(bucket["wins"]), int(bucket["games"])),

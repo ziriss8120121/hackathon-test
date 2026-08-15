@@ -248,7 +248,8 @@
         "rebuttal_count": 0,
         "agreement_count": 0,
         "hypothesis_count": 5,
-        "parse_failed_count": 0
+        "parse_failed_count": 0,
+        "mbti_types": "ENFP / ENTP"
       },
       {
         "player_id": "p2",
@@ -265,7 +266,8 @@
         "rebuttal_count": 0,
         "agreement_count": 0,
         "hypothesis_count": 0,
-        "parse_failed_count": 0
+        "parse_failed_count": 0,
+        "mbti_types": "ISTP / INTP"
       },
       {
         "player_id": "p3",
@@ -282,7 +284,8 @@
         "rebuttal_count": 0,
         "agreement_count": 4,
         "hypothesis_count": 0,
-        "parse_failed_count": 0
+        "parse_failed_count": 0,
+        "mbti_types": "ESFJ / ENFJ"
       },
       {
         "player_id": "p4",
@@ -299,7 +302,8 @@
         "rebuttal_count": 0,
         "agreement_count": 0,
         "hypothesis_count": 0,
-        "parse_failed_count": 0
+        "parse_failed_count": 0,
+        "mbti_types": "ISTJ / ISFJ"
       }
     ]
   },

@@ -86,7 +86,7 @@ MBTI人狼AI先行テストについて、要件定義書の要件をどう実�
 | HTTP通信 | httpx | BSD（無料） | Ollamaにも Gemini にも同じクライアントで届く。ベンダーSDKを入れずに済む。 |
 | 画面 | 素のHTML / CSS / JavaScript | 無料 | npmとビルド工程を持たない。差し替え前提の画面に build を挟む価値がない。 |
 | 推論（既定） | Ollama + `gemma3:4b` | Ollama本体はMIT。`gemma3:4b` は Gemma Terms of Use（無償利用可、OSIオープンソースではない）。 | ローカル完結で回数制限がない。100試合以上の実行はこの経路しか成立しない。 |
-| 推論（比較用） | Gemini API 無料枠（`gemini-2.5-flash-lite` 等） | 無料枠のまま利用（課金を有効化しない） | ローカル小型モデルで議論が成立しない場合の品質比較用。 |
+| 推論（比較用） | Gemini API 無料枠（`gemini-3.1-flash-lite`） | 無料枠のまま利用（課金を有効化しない） | ローカル小型モデルで議論が成立しない場合の品質比較用。 |
 | 推論（テスト用） | Stub（LLMを呼ばない） | 無料 | LLMなしで1試合を完走できるため、進行とファイル出力を即時・無課金で検証できる。 |
 | テスト | pytest | MIT（無料） | 再現性と役職漏れの検査を自動化する。 |
 | 保存・共有 | GitHub / GitHub Pages | 無料枠 | 要件のIF-03、IF-04。 |
@@ -805,7 +805,7 @@ runs/
 要件4.3の必須列を先頭に置き、要件4.4の「できれば取る指標」を後ろに足す。
 
 ```text
-run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
+run_id,series_id,player_id,function,mbti_types,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
 ```
 
 1行 = 1プレイヤー。複数試合の結果を縦に連結すれば、そのまま表計算ソフトで機能別の集計ができる。
@@ -814,12 +814,14 @@ run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,e
 
 | ファイル | 構成 |
 | --- | --- |
-| `summary.md` | 勝敗、人狼だった心理機能、処刑された人、最も疑われた人、最も発言した人、実行条件、所要時間 |
+| `summary.md` | 勝敗、勝ったMBTI、人狼だったMBTI、処刑された人、最も疑われた人、最も発言した人、実行条件、所要時間 |
 | `timeline.md` | ターンごとに「`p1`（Ne / 村人）: 発言」の並び。役職は実行後の閲覧用なので明記する |
-| `series_summary.md` | 試合数、成功・失敗数、陣営別の勝率、心理機能別の勝率と平均発言数、合計所要時間 |
+| `series_summary.md` | 試合数、成功・失敗数、陣営別の勝率、心理機能別の勝率とMBTI候補、合計所要時間 |
 | `history_input.json` | history_modeが `none` 以外のとき、エージェントへ渡した過去情報（Want、F-39） |
 
 `timeline.md` には役職を書く。エージェントへの入力（公開ビュー）とは別物であり、人が結果を読むためのファイルなので、役職が見えている方が読みやすい。混同を避けるため、エージェント入力を組み立てるのは `engine/view.py` だけに限定する。
+
+MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タイプとして出す。初回MVPは1人1心理機能のため、タイプは一意に決まらない。
 
 ---
 
@@ -855,9 +857,9 @@ run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,e
 | 設定パネル | 参加人数、ターン数、試合回数、役職割当方法、seed、history_mode、脳（provider / model） | F-50 |
 | 実行ボタン | 「対戦開始」。押すと設定パネルを読み取り専用にする | F-51 |
 | 状態表示 | queued / running（フェーズとターン番号）/ done / failed。失敗時は原因の種別と本文 | F-52、F-55 |
-| 結果カード | 勝敗、人狼だった心理機能、処刑された人、最も疑われた人、最も発言した人 | F-53 |
+| 結果カード | 勝敗、勝ったMBTI、人狼だったMBTI、処刑された人、最も疑われた人、最も発言した人 | F-53 |
 | 会話タイムライン | ターンごとの発言一覧。実行完了後にまとめて表示する | F-53 |
-| メトリクス表 | 心理機能ごとの集計 | F-53 |
+| メトリクス表 | 心理機能ごとの集計（MBTI候補を含む） | F-53 |
 | 実行条件 | seed、人数、ターン数、history_mode、実行環境、所要時間、使用した脳 | F-54 |
 | 過去実行の一覧 | `runs/` の走査結果から選んで表示を切り替える | F-56 |
 
@@ -1003,7 +1005,7 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M5 | テスト一式、無料であることの確認記録 | AC-07〜AC-11を満たす |
 | M6 | `GeminiBrain`、GitHub Pages公開 | 品質比較ができる、URLで共有できる |
 
-コードはM0からM6まで実装済みである。M2の実機確認（Ollama 0.32.13 + `gemma3:4b`、規約と所要時間の記録）は 2026-08-15 に完了した。残っているのは M6 の GitHub Pages 公開である。`GeminiBrain` のコードはあるが、APIキー未発行のため実機での品質比較は未実施。
+コードはM0からM6まで実装済みである。M2の実機確認（Ollama 0.32.13 + `gemma3:4b`）と Gemini 無料枠での1試合（`gemini-3.1-flash-lite`）は 2026-08-15 に完了した。残っているのは M6 の GitHub Pages 公開である。
 
 M0からM1までを推論なしで作る理由は、出力形式と画面の判断を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M2でモデルの品質が期待に届かなかった場合も、出力とテストを作り直さずにモデルだけを差し替えて再実行できる。
 

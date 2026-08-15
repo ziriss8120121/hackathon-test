@@ -15,6 +15,8 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, Iterable, List, Optional
 
+from ..agents.mbti_types import mbti_candidates_text
+
 _PLAYER_ID_RE = re.compile(r"p\d+")
 _SENTENCE_SPLIT_RE = re.compile(r"[。．.!?！？\n]+")
 
@@ -154,6 +156,7 @@ def compute_metrics(
             {
                 "player_id": pid,
                 "function": player.function,
+                "mbti_types": mbti_candidates_text(player.function),
                 "role": player.role,
                 "speech_count": len(texts),
                 "avg_chars": round(sum(char_counts) / len(char_counts), 1)
@@ -187,6 +190,7 @@ CSV_COLUMNS = (
     "series_id",
     "player_id",
     "function",
+    "mbti_types",
     "role",
     "speech_count",
     "avg_chars",

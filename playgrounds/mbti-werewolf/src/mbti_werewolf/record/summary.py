@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 
 from ..agents.functions import function_label
+from ..agents.mbti_types import mbti_candidates_text, player_mbti_text, winning_mbti_text
 
 WINNER_LABELS = {"village": "村人陣営の勝ち", "werewolf": "人狼陣営の勝ち"}
 ROLE_LABELS = {"werewolf": "人狼", "villager": "村人"}
@@ -34,8 +35,8 @@ def render_summary(run_log: Dict[str, Any]) -> str:
             "",
         ]
 
-    werewolf_functions = [
-        "{}（{}）".format(p["function"], p["player_id"])
+    werewolf_mbti = [
+        player_mbti_text(p["player_id"], p["function"])
         for p in players
         if p.get("role") == "werewolf"
     ]
@@ -47,13 +48,16 @@ def render_summary(run_log: Dict[str, Any]) -> str:
         "| 勝敗 | {} |".format(
             WINNER_LABELS.get(result.get("winner"), "（決着していません）")
         ),
-        "| 人狼だった心理機能 | {} |".format(
-            "、".join(werewolf_functions) or "（記録なし）"
+        "| 勝ったMBTI | {} |".format(winning_mbti_text(players, result.get("winner"))),
+        "| 人狼だったMBTI | {} |".format(
+            "、".join(werewolf_mbti) or "（記録なし）"
         ),
         "| 処刑された人 | {} |".format(_executed_text(result, players)),
         "| 最も疑われた人 | {} |".format(_top_text(per_player, "suspected_by_count", "件")),
         "| 最も発言した人 | {} |".format(_top_text(per_player, "speech_count", "回")),
         "| 決着方法 | {} |".format(_tie_break_text(result)),
+        "",
+        "MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。",
         "",
         "## 実行条件",
         "",
@@ -74,16 +78,17 @@ def render_summary(run_log: Dict[str, Any]) -> str:
         "",
         "## 心理機能ごとの集計",
         "",
-        "| ID | 心理機能 | 役職 | 発言数 | 平均文字数 | 投票先 | 勝敗 | 疑い | 疑われ | 質問 | 反論 | 同調 | 仮説 |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| ID | 心理機能 | MBTI候補 | 役職 | 発言数 | 平均文字数 | 投票先 | 勝敗 | 疑い | 疑われ | 質問 | 反論 | 同調 | 仮説 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
     for entry in per_player:
         lines.append(
-            "| {} | {}（{}） | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
+            "| {} | {}（{}） | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
                 entry["player_id"],
                 entry["function"],
                 function_label(entry["function"]),
+                mbti_candidates_text(entry["function"]),
                 ROLE_LABELS.get(entry["role"], entry["role"]),
                 entry["speech_count"],
                 entry["avg_chars"],
@@ -138,7 +143,9 @@ def _executed_text(result: Dict[str, Any], players: List[Dict[str, Any]]) -> str
         return "（処刑まで到達していません）"
     role = ROLE_LABELS.get(result.get("executed_role"), result.get("executed_role", ""))
     function = result.get("executed_function") or _function_of(players, executed)
-    return "{}（{} / {}）".format(executed, function, role)
+    return "{}（{} / {}）→ {}".format(
+        executed, function, role, mbti_candidates_text(function)
+    )
 
 
 def _function_of(players: List[Dict[str, Any]], player_id: str) -> str:
@@ -155,7 +162,7 @@ def _top_text(per_player: List[Dict[str, Any]], key: str, unit: str) -> str:
     if not top:
         return "（該当なし）"
     names = [
-        "{}（{}）".format(entry["player_id"], entry["function"])
+        player_mbti_text(entry["player_id"], entry["function"])
         for entry in per_player
         if entry.get(key, 0) == top
     ]

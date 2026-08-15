@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 from ..agents.functions import function_label
+from ..agents.mbti_types import mbti_candidates_text
 
 ROLE_LABELS = {"werewolf": "人狼", "villager": "村人"}
 WINNER_LABELS = {"village": "村人陣営の勝ち", "werewolf": "人狼陣営の勝ち"}
@@ -28,15 +29,16 @@ def render_timeline(run_log: Dict[str, Any]) -> str:
         "",
         "## 参加者",
         "",
-        "| ID | 心理機能 | 役職 |",
-        "| --- | --- | --- |",
+        "| ID | 心理機能 | MBTI候補 | 役職 |",
+        "| --- | --- | --- | --- |",
     ]
     for player in run_log.get("players") or []:
         lines.append(
-            "| {} | {}（{}） | {} |".format(
+            "| {} | {}（{}） | {} | {} |".format(
                 player["player_id"],
                 player["function"],
                 function_label(player["function"]),
+                mbti_candidates_text(player["function"]),
                 ROLE_LABELS.get(player["role"], player["role"]),
             )
         )

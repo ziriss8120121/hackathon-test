@@ -1,0 +1,14 @@
+{
+  "run_id": "s-20260815-212419-r001",
+  "series_id": "s-20260815-212419",
+  "status": "failed",
+  "phase": "failed",
+  "turn": 3,
+  "turn_count": 3,
+  "started_at": "2026-08-15T21:24:19+09:00",
+  "updated_at": "2026-08-15T21:24:45+09:00",
+  "error": {
+    "kind": "rate_limited",
+    "message": "Gemini APIの無料枠の上限に達しました。ローカル実行へ切り替えてください。"
+  }
+}

@@ -29,6 +29,11 @@ const FUNCTION_LABELS = {
   Ne: "外向的直観", Ni: "内向的直観", Se: "外向的感覚", Si: "内向的感覚",
   Te: "外向的思考", Ti: "内向的思考", Fe: "外向的感情", Fi: "内向的感情",
 };
+// 要求定義書6.5。主機能からの候補。並びは mbti_types.py と揃える。
+const DOMINANT_TO_MBTI = {
+  Si: ["ISTJ", "ISFJ"], Ni: ["INFJ", "INTJ"], Ti: ["ISTP", "INTP"], Fi: ["ISFP", "INFP"],
+  Se: ["ESTP", "ESFP"], Ne: ["ENFP", "ENTP"], Te: ["ESTJ", "ENTJ"], Fe: ["ESFJ", "ENFJ"],
+};
 
 const form = document.getElementById("config-form");
 const startButton = document.getElementById("start-button");
@@ -268,11 +273,25 @@ async function showRun(runId) {
   highlightSelected();
 }
 
+function mbtiOf(fn) {
+  const types = DOMINANT_TO_MBTI[fn] || [];
+  return types.length ? types.join(" / ") : "—";
+}
+
+function winningMbti(log) {
+  const winner = (log.result || {}).winner;
+  const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
+  if (!wanted) return "決着なし";
+  const parts = (log.players || []).filter((p) => p.role === wanted)
+    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function));
+  return parts.join("、") || "—";
+}
+
 function who(id) {
   const p = players[id];
   if (!p) return esc(id || "—");
   const label = FUNCTION_LABELS[p.function] ? p.function + "／" + FUNCTION_LABELS[p.function] : p.function;
-  return esc(id) + "（" + esc(label) + " / " + esc(ROLE_LABELS[p.role] || p.role) + "）";
+  return esc(id) + "（" + esc(label) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(mbtiOf(p.function)) + "）";
 }
 
 function topOf(log, key) {
@@ -281,17 +300,18 @@ function topOf(log, key) {
   const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
   if (!top) return "該当なし";
   return rows.filter((r) => (r[key] || 0) === top)
-    .map((r) => r.player_id + "（" + r.function + "）").join("、") + " — " + top;
+    .map((r) => r.player_id + "（" + r.function + "）→ " + mbtiOf(r.function)).join("、") + " — " + top;
 }
 
 function renderCards(log) {
   const result = log.result || {};
   const winnerClass = result.winner === "village" ? "village" : (result.winner === "werewolf" ? "werewolf" : "");
   const wolves = (log.players || []).filter((p) => p.role === "werewolf")
-    .map((p) => p.function + "（" + p.player_id + "）").join("、") || "—";
+    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function)).join("、") || "—";
   const cards = [
     ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[result.winner] || "決着なし") + "</span>"],
-    ["人狼だった心理機能", esc(wolves)],
+    ["勝ったMBTI", esc(winningMbti(log))],
+    ["人狼だったMBTI", esc(wolves)],
     ["処刑された人", result.executed ? who(result.executed) : "—"],
     ["最も疑われた人", esc(topOf(log, "suspected_by_count"))],
     ["最も発言した人", esc(topOf(log, "speech_count"))],
@@ -340,11 +360,12 @@ function renderVotes(log) {
 function renderMetrics(log) {
   const rows = (log.metrics && log.metrics.per_player) || [];
   if (!rows.length) return "<p class='muted'>集計はない。</p>";
-  const head = ["ID", "心理機能", "役職", "発言数", "平均文字数", "投票先", "勝敗",
+  const head = ["ID", "心理機能", "MBTI候補", "役職", "発言数", "平均文字数", "投票先", "勝敗",
     "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
   const body = rows.map((row) => "<tr>" + [
     row.player_id,
     row.function + (FUNCTION_LABELS[row.function] ? "（" + FUNCTION_LABELS[row.function] + "）" : ""),
+    mbtiOf(row.function),
     ROLE_LABELS[row.role] || row.role,
     row.speech_count, row.avg_chars, row.final_vote || "—",
     row.win === null || row.win === undefined ? "—" : (row.win ? "勝ち" : "負け"),

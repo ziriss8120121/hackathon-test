@@ -1,0 +1,14 @@
+{
+  "run_id": "s-20260815-212321-r001",
+  "series_id": "s-20260815-212321",
+  "status": "failed",
+  "phase": "failed",
+  "turn": 0,
+  "turn_count": 3,
+  "started_at": "2026-08-15T21:23:21+09:00",
+  "updated_at": "2026-08-15T21:23:21+09:00",
+  "error": {
+    "kind": "invalid_response",
+    "message": "Gemini APIが 404 を返しました: {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"This model models/gemini-2.5-flash-lite is no longer available to new users. Please update your code to use a newer model for the latest features and im"
+  }
+}

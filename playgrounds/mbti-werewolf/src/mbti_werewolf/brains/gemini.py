@@ -13,13 +13,16 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from typing import Any, Dict
 
 from .base import BaseBrain, BrainError
 
-DEFAULT_MODEL = "gemini-2.5-flash-lite"
+DEFAULT_MODEL = "gemini-3.1-flash-lite"
 API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 API_KEY_ENV = "GEMINI_API_KEY"
+# 無料枠の分間上限に当たらないよう、呼び出し間隔を空ける。
+_MIN_INTERVAL_SECONDS = 7.0
 
 
 class GeminiBrain(BaseBrain):
@@ -31,6 +34,7 @@ class GeminiBrain(BaseBrain):
         self.model = config.brain.model or DEFAULT_MODEL
         self.name = "gemini:{}".format(self.model)
         self._api_key = os.environ.get(API_KEY_ENV, "").strip()
+        self._last_call_at = 0.0
 
     def _complete(self, system: str, user: str, temperature: float) -> str:
         if not self._api_key:
@@ -38,6 +42,7 @@ class GeminiBrain(BaseBrain):
                 "unreachable",
                 "環境変数 {} が設定されていません。".format(API_KEY_ENV),
             )
+        self._wait_for_interval()
 
         try:
             import httpx
@@ -76,6 +81,8 @@ class GeminiBrain(BaseBrain):
             )
         except httpx.HTTPError as exc:
             raise BrainError("unreachable", "Gemini APIへの通信に失敗しました: {}".format(exc))
+        finally:
+            self._last_call_at = time.monotonic()
 
         if response.status_code == 429:
             raise BrainError(
@@ -98,6 +105,14 @@ class GeminiBrain(BaseBrain):
             raise BrainError("invalid_response", "Gemini APIの応答がJSONではありません。")
 
         return _first_text(body)
+
+    def _wait_for_interval(self) -> None:
+        if self._last_call_at <= 0:
+            return
+        elapsed = time.monotonic() - self._last_call_at
+        remaining = _MIN_INTERVAL_SECONDS - elapsed
+        if remaining > 0:
+            time.sleep(remaining)
 
 
 def _first_text(body: Dict[str, Any]) -> str:
