@@ -15,4 +15,5 @@
 | Path | 内容 |
 | --- | --- |
 | `requirements.md` | 要求定義書（Confluence正本のマークダウン版） |
+| `system-requirements.md` | 要件定義書。システムが満たすべき要件と受入基準 |
 
