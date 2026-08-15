@@ -10,3 +10,9 @@
 - 実験条件の補足
 - GitHub Pagesで見せる内容のメモ
 
+## ファイル
+
+| Path | 内容 |
+| --- | --- |
+| `requirements.md` | 要求定義書（Confluence正本のマークダウン版） |
+
