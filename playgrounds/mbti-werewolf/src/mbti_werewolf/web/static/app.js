@@ -257,6 +257,7 @@ async function showRun(runId) {
   }
 
   document.getElementById("result-cards").innerHTML = renderCards(log);
+  document.getElementById("roster").innerHTML = renderRoster(log);
   document.getElementById("timeline").innerHTML = renderTimeline(log);
   document.getElementById("votes").innerHTML = renderVotes(log);
   document.getElementById("metrics").innerHTML = renderMetrics(log);
@@ -278,12 +279,22 @@ function mbtiOf(fn) {
   return types.length ? types.join(" / ") : "—";
 }
 
+// MBTIタイプが確定しているプレイヤー（v1改善のMVPロースター）はタイプ名を、
+// 確定していない（旧ログ、functions直接指定など）場合は候補2タイプを表示する。
+function identityOf(entry) {
+  if (!entry) return "—";
+  if (entry.mbti_type) {
+    return entry.mbti_type + (entry.display_name ? "（" + entry.display_name + "）" : "");
+  }
+  return mbtiOf(entry.function);
+}
+
 function winningMbti(log) {
   const winner = (log.result || {}).winner;
   const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
   if (!wanted) return "決着なし";
   const parts = (log.players || []).filter((p) => p.role === wanted)
-    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function));
+    .map((p) => p.player_id + "（" + p.function + "）→ " + identityOf(p));
   return parts.join("、") || "—";
 }
 
@@ -291,7 +302,7 @@ function who(id) {
   const p = players[id];
   if (!p) return esc(id || "—");
   const label = FUNCTION_LABELS[p.function] ? p.function + "／" + FUNCTION_LABELS[p.function] : p.function;
-  return esc(id) + "（" + esc(label) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(mbtiOf(p.function)) + "）";
+  return esc(id) + "（" + esc(label) + " / " + esc(ROLE_LABELS[p.role] || p.role) + " / " + esc(identityOf(p)) + "）";
 }
 
 function topOf(log, key) {
@@ -300,14 +311,28 @@ function topOf(log, key) {
   const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
   if (!top) return "該当なし";
   return rows.filter((r) => (r[key] || 0) === top)
-    .map((r) => r.player_id + "（" + r.function + "）→ " + mbtiOf(r.function)).join("、") + " — " + top;
+    .map((r) => r.player_id + "（" + r.function + "）→ " + identityOf(r)).join("、") + " — " + top;
+}
+
+function renderRoster(log) {
+  const list = log.players || [];
+  if (!list.length) return "";
+  const cards = list.map((p) => {
+    const fn = FUNCTION_LABELS[p.function] ? p.function + "（" + FUNCTION_LABELS[p.function] + "）" : p.function;
+    const stack = (p.function_stack || []).join(" / ");
+    return '<div class="card"><div class="label">' + esc(p.player_id) + '・' + esc(ROLE_LABELS[p.role] || p.role) + '</div>'
+      + '<div class="value">' + esc(identityOf(p)) + '</div>'
+      + '<div class="sub">主機能 ' + esc(fn) + (stack ? '<br>スタック ' + esc(stack) : '') + '</div>'
+      + '</div>';
+  }).join("");
+  return '<div class="cards">' + cards + '</div>';
 }
 
 function renderCards(log) {
   const result = log.result || {};
   const winnerClass = result.winner === "village" ? "village" : (result.winner === "werewolf" ? "werewolf" : "");
   const wolves = (log.players || []).filter((p) => p.role === "werewolf")
-    .map((p) => p.player_id + "（" + p.function + "）→ " + mbtiOf(p.function)).join("、") || "—";
+    .map((p) => p.player_id + "（" + p.function + "）→ " + identityOf(p)).join("、") || "—";
   const cards = [
     ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[result.winner] || "決着なし") + "</span>"],
     ["勝ったMBTI", esc(winningMbti(log))],
@@ -360,12 +385,12 @@ function renderVotes(log) {
 function renderMetrics(log) {
   const rows = (log.metrics && log.metrics.per_player) || [];
   if (!rows.length) return "<p class='muted'>集計はない。</p>";
-  const head = ["ID", "心理機能", "MBTI候補", "役職", "発言数", "平均文字数", "投票先", "勝敗",
+  const head = ["ID", "心理機能", "MBTI", "役職", "発言数", "平均文字数", "投票先", "勝敗",
     "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
   const body = rows.map((row) => "<tr>" + [
     row.player_id,
     row.function + (FUNCTION_LABELS[row.function] ? "（" + FUNCTION_LABELS[row.function] + "）" : ""),
-    mbtiOf(row.function),
+    identityOf(row),
     ROLE_LABELS[row.role] || row.role,
     row.speech_count, row.avg_chars, row.final_vote || "—",
     row.win === null || row.win === undefined ? "—" : (row.win ? "勝ち" : "負け"),

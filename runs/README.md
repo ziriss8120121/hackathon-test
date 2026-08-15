@@ -23,7 +23,15 @@ runs/
       timeline.md            会話タイムライン
       metrics.csv            1行 = 1プレイヤーの集計
       result.html            自己完結の結果ビュー
+  latest.html                 最新の result.html への案内（v1改善で追加）
 ```
+
+`latest.html` は実行のたびに更新され、直近の試合の `result.html` へ自動で
+切り替わる（ダメな場合は手動リンクも出す）。ブックマークしておけば毎回
+`series_id`/`run_id` を探さずに最新結果を開ける。ただし相対リンクなので、
+スマホやLINEから直接URLで開けるようにするには別途GitHub Pagesなどでの公開が
+必要（設計書のM6、未着手）。ローカルにcloneした状態、または操作画面
+（`python -m mbti_werewolf ui`）経由なら今すぐ使える。
 
 - `series_id` は `s-YYYYMMDD-HHMMSS`、`run_id` は `{series_id}-r001` の形です。
 - `run_id` が `series_id` を含むため、保存先は `run_id` だけで特定できます。

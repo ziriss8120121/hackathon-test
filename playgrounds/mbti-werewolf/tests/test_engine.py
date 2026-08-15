@@ -38,6 +38,22 @@ def test_stub_game_completes_and_writes_outputs(tmp_path, make_config):
     assert (tmp_path / series_id / "series_summary.md").is_file()
 
 
+def test_latest_html_points_to_most_recent_run(tmp_path, make_config):
+    """runs/latest.html が常に一番最近に完了した試合を指すこと（v1改善）。"""
+    runner = Runner(tmp_path)
+
+    first_series_id, _ = runner.run_series(make_config())
+    latest_path = tmp_path / "latest.html"
+    assert latest_path.is_file()
+    first_content = latest_path.read_text(encoding="utf-8")
+    assert "{}/r001/result.html".format(first_series_id) in first_content
+
+    second_series_id, _ = runner.run_series(make_config(game_count=2))
+    second_content = latest_path.read_text(encoding="utf-8")
+    assert "{}/r002/result.html".format(second_series_id) in second_content
+    assert "{}/r001/result.html".format(first_series_id) not in second_content
+
+
 def test_run_log_contents(tmp_path, make_config):
     config = make_config()
     runner = Runner(tmp_path)
@@ -52,7 +68,11 @@ def test_run_log_contents(tmp_path, make_config):
     assert len(log["players"]) == 4
     assert sum(1 for p in log["players"] if p["role"] == "werewolf") == 1
     assert all(p["agent_prompt_version"] == "v1" for p in log["players"])
-    assert {p["function"] for p in log["players"]} == {"Ne", "Ti", "Fe", "Si"}
+    # 既定はMVP4人のMBTIロースター（討論者/擁護者/仲介者/幹部）（CLAUDE.md、v1改善）
+    assert {p["function"] for p in log["players"]} == {"Ne", "Si", "Fi", "Te"}
+    assert {p["mbti_type"] for p in log["players"]} == {"ENTP", "ISFJ", "INFP", "ESTJ"}
+    assert all(p["display_name"] for p in log["players"])
+    assert all(len(p["function_stack"]) == 4 for p in log["players"])
 
     # 議論3ターン、投票1回、勝敗判定（AC-02）
     assert len(log["turns"]) == 12

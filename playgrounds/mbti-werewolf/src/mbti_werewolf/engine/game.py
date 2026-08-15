@@ -167,6 +167,8 @@ class GameEngine:
             "executed": executed,
             "executed_role": executed_player.role,
             "executed_function": executed_player.function,
+            "executed_mbti_type": executed_player.mbti_type,
+            "executed_display_name": executed_player.display_name,
             "winner": winner,
             "vote_counts": {pid: counts.get(pid, 0) for pid in sorted(counts)},
             "tie_break": tie_break,

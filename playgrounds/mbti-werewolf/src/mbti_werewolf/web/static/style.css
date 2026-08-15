@@ -103,6 +103,7 @@ button.ghost:hover { background: #22262f; color: var(--text); }
 .card { background: #14171e; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
 .card .label { color: var(--muted); font-size: 12px; }
 .card .value { font-size: 16px; margin-top: 4px; word-break: break-all; }
+.card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
 .village { color: var(--ok); }
 .werewolf { color: var(--ng); }
 

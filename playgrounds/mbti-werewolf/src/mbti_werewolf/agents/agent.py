@@ -21,7 +21,7 @@ from typing import Dict, List, Tuple
 from ..brains.base import Request
 from ..engine.roles import Player, role_composition_text
 from ..engine.view import PublicView
-from .functions import function_label, function_rule
+from .functions import function_gist, function_label, function_rule
 
 _PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
 _PLAYER_ID_RE = re.compile(r"p\d+")
@@ -36,6 +36,30 @@ _ROLE_DESCRIPTIONS = {
         "処刑されないように振る舞い、村人に別の人を処刑させることが目的です。"
     ),
 }
+
+# MBTIの4機能スタック（主/補助/第三/劣等）を、行動ルールを壊さない範囲で
+# プロンプトへ反映するためのヒント。性格・発言傾向はMBTIタイプ名ではなく
+# この4機能スタックで作る。各段は「その機能が何を見る機能か」（function_gist、
+# 主機能の行動ルールと同じ語彙）と「どのくらいの強さで出すか」を1行で示す（v1改善）。
+_STACK_TIERS: Tuple[Tuple[str, str], ...] = (
+    ("主", "中心的な考え方として前面に出す（上の行動ルールのとおり）。"),
+    ("補助", "主機能を支える形で、時々自然に混ぜる程度にする。"),
+    ("第三", "余裕があるときだけ、軽く顔を出す程度にする。"),
+    ("劣等", "普段は抑えめにし、強く追い詰められたときだけにじませる。"),
+)
+
+
+def _stack_hint_block(function_stack: Tuple[str, ...]) -> str:
+    """4機能スタックの使い分けを短いブロックにする。スタックが無ければ空文字。"""
+    if not function_stack:
+        return ""
+    lines = [
+        "- {} {}（{}）: {}{}".format(
+            tier, code, function_label(code), function_gist(code), hint
+        )
+        for (tier, hint), code in zip(_STACK_TIERS, function_stack)
+    ]
+    return "\n\n# 4機能スタックの使い分け（軽く）\n" + "\n".join(lines)
 
 
 @dataclass
@@ -103,6 +127,12 @@ class Agent:
                 "、".join(view.teammates)
             )
 
+        mbti_suffix = ""
+        if self.player.mbti_type:
+            mbti_suffix = "／{}（{}）".format(
+                self.player.mbti_type, self.player.display_name or self.player.mbti_type
+            )
+
         return {
             "player_count": self.config.player_count,
             "role_composition": role_composition_text(self.config.role_composition),
@@ -113,6 +143,8 @@ class Agent:
             "function": self.player.function,
             "function_label": function_label(self.player.function),
             "function_rule": function_rule(self.player.function),
+            "mbti_suffix": mbti_suffix,
+            "stack_hint": _stack_hint_block(self.player.function_stack),
             "max_output_chars": self.config.brain.max_output_chars,
             "alive_ids": "、".join(view.alive_ids),
             "vote_candidates": "、".join(view.vote_candidates),

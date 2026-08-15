@@ -147,6 +147,16 @@ def command_run(args: argparse.Namespace) -> int:
     print("集計:   {}".format(series_path / "series_summary.md"))
     if config.game_count == 1:
         print("結果:   {}".format(series_path / "r001" / "result.html"))
+    print("-" * 60)
+    print("最新結果へのリンク: {}".format(runner.runs_dir / "latest.html"))
+    print(
+        "スマホ確認用URL（GitHub Pages、未公開・設計書M6）: "
+        "https://ziriss8120121.github.io/hackathon-test/runs/latest.html"
+    )
+    print(
+        "上記URLは、リポジトリでGitHub Pagesを公開してから runs/ 配下を commit・push した場合にだけ反映されます"
+        "（ローカル実行だけでは反映されません。Pages公開自体は人がSettingsで行う必要があります）。"
+    )
 
     return 0 if series.get("status") == "done" else 1
 
