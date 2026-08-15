@@ -1,0 +1,5 @@
+run_id,series_id,player_id,function,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
+s-20260815-195432-r001,s-20260815-195432,p1,Ne,werewolf,3,60.3,p2,false,0.004,2,0,0,0,0,4
+s-20260815-195432-r001,s-20260815-195432,p2,Ti,villager,3,45.7,p1,true,0.004,0,1,0,0,0,0
+s-20260815-195432-r001,s-20260815-195432,p3,Fe,villager,3,47.3,p4,true,0.004,0,0,0,0,4,0
+s-20260815-195432-r001,s-20260815-195432,p4,Si,villager,3,40.3,p3,true,0.004,0,1,0,0,0,0

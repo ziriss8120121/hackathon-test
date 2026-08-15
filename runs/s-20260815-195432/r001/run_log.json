@@ -1,0 +1,326 @@
+{
+  "schema_version": "1",
+  "run_id": "s-20260815-195432-r001",
+  "series_id": "s-20260815-195432",
+  "run_index": 1,
+  "status": "done",
+  "phase": "finished",
+  "config": {
+    "player_count": 4,
+    "turn_count": 3,
+    "game_count": 1,
+    "functions": [
+      "Ne",
+      "Ti",
+      "Fe",
+      "Si"
+    ],
+    "role_assignment_mode": "seeded_random",
+    "role_composition": {
+      "werewolf": 1,
+      "villager": 3
+    },
+    "seed": 7,
+    "base_seed": 7,
+    "history_mode": "none",
+    "history_scope": null,
+    "brain": {
+      "provider": "stub",
+      "model": "",
+      "temperature": 0.8,
+      "max_output_chars": 200,
+      "timeout_seconds": 120,
+      "max_retries": 3
+    },
+    "machine_name": "yukawayrounoAir"
+  },
+  "brain": {
+    "provider": "stub",
+    "model": "stub",
+    "endpoint_kind": "stub",
+    "name": "stub"
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "function": "Ne",
+      "role": "werewolf",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p2",
+      "function": "Ti",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p3",
+      "function": "Fe",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    },
+    {
+      "player_id": "p4",
+      "function": "Si",
+      "role": "villager",
+      "agent_prompt_version": "v1"
+    }
+  ],
+  "speaking_order": [
+    "p2",
+    "p3",
+    "p4",
+    "p1"
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "player_id": "p2",
+      "speech_text": "p1 の話は前提が示されていません。理由の部分が抜けているので、そのままでは疑う材料として使えません。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 1,
+      "player_id": "p3",
+      "speech_text": "p4 の言うことはわかります。責める言い方にならないように、みんなで確認しながら進めたいです。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 1,
+      "player_id": "p4",
+      "speech_text": "先ほど p1 が言っていた内容と、今の発言でずれがあります。最初に出た話に戻って確認したいです。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 1,
+      "player_id": "p1",
+      "speech_text": "仮説を広げておきます。p2 が怪しいという線と、投票が割れるのを待っている人がいる線です。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 2,
+      "player_id": "p2",
+      "speech_text": "整理します。p4 の主張は他の発言と両立しません。どちらかが誤りです。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 2,
+      "player_id": "p3",
+      "speech_text": "p4 の意見に同意します。確かにその見方は納得できました。全員で落ち着いて整理していきましょう。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 2,
+      "player_id": "p4",
+      "speech_text": "p1 は最初のターンで別のことを言っていました。そこが引っかかっています。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 2,
+      "player_id": "p1",
+      "speech_text": "まだ判断材料が少ないので可能性を並べます。p3 が人狼かもしれないですし、あえて静かにしている人が人狼という可能性もあると思います。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 3,
+      "player_id": "p2",
+      "speech_text": "p1 の話は前提が示されていません。理由の部分が抜けているので、そのままでは疑う材料として使えません。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 3,
+      "player_id": "p3",
+      "speech_text": "p1 の言うことはわかります。責める言い方にならないように、みんなで確認しながら進めたいです。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 3,
+      "player_id": "p4",
+      "speech_text": "これまでに出た発言を振り返ると、p2 の説明だけが後から変わっています。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    },
+    {
+      "turn": 3,
+      "player_id": "p1",
+      "speech_text": "考えられる筋は複数あります。p4 が誘導しているのかもしれませんし、逆に p4 は素直に話しているだけかもしれません。断定はまだできません。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 0.0
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p2",
+      "target": "p1",
+      "reason": "話の筋が途中で変わっていたため。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 0.0
+    },
+    {
+      "voter": "p3",
+      "target": "p4",
+      "reason": "発言の根拠が薄いと感じたため。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 0.0
+    },
+    {
+      "voter": "p4",
+      "target": "p3",
+      "reason": "議論を誘導しようとしているように見えたため。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 0.0
+    },
+    {
+      "voter": "p1",
+      "target": "p2",
+      "reason": "話の筋が途中で変わっていたため。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 0.0
+    }
+  ],
+  "result": {
+    "executed": "p1",
+    "executed_role": "werewolf",
+    "executed_function": "Ne",
+    "winner": "village",
+    "vote_counts": {
+      "p1": 1,
+      "p2": 1,
+      "p3": 1,
+      "p4": 1
+    },
+    "tie_break": {
+      "method": "seeded_random",
+      "candidates": [
+        "p1",
+        "p2",
+        "p3",
+        "p4"
+      ],
+      "player_id": "p1",
+      "seed": 10
+    }
+  },
+  "metrics": {
+    "per_player": [
+      {
+        "player_id": "p1",
+        "function": "Ne",
+        "role": "werewolf",
+        "speech_count": 3,
+        "avg_chars": 60.3,
+        "final_vote": "p2",
+        "win": false,
+        "elapsed_seconds": 0.004,
+        "suspicion_count": 2,
+        "suspected_by_count": 0,
+        "question_count": 0,
+        "rebuttal_count": 0,
+        "agreement_count": 0,
+        "hypothesis_count": 4,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p2",
+        "function": "Ti",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 45.7,
+        "final_vote": "p1",
+        "win": true,
+        "elapsed_seconds": 0.004,
+        "suspicion_count": 0,
+        "suspected_by_count": 1,
+        "question_count": 0,
+        "rebuttal_count": 0,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p3",
+        "function": "Fe",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 47.3,
+        "final_vote": "p4",
+        "win": true,
+        "elapsed_seconds": 0.004,
+        "suspicion_count": 0,
+        "suspected_by_count": 0,
+        "question_count": 0,
+        "rebuttal_count": 0,
+        "agreement_count": 4,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p4",
+        "function": "Si",
+        "role": "villager",
+        "speech_count": 3,
+        "avg_chars": 40.3,
+        "final_vote": "p3",
+        "win": true,
+        "elapsed_seconds": 0.004,
+        "suspicion_count": 0,
+        "suspected_by_count": 1,
+        "question_count": 0,
+        "rebuttal_count": 0,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-08-15T19:54:32+09:00",
+    "ended_at": "2026-08-15T19:54:32+09:00",
+    "elapsed_seconds": 0.004,
+    "ai_wait_seconds": 0.0,
+    "machine_name": "yukawayrounoAir"
+  },
+  "failure": null
+}
