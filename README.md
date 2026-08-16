@@ -26,7 +26,7 @@
 | 一覧 | https://ziriss8120121.github.io/hackathon-test/ |
 | 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
 
-`main` へ push すると GitHub Actions が `runs/` から静的サイトを作り直す。
+`python -m mbti_werewolf pages` で静的サイトを作り、`gh-pages` ブランチへ載せる。
 ローカルで試合を回しただけではURLは変わらない。操作画面からの新規実行は公開しない。
 
 ## ルール

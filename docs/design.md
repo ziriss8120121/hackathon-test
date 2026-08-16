@@ -900,8 +900,8 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 | 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
 | 中身 | `runs/` の `result.html`、`latest.html`、それを選ぶ一覧 |
 | 生成 | `python -m mbti_werewolf pages` |
-| 更新 | `main` への push で GitHub Actions が生成して公開する |
-| 生成物 | `site/`（gitignore。リポジトリには置かない） |
+| 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート |
+| 生成物 | `site/`（gitignore。リポジトリの `main` には置かない） |
 
 操作画面を公開しない理由は、実行がローカルの脳（Ollama / 環境変数のAPIキー）に依存するためである。結果ファイルは自己完結なので、ブラウザだけで読める。
 
