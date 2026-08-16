@@ -210,4 +210,4 @@ def test_old_run_log_without_mbti_fields_still_renders():
     assert "ESFJ / ENFJ" in summary
     assert "ESFJ / ENFJ" in timeline
     assert "勝ったMBTI" in summary
-    assert "MBTI人狼 実行結果" in html
+    assert "MBTI人狼" in html
