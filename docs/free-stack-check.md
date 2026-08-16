@@ -172,3 +172,4 @@ APIキーは環境変数（`.env`、gitignore済み）からのみ読み、出�
 | --- | --- | --- |
 | Gemini無料枠の1日あたり上限 | 分間の 429 は観測した。1日あたりの回数は AI Studio の使用量画面で未確認。 | 多試合を Gemini で回すとき。 |
 | 実ブラウザでの画面確認 | HTTP経路は確認済み。見た目とクリックは未実施。 | Designerが `http://127.0.0.1:8765/` を開くとき。 |
+| GitHub Pagesの公開URL | 結果一覧と latest.html を Actions で公開する。 | https://ziriss8120121.github.io/hackathon-test/ |

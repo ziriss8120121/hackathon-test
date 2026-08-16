@@ -8,7 +8,7 @@
 
 - ローカルで動かす時のメモ
 - 実験条件の補足
-- GitHub Pagesで見せる内容のメモ
+- GitHub Pagesで見せる内容のメモ（公開先: https://ziriss8120121.github.io/hackathon-test/ ）
 
 ## ファイル
 

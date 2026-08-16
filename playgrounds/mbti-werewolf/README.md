@@ -109,7 +109,15 @@ runs/s-20260815-190959/
 ```
 
 `result.html` は結果データを埋め込んだ1ファイルで、外部と通信しない。
-Pythonを動かせないメンバーはこれをブラウザで開けばよい。
+Pythonを動かせないメンバーはこれをブラウザで開ける。GitHub Pages の一覧は
+https://ziriss8120121.github.io/hackathon-test/ から同じファイルを開く。
+
+```bash
+python -m mbti_werewolf pages --out site
+```
+
+`main` への push で GitHub Actions が同じコマンドを回し、Pages を更新する。
+操作画面からの新規実行は公開しない。
 
 `metrics.csv` は複数試合分を縦に連結すれば、そのまま表計算ソフトで機能別に集計できる。
 

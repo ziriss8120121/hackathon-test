@@ -84,6 +84,29 @@ def test_settings_can_be_changed_without_code_edit(tmp_path):
     assert len(log["votes"]) == 8
 
 
+def test_pages_builds_index_from_runs(tmp_path, capsys):
+    code = main(["run", "--brain", "stub", "--runs-dir", str(tmp_path / "runs")])
+    assert code == 0
+
+    out = tmp_path / "site"
+    code = main(
+        ["pages", "--runs-dir", str(tmp_path / "runs"), "--out", str(out)]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 0
+    assert (out / "index.html").is_file()
+    assert (out / ".nojekyll").is_file()
+    html = (out / "index.html").read_text(encoding="utf-8")
+    assert "勝ったMBTI" in html
+    assert "run_id" in html
+    copied = list(out.glob("runs/*/r001/result.html"))
+    assert copied, "result.html がサイトへコピーされていない"
+    assert (out / "runs" / "latest.html").is_file()
+    assert "最新の試合" in html
+    assert "GitHub Pages用サイト" in captured.out
+
+
 def test_invalid_config_returns_error_code(tmp_path, capsys):
     code = main(["run", "--brain", "stub", "--players", "2", "--runs-dir", str(tmp_path)])
     captured = capsys.readouterr()

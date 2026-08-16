@@ -890,6 +890,21 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 
 データを埋め込む理由は、`file://` から `fetch` で別ファイルを読むとブラウザに拒否されるためである。1ファイルに閉じることで、ZIPで渡してもGitHubのPagesに置いても同じ挙動になる。
 
+### 7.6 GitHub Pages
+
+公開するのは結果ビューだけである。操作画面（FastAPI）はローカルに残す。
+
+| 項目 | 決定 |
+| --- | --- |
+| URL | https://ziriss8120121.github.io/hackathon-test/ |
+| 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
+| 中身 | `runs/` の `result.html`、`latest.html`、それを選ぶ一覧 |
+| 生成 | `python -m mbti_werewolf pages` |
+| 更新 | `main` への push で GitHub Actions が生成して公開する |
+| 生成物 | `site/`（gitignore。リポジトリには置かない） |
+
+操作画面を公開しない理由は、実行がローカルの脳（Ollama / 環境変数のAPIキー）に依存するためである。結果ファイルは自己完結なので、ブラウザだけで読める。
+
 ---
 
 ## 8. 実行方式
@@ -902,6 +917,7 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 | 1試合を実行する | `python -m mbti_werewolf run` |
 | 100試合を実行する | `python -m mbti_werewolf run --games 100 --seed 42` |
 | 脳を切り替える | `python -m mbti_werewolf run --brain stub` |
+| GitHub Pages用サイトを生成する | `python -m mbti_werewolf pages` |
 
 `ui` は内部でuvicornを起動し、既定ポートで待ち受ける。単一のコマンドで画面まで到達するため、要件のF-57とNF-04を満たす。
 
@@ -1005,7 +1021,7 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M5 | テスト一式、無料であることの確認記録 | AC-07〜AC-11を満たす |
 | M6 | `GeminiBrain`、GitHub Pages公開 | 品質比較ができる、URLで共有できる |
 
-コードはM0からM6まで実装済みである。M2の実機確認（Ollama 0.32.13 + `gemma3:4b`）と Gemini 無料枠での1試合（`gemini-3.1-flash-lite`）は 2026-08-15 に完了した。残っているのは M6 の GitHub Pages 公開である。
+コードはM0からM6まで実装済みである。M2の実機確認（Ollama 0.32.13 + `gemma3:4b`）と Gemini 無料枠での1試合（`gemini-3.1-flash-lite`）は 2026-08-15 に完了した。GitHub Pages は結果ビューの公開用で、URLは https://ziriss8120121.github.io/hackathon-test/ である。
 
 M0からM1までを推論なしで作る理由は、出力形式と画面の判断を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M2でモデルの品質が期待に届かなかった場合も、出力とテストを作り直さずにモデルだけを差し替えて再実行できる。
 

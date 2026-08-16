@@ -4,6 +4,7 @@
     python -m mbti_werewolf run                     1試合を実行する
     python -m mbti_werewolf run --games 100 --seed 42
     python -m mbti_werewolf run --brain stub        脳を切り替える
+    python -m mbti_werewolf pages                   GitHub Pages用の静的サイトを生成する
 
 長時間・多試合の実行は画面を経由しないこの経路で行う。ブラウザやスリープの影響を
 受けず、nohup などでシェルから切り離せるためである（要件IF-07、F-23）。
@@ -52,6 +53,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--machine", help="実行環境の識別名（既定はホスト名）")
     run.add_argument("--runs-dir", type=Path, help="出力先（既定はリポジトリの runs/）")
 
+    pages = sub.add_parser("pages", help="GitHub Pages用の静的サイトを生成する")
+    pages.add_argument("--runs-dir", type=Path, help="読み取る runs/（既定はリポジトリの runs/）")
+    pages.add_argument("--out", type=Path, help="書き出し先（既定はリポジトリの site/）")
+
     return parser
 
 
@@ -63,6 +68,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return command_ui(args)
     if args.command == "run":
         return command_run(args)
+    if args.command == "pages":
+        return command_pages(args)
 
     parser.print_help()
     return 1
@@ -150,15 +157,27 @@ def command_run(args: argparse.Namespace) -> int:
     print("-" * 60)
     print("最新結果へのリンク: {}".format(runner.runs_dir / "latest.html"))
     print(
-        "スマホ確認用URL（GitHub Pages、未公開・設計書M6）: "
-        "https://ziriss8120121.github.io/hackathon-test/runs/latest.html"
+        "公開URL（一覧）: https://ziriss8120121.github.io/hackathon-test/"
     )
     print(
-        "上記URLは、リポジトリでGitHub Pagesを公開してから runs/ 配下を commit・push した場合にだけ反映されます"
-        "（ローカル実行だけでは反映されません。Pages公開自体は人がSettingsで行う必要があります）。"
+        "公開URL（最新）: https://ziriss8120121.github.io/hackathon-test/runs/latest.html"
     )
+    print("URLへ反映するには、runs/ を commit して main へ push する。")
 
     return 0 if series.get("status") == "done" else 1
+
+
+def command_pages(args: argparse.Namespace) -> int:
+    from .config import project_root, runs_root
+    from .record.pages import build_pages
+
+    dest = build_pages(
+        runs_dir=args.runs_dir or runs_root(),
+        output_dir=args.out or (project_root() / "site"),
+    )
+    print("GitHub Pages用サイト: {}".format(dest))
+    print("一覧: {}".format(dest / "index.html"))
+    return 0
 
 
 def _overrides(args: argparse.Namespace) -> Dict[str, Any]:
