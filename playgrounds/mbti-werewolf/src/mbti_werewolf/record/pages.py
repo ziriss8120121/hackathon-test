@@ -1,7 +1,7 @@
 """GitHub Pages用の静的サイト生成（設計書7.6、要件F-42、IF-04）。
 
-操作画面はローカルで動かす。公開するのは自己完結の result.html と、
-それを選ぶための一覧だけである。生成物は出力先に書き、リポジトリには置かない。
+公開するのは自己完結の result.html、それを選ぶ一覧、および操作画面の見た目
+（実行なし）である。生成物は出力先に書き、リポジトリの main には置かない。
 """
 
 from __future__ import annotations
@@ -44,6 +44,10 @@ def build_pages(runs_dir: Optional[Path] = None, output_dir: Optional[Path] = No
     if latest.is_file():
         (dest / "runs").mkdir(parents=True, exist_ok=True)
         shutil.copy2(latest, dest / "runs" / "latest.html")
+
+    static_dir = Path(__file__).resolve().parents[1] / "web" / "static"
+    shutil.copy2(static_dir / "style.css", dest / "style.css")
+    (dest / "simulator.html").write_text(render_simulator_preview(), encoding="utf-8")
 
     (dest / ".nojekyll").write_text("", encoding="utf-8")
     (dest / "index.html").write_text(render_index(entries), encoding="utf-8")
@@ -228,7 +232,7 @@ a {{ color: var(--accent); }}
 <body>
 <main>
   <h1>MBTI人狼 実行結果</h1>
-  <p class="sub">開発環境なしで結果を見るための公開ページ。{count}件。操作画面からの新規実行は含まない。<a href="runs/latest.html">最新の試合</a></p>
+  <p class="sub">開発環境なしで結果を見るための公開ページ。{count}件。対戦の新規実行はできない。<a href="simulator.html">操作画面の見た目</a> / <a href="runs/latest.html">最新の試合</a></p>
   <h2>観察用の試合</h2>
   <div class="cards">
 {cards}
@@ -252,6 +256,130 @@ a {{ color: var(--accent); }}
     MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。
   </p>
 </main>
+</body>
+</html>
+"""
+
+
+def render_simulator_preview() -> str:
+    """操作画面と同じ項目を、実行できない見た目として出す。"""
+    return _SIMULATOR
+
+
+_SIMULATOR = """<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MBTI人狼シミュレーター（見た目）</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.preview-banner {
+  background: #332812;
+  border: 1px solid #6c5230;
+  color: #f0d9a8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-inline-size: 0;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>MBTI人狼シミュレーター</h1>
+  <p class="sub">条件を設定して対戦を開始し、完了後に同じ画面で会話と結果を確認する。会話は逐次表示しない。</p>
+</header>
+<main>
+  <p class="preview-banner">
+    これは操作画面の見た目です。公開ページからは対戦を開始できません。
+    実行するには、リポジトリを clone してローカルで <code>python -m mbti_werewolf ui</code> を起動してください。
+    <a href="./">結果一覧へ戻る</a>
+  </p>
+  <section class="panel" id="setup-panel">
+    <h2>1. 実験条件</h2>
+    <form id="config-form">
+      <fieldset disabled>
+      <div class="grid">
+        <label>参加人数
+          <input type="number" name="player_count" value="4">
+        </label>
+        <label>議論ターン数
+          <input type="number" name="turn_count" value="3">
+        </label>
+        <label>試合回数
+          <input type="number" name="game_count" value="1">
+        </label>
+        <label>seed
+          <input type="number" name="seed" value="42">
+        </label>
+        <label>役職割当方法
+          <select name="role_assignment_mode">
+            <option selected>seeded_random（seed付きランダム）</option>
+          </select>
+        </label>
+        <label>history_mode
+          <select name="history_mode">
+            <option selected>none（過去ログを渡さない）</option>
+          </select>
+        </label>
+        <label>人狼の人数
+          <input type="number" name="werewolf_count" value="1">
+        </label>
+        <label>脳（provider）
+          <select name="provider">
+            <option selected>stub（LLMを呼ばない・即時）</option>
+            <option>ollama（ローカル実行）</option>
+            <option>gemini（無料枠API）</option>
+          </select>
+        </label>
+        <label>モデル名
+          <input type="text" name="model" placeholder="例: gemma3:4b" value="">
+        </label>
+        <label>発言の文字数上限
+          <input type="number" name="max_output_chars" value="200">
+        </label>
+      </div>
+      <label class="inline">心理機能（上級者向け・主機能を直接指定）
+        <input type="text" name="functions" value="Ne, Si, Fi, Te">
+      </label>
+      <p class="hint">
+        既定はMBTIタイプそのもので定義した4人ロースター（討論者ENTP・擁護者ISFJ・仲介者INFP・幹部ESTJ）です。
+        上の欄は、その4人の主機能がそのまま入っています。ここを書き換えると参加人数以上の主機能を上から順に割り当てる旧来の指定方法になり、
+        MBTIタイプの表示は書き換えた分だけ外れます（候補2タイプ表示に戻ります）。
+      </p>
+      <h2>2. 実行</h2>
+      <div class="actions">
+        <button type="button" disabled>対戦開始</button>
+        <button type="button" class="ghost" disabled>条件を編集し直す</button>
+      </div>
+      <p class="hint">公開ページでは実行できません。</p>
+      </fieldset>
+    </form>
+  </section>
+  <section class="panel">
+    <h2>3. 状態</h2>
+    <div class="status-line">
+      <span class="dot"></span>
+      <strong>未実行</strong>
+      <span class="muted">この公開ページでは試合を回せません。</span>
+    </div>
+    <div class="progress"><div class="bar"></div></div>
+  </section>
+  <section class="panel">
+    <h2>5. 過去の実行</h2>
+    <p class="muted">過去の試合は <a href="./">結果一覧</a> から開きます。</p>
+  </section>
+</main>
+<footer>
+  MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。
+</footer>
 </body>
 </html>
 """

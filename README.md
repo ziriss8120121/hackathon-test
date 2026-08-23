@@ -24,10 +24,11 @@
 | ページ | URL |
 | --- | --- |
 | 一覧 | https://ziriss8120121.github.io/hackathon-test/ |
+| 操作画面の見た目 | https://ziriss8120121.github.io/hackathon-test/simulator.html |
 | 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
 
 `python -m mbti_werewolf pages` で静的サイトを作り、`gh-pages` ブランチへ載せる。
-ローカルで試合を回しただけではURLは変わらない。操作画面からの新規実行は公開しない。
+ローカルで試合を回しただけではURLは変わらない。操作画面の見た目は公開するが、そこから対戦は開始できない。
 
 ## ルール
 

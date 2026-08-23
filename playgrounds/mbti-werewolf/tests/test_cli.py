@@ -97,9 +97,15 @@ def test_pages_builds_index_from_runs(tmp_path, capsys):
     assert code == 0
     assert (out / "index.html").is_file()
     assert (out / ".nojekyll").is_file()
+    assert (out / "simulator.html").is_file()
+    assert (out / "style.css").is_file()
     html = (out / "index.html").read_text(encoding="utf-8")
+    preview = (out / "simulator.html").read_text(encoding="utf-8")
     assert "勝ったMBTI" in html
     assert "run_id" in html
+    assert "simulator.html" in html
+    assert "操作画面の見た目" in preview
+    assert "対戦を開始できません" in preview
     copied = list(out.glob("runs/*/r001/result.html"))
     assert copied, "result.html がサイトへコピーされていない"
     assert (out / "runs" / "latest.html").is_file()

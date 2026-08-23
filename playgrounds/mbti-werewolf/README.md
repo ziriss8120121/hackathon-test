@@ -116,7 +116,7 @@ https://ziriss8120121.github.io/hackathon-test/ から同じファイルを開�
 python -m mbti_werewolf pages --out site
 ```
 
-生成物は `gh-pages` ブランチへ載せて公開する。操作画面からの新規実行は公開しない。
+生成物は `gh-pages` ブランチへ載せて公開する。操作画面の見た目は公開するが、そこから対戦は開始できない。
 
 `metrics.csv` は複数試合分を縦に連結すれば、そのまま表計算ソフトで機能別に集計できる。
 

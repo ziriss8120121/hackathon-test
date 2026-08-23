@@ -892,18 +892,19 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 
 ### 7.6 GitHub Pages
 
-公開するのは結果ビューだけである。操作画面（FastAPI）はローカルに残す。
+公開するのは結果ビューと、操作画面の見た目（実行なし）である。対戦の実行そのものは FastAPI をローカルで動かす。
 
 | 項目 | 決定 |
 | --- | --- |
 | URL | https://ziriss8120121.github.io/hackathon-test/ |
+| 操作画面の見た目 | https://ziriss8120121.github.io/hackathon-test/simulator.html |
 | 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
-| 中身 | `runs/` の `result.html`、`latest.html`、それを選ぶ一覧 |
+| 中身 | `runs/` の `result.html`、`latest.html`、それを選ぶ一覧、操作画面の静的プレビュー |
 | 生成 | `python -m mbti_werewolf pages` |
 | 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート |
 | 生成物 | `site/`（gitignore。リポジトリの `main` には置かない） |
 
-操作画面を公開しない理由は、実行がローカルの脳（Ollama / 環境変数のAPIキー）に依存するためである。結果ファイルは自己完結なので、ブラウザだけで読める。
+操作画面から対戦を開始できない理由は、実行がローカルの脳（Ollama / 環境変数のAPIキー）に依存するためである。見た目だけは自己完結の HTML にして、チームがブラウザだけで確認できるようにする。結果ファイルも自己完結なので、ブラウザだけで読める。
 
 ---
 
