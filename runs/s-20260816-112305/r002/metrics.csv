@@ -1,0 +1,5 @@
+run_id,series_id,player_id,function,mbti_types,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
+s-20260816-112305-r002,s-20260816-112305,p1,Ne,ENFP / ENTP,werewolf,10,184.9,p4,true,421.947,1,2,10,4,0,16
+s-20260816-112305-r002,s-20260816-112305,p2,Si,ISTJ / ISFJ,werewolf,10,188.7,p4,true,421.947,4,2,7,7,0,2
+s-20260816-112305-r002,s-20260816-112305,p3,Fi,ISFP / INFP,werewolf,10,165.2,p4,true,421.947,3,10,17,0,1,1
+s-20260816-112305-r002,s-20260816-112305,p4,Te,ESTJ / ENTJ,villager,10,169.6,p3,false,421.947,6,7,1,1,0,0

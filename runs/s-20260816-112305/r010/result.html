@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MBTI人狼 結果 s-20260816-112305-r010</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --line: #e2e5ea;
+  --text: #1f2328;
+  --muted: #667085;
+  --accent: #3b66d6;
+  --village: #1f9d55;
+  --werewolf: #d1373f;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  padding: 0 0 64px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.7;
+}
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
+.site-header { position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.site-header-inner { max-width: 960px; margin: 0 auto; padding: 14px 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+.brand-accent { color: var(--accent); font-weight: 500; }
+.status-chip { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
+.status-chip.done { border-color: var(--village); color: var(--village); }
+.status-chip.failed { border-color: var(--werewolf); color: var(--werewolf); }
+.site-nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; padding: 10px 16px; }
+.site-nav a { flex-shrink: 0; font-size: 12px; color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
+.site-nav a:hover { color: var(--text); border-color: var(--line); background: #eef1f5; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 40px 0 12px; padding: 2px 0 6px 12px; border-bottom: 1px solid var(--line); position: relative; scroll-margin-top: 96px; }
+h2::before { content: ""; position: absolute; left: 0; top: 1px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--accent); }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.2); }
+.card .label { color: var(--muted); font-size: 12px; }
+.card .value { font-size: 17px; margin-top: 4px; word-break: break-all; }
+.village { color: var(--village); }
+.werewolf { color: var(--werewolf); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { color: var(--muted); font-weight: 600; }
+td.wrap, th.wrap { white-space: normal; }
+tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.025); }
+tbody tr:hover { background: rgba(59, 102, 214, 0.08); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.scroll table { border: none; }
+.scroll th, .scroll td { border-bottom: 1px solid var(--line); }
+.scroll tr:last-child td { border-bottom: none; }
+.discussion-note { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
+.chat-log { background: #ffffff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-row { display: flex; align-items: flex-start; gap: 8px; }
+.chat-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; }
+.chat-avatar-muted { background: #9aa1b1; }
+.chat-bubble-wrap { max-width: 78%; display: flex; flex-direction: column; }
+.chat-meta { font-size: 11px; color: #6b7280; margin: 0 4px 4px; }
+.chat-bubble { padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px; font-size: 14px; line-height: 1.6; color: #24292f; word-break: break-word; white-space: pre-wrap; }
+.chat-row.role-village .chat-bubble { background: #eaf7ee; border: 1px solid #bfe6cf; }
+.chat-row.role-werewolf .chat-bubble { background: #ffeef0; border: 1px solid #f3c2c8; }
+.chat-flag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 999px; background: #eef0f3; color: #6b7280; margin-left: 6px; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-left: 6px; }
+.alert { background: #fdecee; border: 1px solid #f3b4bb; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
+.note { color: var(--muted); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; font-size: 13px; }
+dl.kv dt { color: var(--muted); }
+dl.kv dd { margin: 0; word-break: break-all; }
+.card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
+.roster-card { display: flex; flex-direction: column; gap: 10px; }
+.roster-card-top { display: flex; align-items: center; gap: 12px; }
+.mbti-icon { width: 56px; height: 56px; border-radius: 12px; background: #1f2328; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.mbti-icon-fallback { font-size: 13px; font-weight: 700; color: #e6e8ee; letter-spacing: 0.02em; }
+.roster-card-title { min-width: 0; }
+.roster-card-title .value { font-size: 15px; word-break: break-word; }
+.roster-card-title .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.roster-badges, .roster-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.badge.role-badge.village { border-color: var(--village); color: var(--village); }
+.badge.role-badge.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.badge.result-badge.win { border-color: var(--village); color: var(--village); }
+.badge.result-badge.lose { border-color: var(--werewolf); color: var(--werewolf); }
+.stat-pill { font-size: 11px; color: var(--muted); background: rgba(15, 23, 42, 0.03); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="brand">MBTI人狼 <span class="brand-accent">結果ビュー</span></div>
+    <div class="status-chip" id="status-chip"></div>
+  </div>
+  <nav class="site-nav">
+    <a href="#sec-roster">参加者</a>
+    <a href="#sec-discussion">議論ログ</a>
+    <a href="#sec-votes">投票</a>
+    <a href="#sec-cards">結果</a>
+    <a href="#sec-metrics">メトリクス</a>
+    <a href="#sec-conditions">実行条件</a>
+  </nav>
+</header>
+<main>
+  <p class="sub" id="head-sub"></p>
+  <div id="app"></div>
+  <p class="note" id="foot-note"></p>
+</main>
+
+<script type="application/json" id="run-data">{"schema_version": "1", "run_id": "s-20260816-112305-r010", "series_id": "s-20260816-112305", "run_index": 10, "status": "done", "phase": "finished", "config": {"player_count": 4, "turn_count": 10, "game_count": 10, "functions": ["Ne", "Si", "Fi", "Te"], "mbti_types": ["ENTP", "ISFJ", "INFP", "ESTJ"], "role_assignment_mode": "seeded_random", "role_composition": {"werewolf": 3, "villager": 1}, "seed": 51, "base_seed": 42, "history_mode": "none", "history_scope": null, "brain": {"provider": "gemini", "model": "", "temperature": 0.8, "max_output_chars": 200, "timeout_seconds": 120, "max_retries": 3}, "machine_name": "yukawayrounoAir"}, "brain": {"provider": "gemini", "model": "gemini-3.1-flash-lite", "endpoint_kind": "free_api", "name": "gemini:gemini-3.1-flash-lite"}, "players": [{"player_id": "p1", "function": "Ne", "role": "werewolf", "agent_prompt_version": "v1", "mbti_type": "ENTP", "display_name": "討論者", "function_stack": ["Ne", "Ti", "Fe", "Si"]}, {"player_id": "p2", "function": "Si", "role": "villager", "agent_prompt_version": "v1", "mbti_type": "ISFJ", "display_name": "擁護者", "function_stack": ["Si", "Fe", "Ti", "Ne"]}, {"player_id": "p3", "function": "Fi", "role": "werewolf", "agent_prompt_version": "v1", "mbti_type": "INFP", "display_name": "仲介者", "function_stack": ["Fi", "Ne", "Si", "Te"]}, {"player_id": "p4", "function": "Te", "role": "werewolf", "agent_prompt_version": "v1", "mbti_type": "ESTJ", "display_name": "幹部", "function_stack": ["Te", "Si", "Ne", "Fi"]}], "speaking_order": ["p3", "p4", "p1", "p2"], "turns": [{"turn": 1, "player_id": "p3", "speech_text": "皆さんはじめまして。初めての議論で少し緊張していますが、まずは落ち着いて話し合いたいですね。誰か特定の個人を疑うよりも、まずは全員の意見を聞いてから、誰が最も村人らしい誠実な考えを持っているかを見極めていきたいと思っています。p1さんやp2さん、p4さんは、今の状況をどう見ていますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 2.237}, {"turn": 1, "player_id": "p4", "speech_text": "p3さん、意見ありがとうございます。効率的に議論を進めるため、まずは各自が疑わしいと思う相手を提示すべきです。私はまだ情報が少なく判断しかねますが、全員の出方を観察し、早めに議論の方向性を固める必要があります。p1さん、p2さんはどう考えますか？今のところ、特定の誰かを疑う根拠はありますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.457}, {"turn": 1, "player_id": "p1", "speech_text": "皆さん、よろしくお願いします。まだ情報が皆無に近いので判断は難しいですね。p3さんのように慎重に様子を見るのが正解か、あるいはp4さんのように積極的に意見を交わすべきか、どちらが村人らしい動きなのか迷いますね。現時点では誰が怪しいというよりも、まずは皆さんの議論の進め方から、論理的な一貫性があるかどうかを観察していきたいと思っています。誰が最も本質を突く発言をするのか、少し様子を見てみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.649}, {"turn": 1, "player_id": "p2", "speech_text": "皆さん、よろしくお願いします。p3さんは慎重に意見を聞きたいと仰り、p4さんは効率的な議論のために疑わしい相手を挙げることを提案し、p1さんは議論の進め方から一貫性を観察したいと言いましたね。三人三様の姿勢ですが、まずは皆さんの発言に矛盾が生じないか、過去の発言を整理しながら慎重に見守りたいと思います。今はまだ特定の誰かを疑う段階ではありませんので、まずは皆さんの考えをもう少し詳しく伺えますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.619}, {"turn": 2, "player_id": "p3", "speech_text": "皆さんの意見を伺い、議論を急ぐよりも互いの考えを深く知ることに意義を感じています。p1さんが仰る一貫性も大切ですが、言葉の端々から滲む誠実さこそが判断の鍵になる気がしてなりません。現状では特定の誰かを疑う根拠は見当たりませんが、p2さんの慎重な姿勢には共感します。皆さんは、自分の意見が他者にどう映るか意識して発言されていますか？私は、今はまだ誰かを排除する時期ではないと感じています。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 10.178}, {"turn": 2, "player_id": "p4", "speech_text": "議論を深めるのも重要ですが、ターン数は限られています。現状では誰も根拠を出せておらず、このままでは時間だけが過ぎてしまいます。p1さん、p2さん、議論の停滞を避けるために、そろそろ何らかの基準で候補を絞るべきではないでしょうか？何か疑わしい点や気になる言動があれば、遠慮なく指摘してください。次からは具体的な判断材料を提示することを提案します。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.718}, {"turn": 2, "player_id": "p1", "speech_text": "p4さんの言う通り、時間制限を考えると焦る気持ちも分かります。ただ、拙速な判断で村人を吊るリスクを考えると、もう少し議論の幅を持たせるべきかもしれませんね。例えば、p2さんの慎重さが逆に隠れ蓑になっている可能性もあれば、p3さんの慎重さが実は慎重に立ち回るための戦略である可能性も捨てきれません。今の発言から論理の矛盾を探りつつ、もう少しだけ皆の出方を見極めてみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.73}, {"turn": 2, "player_id": "p2", "speech_text": "p4さんはターン2で議論の停滞を懸念し、基準を設ける提案をされましたね。p1さんはそれに同意しつつ、慎重な姿勢が隠れ蓑である可能性を指摘されました。お二人の懸念は理解できますが、今はまだ発言の蓄積が少ない段階です。私は、まずは皆さんが先ほど仰った通り、誠実な意見交換を続けるべきだと思います。p3さんの「今は誰かを排除する時期ではない」というお考えも、現時点では妥当ではないでしょうか。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.56}, {"turn": 3, "player_id": "p3", "speech_text": "p2さん、私の考えに共感してくださりありがとうございます。p4さんが焦る気持ちも理解できますが、今は拙速に誰かを疑うよりも、お互いの言葉の裏にある誠実さを感じ取りたいという思いが強いです。何かの戦略や効率を優先するあまり、人としての温かみを見失いたくはありません。p1さん、p4さん、議論の進行は大切ですが、この対話の中で感じる違和感や安心感を大切にしてみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.648}, {"turn": 3, "player_id": "p4", "speech_text": "p3さん、誠実さや温かみという曖昧な基準では人狼は排除できません。議論の停滞は人狼を利するだけです。p1さんとp2さんは、そろそろ誰か一人に投票先を絞る議論を始めることに同意しますか？客観的な材料に基づき、次は議論の候補を具体的に絞り込むべきです。感情論ではなく、論理的な絞り込みを優先しましょう。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.604}, {"turn": 3, "player_id": "p1", "speech_text": "p4さんの論理的な絞り込みも一理ありますが、逆にp3さんの言う誠実さが村人陣営の結束には必要という可能性も捨てきれませんね。どちらがこの場において有効か、皆さんはどう感じますか？p2さんはこの論争をどう見ていますか？慎重な姿勢が膠着を生んでいるのか、あるいは議論の深まりに寄与しているのか、可能性は複数考えられますね。もう少しだけ各々の意図を探る余地があってもいいのではないでしょうか。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.555}, {"turn": 3, "player_id": "p2", "speech_text": "p4さんはターン3で論理的な絞り込みを強く主張されていますが、p3さんはあくまで誠実さや温かみを重視すべきだと仰っていますね。p1さんはその両者の意見を検討しつつ、まだ慎重に議論を深めるべきだと提案されました。私は皆さんのこれまでの発言に論理的な矛盾は見当たらないと感じていますが、p4さんの急ぐ姿勢が逆に議論を硬直させていないか、少し気になります。もう少しだけ、個々の考えを詳しく聞かせてください。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.682}, {"turn": 4, "player_id": "p3", "speech_text": "p4さん、論理を優先するあまり、対話そのものが事務的になってしまうのは少し悲しいですね。私は、誰かを排除するための議論よりも、こうして皆さんの言葉の奥にある意図を確かめ合う時間こそが、結果的に真実を見抜く助けになると信じています。p2さんが仰るように、焦って硬直させるより、もう少しお互いの考えを聞かせていただけませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.233}, {"turn": 4, "player_id": "p4", "speech_text": "p3さん、悲しいといった感情論は議論の解決に寄与しません。私は効率を求めているのではなく、人狼を特定するために最短のルートを提案しているだけです。p2さんが私の姿勢を懸念していますが、膠着状態を招いているのは誰か、客観的に見てみましょう。p1さん、p2さん、そろそろp3さんの非論理的な態度をどう評価するか、結論を出しませんか。これ以上時間を浪費しても村人側に利はありません。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.324}, {"turn": 4, "player_id": "p1", "speech_text": "p4さんの論理的な最短ルートという主張も、p3さんの対話を重んじる姿勢も、どちらも村人としての誠実なアプローチである可能性はありますね。ただ、p4さんの焦りが逆に人狼を誘い出そうとする高度な戦略である可能性や、逆にp3さんの対話重視が議論を停滞させるための時間稼ぎであるという可能性も考えられます。皆さんは、この対立のどちらに、より村人らしさを感じますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.092}, {"turn": 4, "player_id": "p2", "speech_text": "p4さんはターン4でp3さんの姿勢を非論理的とし、結論を急ぐよう強く主張されましたね。p1さんは双方に可能性を見出しつつ、どちらが村人らしいか問いかけました。私は、議論を停滞させないことも重要ですが、p4さんのように結論を急かす姿勢が、かえって議論をかき乱すリスクもあると考えます。焦らず、もう少し皆さんの言葉の一貫性を確認させてください。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 10.357}, {"turn": 5, "player_id": "p3", "speech_text": "p4さん、私は人としての対話を大切にしたいだけです。それを非論理的と切り捨て、結論を急がせる姿勢に強い違和感を覚えます。効率を求めるあまり、私たちは一番大切な「誰が誠実か」を見失っているのではないでしょうか。p1さん、p2さん、このまま急いで結論を出して本当に後悔しませんか？私はまだ、皆さんの言葉の奥にある真意をもっと深く理解したいと考えています。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.593}, {"turn": 5, "player_id": "p4", "speech_text": "p3さん、感情に訴えるばかりで具体的な根拠が皆無ですね。これ以上の停滞は村人陣営にとって致命的です。p1さん、p2さん、議論を前進させるためにも、そろそろp3さんを投票対象の筆頭として検討し、議論の方向性を確定させませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.355}, {"turn": 5, "player_id": "p1", "speech_text": "p4さんがp3さんを絞り込むべきだと主張する一方で、p3さんは対話を重んじる姿勢を崩していませんね。p4さんの急ぐ姿勢が村人を守るための論理的防衛である可能性もあれば、逆にp3さんの対話重視が場を和ませるための村人らしい振る舞いである可能性もあります。p2さんはこの膠着をどう見ていますか？双方の意図をもう少し深く検討し、誰が最も村人らしい一貫性を持っているか、慎重に見極めたいですね。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.189}, {"turn": 5, "player_id": "p2", "speech_text": "p4さんはターン5でも一貫してp3さんを投票対象にすべきだと主張し、議論の短縮を急いでいますね。p1さんは双方の可能性を慎重に検討されています。私はp4さんの急ぐ姿勢が、逆に議論を分断させ、慎重な検討を妨げているように感じてしまいます。p3さんの対話を大切にする姿勢も、村人らしい誠実な行動だと思えます。もう少しだけ、皆さんの発言の細部に矛盾がないか見守らせてください。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.13}, {"turn": 6, "player_id": "p3", "speech_text": "p4さん、議論を急かすその姿勢こそが、この場をかき乱しているように見えてなりません。効率や論理だけで結論を出そうとすれば、かえって真実から遠ざかるのではないでしょうか。私は、皆さんがどう感じているか、その言葉の温度を感じ取りたいのです。p1さん、p2さん、この対話の先に何が見えるか、もう少しだけ一緒に考えてくれませんか？急いで決断を下すことよりも、今は慎重に互いを理解し合う時間が必要です。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.87}, {"turn": 6, "player_id": "p4", "speech_text": "p3さん、温度や誠実さという主観だけで議論を停滞させるのは限界です。ターン6を迎え、これ以上結論を先送りすれば村人側は混乱し人狼を利するだけです。私はp3さんの非論理的な引き延ばし工作を強く警戒します。p1さん、p2さん、そろそろp3さんを投票対象として確定させませんか？これ以上の停滞は許容できません。客観的な論理に基づき、今ここで投票先を絞り込みましょう。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.525}, {"turn": 6, "player_id": "p1", "speech_text": "p4さんが急ぐ姿勢を人狼の引き延ばし工作と捉えるか、あるいはp3さんの対話重視が議論を混乱させるための時間稼ぎであると捉えるか、視点によって解釈は変わりますね。p4さんの論理的防衛が村人を守るためのものか、p3さんの慎重さが場を和ませるための村人らしい振る舞いか。皆さんは、どちらの姿勢に議論の停滞を打破する意図を感じますか？まだ結論を急ぐ前に、両者の意図をもう少し深く検討する余地はありそうです。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.366}, {"turn": 6, "player_id": "p2", "speech_text": "p4さんはターン6でもp3さんの対話重視を非論理的とし、結論を急いでいますね。p1さんは双方の意図を慎重に検討されています。私はp4さんの焦りが、かえって議論を分断し、人狼に有利な状況を作っているのではないかと懸念しています。p3さんの姿勢は一貫しており、場を落ち着かせようとする誠実さを感じます。今はまだ結論を急がず、もう少し発言の積み重ねと矛盾の有無を確認すべきだと思います。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.767}, {"turn": 7, "player_id": "p3", "speech_text": "p4さん、私はただ皆さんと心を通わせたいだけです。効率を優先するあまり、言葉の端々から感じられる互いの誠実さを見失うのは、村人として最も避けるべきことではないでしょうか。p2さんが仰る通り、焦りは議論を分断させるだけです。p1さん、p4さんの急ぐ姿勢に何か違和感はありませんか？私は、もう少し皆さんの言葉に耳を傾け、お互いの真意をじっくりと確かめ合いたいと強く感じています。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.734}, {"turn": 7, "player_id": "p4", "speech_text": "p3さん、心を通わせるといった主観的な表現で議論を逸らすのはやめてください。議論は残り3ターンであり、停滞は人狼の思う壺です。p1さん、p2さん、感情論に終始するp3さんを排除し、議論を正常化すべきです。これ以上時間を浪費しても村人に利はありません。今ここでp3さんへの投票で意見を統一しませんか？論理的に判断する時です。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.525}, {"turn": 7, "player_id": "p1", "speech_text": "p4さんの論理的な焦りが村人を守る防衛本能なのか、あるいはp3さんへの攻撃を強める戦略なのかという可能性も残りますね。一方でp3さんの対話重視が、議論を停滞させたい人狼の逃げ道である可能性も捨てきれません。今の局面でどちらを信じるべきか、あるいは第三の選択肢としてp2さんの慎重な姿勢に注目すべきか、皆さんはどう感じますか？もう少し議論の幅を持たせて、可能性を検討してみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.175}, {"turn": 7, "player_id": "p2", "speech_text": "p4さんはターン7でもp3さんへの投票を強く主張し、議論を急がせていますね。p1さんはp4さんの焦りとp3さんの慎重さ、双方に可能性があると仰いました。私は、p4さんが執拗に議論を制限しようとする姿勢にこそ、かえって不自然さを感じます。p3さんは一貫して対話を求めており、そこに矛盾は感じません。投票前に、今一度皆さんの発言に隠れた論理の綻びがないか、注意深く見極めたいと思います。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.821}, {"turn": 8, "player_id": "p3", "speech_text": "p4さんが執拗に結論を急ぐ姿勢には、やはり強い違和感を拭えません。効率という言葉で他者の発言を封じ、感情論として切り捨てるのは、誠実な対話とは言えないのではないでしょうか。p1さん、p2さん、本当に急いで決めるべきでしょうか。私は皆さんとまだ言葉を交わし、互いの真意を確かめ合いたいです。焦って誰かを排除するのではなく、もう少しだけ慎重に、この対話の先に何があるかを見極めてみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 10.142}, {"turn": 8, "player_id": "p4", "speech_text": "p3さん、議論を感情論で引き延ばす姿勢が、人狼の常套手段であることは明白です。残り時間は僅かであり、今ここで決断しなければ村人陣営の敗北です。p1さん、p2さん、p3さんの発言には一貫した根拠が欠如しており、停滞を招くだけです。投票先をp3さんに絞り、議論を正常化することを強く提案します。これが現状で最も合理的な判断です。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.874}, {"turn": 8, "player_id": "p1", "speech_text": "p4さんが提示する論理的な緊急性は一つの正当な視点かもしれませんが、一方で、議論を結論へ急ぎすぎる姿勢が逆に場を混乱させているという可能性も排除できませんね。p3さんの対話重視の姿勢が本当に時間稼ぎなのか、それとも村人らしい誠実さなのか、p2さんの慎重な分析と合わせて、今一度多角的に検討してみませんか？どちらの主張にも人狼の戦略が隠れている可能性を考えると、まだ断定するのは早計かもしれません。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.651}, {"turn": 8, "player_id": "p2", "speech_text": "p4さんはターン8でも執拗にp3さんの排除を急いでいますね。p1さんが仰る通り、この緊急性が本当に村人のためのものか、逆に場を混乱させる戦略かは慎重に見極めるべきです。p3さんは一貫して対話を求めており、p4さんの急かす姿勢にこそ、私は不自然な焦りを感じます。投票前に、今一度皆さんの発言に矛盾や論理の綻びがないか、注意深く見守らせてください。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.036}, {"turn": 9, "player_id": "p3", "speech_text": "p4さんが執拗に結論を急ぐ姿勢には、やはり強い違和感を拭えません。効率という言葉で他者の発言を封じ、感情論として切り捨てるのは、誠実な対話とは言えないのではないでしょうか。p1さん、p2さん、本当に急いで決めるべきでしょうか。私は皆さんとまだ言葉を交わし、互いの真意を確かめ合いたいです。焦って誰かを排除するのではなく、もう少しだけ慎重に、この対話の先に何があるかを見極めてみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.458}, {"turn": 9, "player_id": "p4", "speech_text": "p3さん、感情に訴えるばかりで議論を前進させる具体的な提案がありません。残り時間は僅かであり、ここで決断を避けることは人狼を利するのみです。p1さん、p2さん、議論を終わらせるために、最も停滞を招いているp3さんを投票対象としましょう。これが村人陣営として取るべき最も合理的な判断です。早急に意思を統一してください。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.673}, {"turn": 9, "player_id": "p1", "speech_text": "p4さんの論理的な緊急性も理解できますが、一方でそれが議論をかき乱す戦略である可能性も捨てきれませんね。逆にp3さんの対話姿勢が、議論を停滞させたい人狼の時間稼ぎという見方もできます。皆さんはどちらが村人らしいと感じますか？p2さんの慎重な分析と合わせ、もう少しだけ視点を広げて検討する余地があってもいいのかもしれませんね。結論を急ぐ前に、今一度それぞれの意図を深掘りしてみませんか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.999}, {"turn": 9, "player_id": "p2", "speech_text": "p4さんはターン9でもp3さんを執拗に排除しようとしていますね。p1さんが仰る通り、議論の停滞が人狼を利するのも事実ですが、p4さんのように結論を急かす姿勢が、逆に議論を分断させ、人狼を隠している可能性も否定できません。p3さんは一貫して対話を求めており、そこに矛盾は感じません。投票前に、今一度皆さんの発言に隠れた論理の綻びがないか、私は最後まで注意深く見極めたいと思います。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.206}, {"turn": 10, "player_id": "p3", "speech_text": "p4さんが執拗に結論を急ぐ姿勢には、依然として強い違和感を覚えます。効率を盾に議論を制限し、誰かを排除しようとする姿は、誠実な対話とはかけ離れているのではないでしょうか。p1さん、p2さん、私たちは急いで誰かを吊るす必要はありません。最後までお互いの言葉に耳を傾け、真意を確かめ合うことが、真実に辿り着くための唯一の道だと信じています。どうか冷静な判断をお願いします。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 8.739}, {"turn": 10, "player_id": "p4", "speech_text": "p3さん、結局最後まで具体的な根拠は示されませんでしたね。議論を停滞させ続けるあなたの態度は、人狼の常套手段であると言わざるを得ません。p1さん、p2さん、これ以上の議論は時間の浪費です。合理的な判断を下し、p3さんに投票して決着をつけましょう。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 16.568}, {"turn": 10, "player_id": "p1", "speech_text": "p4さんの論理的な緊急性と、p3さんの対話を重視する姿勢、どちらがより村人らしいのか、最後の最後まで悩みますね。p4さんの急ぐ姿勢が人狼を吊るための正当な防衛か、それとも混乱を狙ったものか。あるいはp3さんの慎重さが場を和ませる真意か、時間稼ぎか。どちらも可能性として捨てきれませんが、皆さんはこの膠着状態を見て、最終的にどの方向へ投票するのが最も村人としての責任を果たせると感じますか？", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.215}, {"turn": 10, "player_id": "p2", "speech_text": "p4さんは最後まで執拗にp3さんの排除を急ぎ、議論を制限しようとしましたね。p1さんが仰る通り、どちらにも人狼の可能性がある中で、私は自身の発言に一貫性があり、最後まで対話を求めたp3さんよりも、議論を強引に終わらせようとするp4さんの姿勢に強い不自然さを感じます。私はこの対話の過程を重視し、p4さんの焦りにこそ人狼の影が潜んでいると判断し、投票に臨みます。", "referenced_history_ids": [], "parse_failed": false, "retry_count": 0, "wait_seconds": 9.924}], "votes": [{"voter": "p3", "target": "p2", "reason": "p2は議論を通じて中立を装いながら、最後まで私（p3）を擁護し、仲間のp4を疑うような誘導を行っていました。p4は人狼としての連携を意識した動きでしたが、p2の言動は村人陣営の不和を誘うための工作であった可能性が高いです。p1よりもp2の方が議論のコントロールを試みていたように感じたため、今回はp2に投票します。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.646}, {"voter": "p4", "target": "p2", "reason": "p2は議論を通じて一貫して私の主張を不自然な焦りや議論の分断として批判し、私の排除を画策するp3の姿勢を擁護し続けました。村人陣営をミスリードし、人狼の私を特定しようとする動きは非常に危険であるため、この局面で最も脅威となるp2を排除すべきと判断しました。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 8.614}, {"voter": "p1", "target": "p2", "reason": "議論の過程でp4とp3が対立する中、p2は終始一貫して慎重な姿勢を崩さず、議論を長引かせることで人狼側の視点から見れば非常に厄介な「村人らしい立ち回り」をしています。p3とp4が互いにヘイトを向け合っている現状で、議論の均衡を保ち続けてきたp2を排除することで、次なる混乱を誘発できる可能性があると判断しました。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 9.225}, {"voter": "p2", "target": "p4", "reason": "p4さんはターン2から一貫して結論を急ぎ、対話を拒否し続けていました。p2としてこれまで発言を振り返ると、p4さんの執拗な誘導は議論を混乱させるための戦略に見えます。p3さんは一貫して対話を求め、矛盾がない誠実な態度を維持しており、強引に排除を進めるp4さんこそが最も疑わしいと判断しました。", "invalid_retry_count": 0, "fallback": false, "parse_failed": false, "wait_seconds": 9.044}], "result": {"executed": "p2", "executed_role": "villager", "executed_function": "Si", "executed_mbti_type": "ISFJ", "executed_display_name": "擁護者", "winner": "werewolf", "vote_counts": {"p2": 3, "p4": 1}, "tie_break": null}, "metrics": {"per_player": [{"player_id": "p1", "function": "Ne", "mbti_types": "ENFP / ENTP", "mbti_type": "ENTP", "display_name": "討論者", "role": "werewolf", "speech_count": 10, "avg_chars": 192.2, "final_vote": "p2", "win": true, "elapsed_seconds": 399.766, "suspicion_count": 0, "suspected_by_count": 4, "question_count": 22, "rebuttal_count": 4, "agreement_count": 0, "hypothesis_count": 15, "parse_failed_count": 0}, {"player_id": "p2", "function": "Si", "mbti_types": "ISTJ / ISFJ", "mbti_type": "ISFJ", "display_name": "擁護者", "role": "villager", "speech_count": 10, "avg_chars": 186.9, "final_vote": "p4", "win": false, "elapsed_seconds": 399.766, "suspicion_count": 7, "suspected_by_count": 1, "question_count": 3, "rebuttal_count": 3, "agreement_count": 1, "hypothesis_count": 6, "parse_failed_count": 0}, {"player_id": "p3", "function": "Fi", "mbti_types": "ISFP / INFP", "mbti_type": "INFP", "display_name": "仲介者", "role": "werewolf", "speech_count": 10, "avg_chars": 180.8, "final_vote": "p2", "win": true, "elapsed_seconds": 399.766, "suspicion_count": 7, "suspected_by_count": 5, "question_count": 19, "rebuttal_count": 2, "agreement_count": 0, "hypothesis_count": 0, "parse_failed_count": 0}, {"player_id": "p4", "function": "Te", "mbti_types": "ESTJ / ENTJ", "mbti_type": "ESTJ", "display_name": "幹部", "role": "werewolf", "speech_count": 10, "avg_chars": 155.1, "final_vote": "p2", "win": true, "elapsed_seconds": 399.766, "suspicion_count": 0, "suspected_by_count": 11, "question_count": 11, "rebuttal_count": 1, "agreement_count": 1, "hypothesis_count": 0, "parse_failed_count": 0}]}, "timing": {"started_at": "2026-08-16T12:24:58+09:00", "ended_at": "2026-08-16T12:31:37+09:00", "elapsed_seconds": 399.766, "ai_wait_seconds": 399.703, "machine_name": "yukawayrounoAir"}, "failure": null}</script>
+<script>
+const ROLE_LABELS = { werewolf: "人狼", villager: "村人" };
+const WINNER_LABELS = { village: "村人陣営の勝ち", werewolf: "人狼陣営の勝ち" };
+const FUNCTION_LABELS = {"Ne": "外向的直観", "Ti": "内向的思考", "Fe": "外向的感情", "Si": "内向的感覚", "Ni": "内向的直観", "Se": "外向的感覚", "Te": "外向的思考", "Fi": "内向的感情"};
+const DOMINANT_TO_MBTI = {"Si": ["ISTJ", "ISFJ"], "Ni": ["INFJ", "INTJ"], "Ti": ["ISTP", "INTP"], "Fi": ["ISFP", "INFP"], "Se": ["ESTP", "ESFP"], "Ne": ["ENFP", "ENTP"], "Te": ["ESTJ", "ENTJ"], "Fe": ["ESFJ", "ENFJ"]};
+
+const log = JSON.parse(document.getElementById("run-data").textContent);
+const players = {};
+(log.players || []).forEach((p) => { players[p.player_id] = p; });
+const metricsByPlayer = {};
+((log.metrics && log.metrics.per_player) || []).forEach((r) => { metricsByPlayer[r.player_id] = r; });
+
+function esc(value) {
+  return String(value === undefined || value === null ? "" : value)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function mbtiOf(fn) {
+  const types = DOMINANT_TO_MBTI[fn] || [];
+  return types.length ? types.join(" / ") : "—";
+}
+
+// MBTIタイプが確定しているプレイヤー（v1改善のMVPロースター）はタイプ名を、
+// 確定していない（旧ログ、functions直接指定など）場合は候補2タイプを表示する。
+function identityOf(entry) {
+  if (!entry) return "—";
+  if (entry.mbti_type) {
+    return entry.display_name ? entry.display_name + "（" + entry.mbti_type + "）" : entry.mbti_type;
+  }
+  return mbtiOf(entry.function);
+}
+
+function playerLabel(id) {
+  const p = players[id];
+  if (!p) return id || "—";
+  return identityOf(p) + " / " + p.player_id + " / " + (ROLE_LABELS[p.role] || p.role) + " / " + p.function;
+}
+
+function hasConfirmedMbti() {
+  return (log.players || []).some((p) => p.mbti_type);
+}
+
+function winningMbti() {
+  const winner = (log.result || {}).winner;
+  const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
+  if (!wanted) return "決着なし";
+  const parts = (log.players || []).filter((p) => p.role === wanted)
+    .map((p) => identityOf(p) + " / " + p.player_id + " / " + p.function);
+  return parts.join("、") || "—";
+}
+
+function who(id) {
+  return esc(playerLabel(id));
+}
+
+function topOf(key) {
+  const rows = (log.metrics && log.metrics.per_player) || [];
+  if (!rows.length) return "—";
+  const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
+  if (!top) return "該当なし";
+  return rows.filter((r) => (r[key] || 0) === top)
+    .map((r) => identityOf(r) + " / " + r.player_id + " / " + r.function).join("、") + " — " + top;
+}
+
+// このファイルは自己完結HTML（外部通信なし、F-41/NF-15）が前提のため、
+// アイコンは画像ではなく文字タイル（MBTIタイプ、無ければ主機能コード）にする。
+// 画像化したくなったら、このHTMLへ data URI として埋め込む形にすること。
+// 外部ファイルを指すimgタグは絶対に入れない。
+function mbtiIconHtml(p) {
+  const text = p.mbti_type ? p.mbti_type : p.function;
+  return '<div class="mbti-icon"><div class="mbti-icon-fallback">' + esc(text) + '</div></div>';
+}
+
+// MBTIの気質グループ（NT/NF/SJ/SP）を4文字のタイプ名から算出する。1タイプ1色ではなく
+// グループ単位で色分けするため、色の定義を増やさなくても16タイプへそのまま拡張できる。
+const TEMPERAMENT_COLORS = { NT: "#7c5cff", NF: "#22a06b", SJ: "#3b82f6", SP: "#f59e0b" };
+
+function temperamentOf(mbtiType) {
+  if (!mbtiType || mbtiType.length < 4) return "";
+  if (mbtiType[1] === "N") return mbtiType[2] === "T" ? "NT" : "NF";
+  return mbtiType[3] === "J" ? "SJ" : "SP";
+}
+
+function chatAvatarHtml(p) {
+  if (p.mbti_type) {
+    const color = TEMPERAMENT_COLORS[temperamentOf(p.mbti_type)] || "#6b7280";
+    return '<div class="chat-avatar" style="background:' + color + ';">' + esc(p.mbti_type) + '</div>';
+  }
+  return '<div class="chat-avatar chat-avatar-muted">' + esc(p.function) + '</div>';
+}
+
+function renderRoster() {
+  const list = log.players || [];
+  if (!list.length) return "";
+  const cards = list.map((p) => {
+    const stack = (p.function_stack && p.function_stack.length ? p.function_stack : [p.function]).join(" / ");
+    const roleKey = p.role === "werewolf" ? "werewolf" : "village";
+    const m = metricsByPlayer[p.player_id] || {};
+    const winLabel = m.win === true ? "勝ち" : (m.win === false ? "負け" : "—");
+    const winKey = m.win === true ? "win" : (m.win === false ? "lose" : "");
+    const speechCount = m.speech_count === undefined || m.speech_count === null ? "—" : m.speech_count;
+    const suspectedCount = m.suspected_by_count === undefined || m.suspected_by_count === null ? "—" : m.suspected_by_count;
+    return '<div class="card roster-card">'
+      + '<div class="roster-card-top">'
+      + mbtiIconHtml(p)
+      + '<div class="roster-card-title">'
+      + '<div class="value">' + esc(identityOf(p)) + '</div>'
+      + '<div class="label">' + esc(p.player_id) + ' / ' + esc(ROLE_LABELS[p.role] || p.role) + ' / 主機能 ' + esc(p.function) + '</div>'
+      + '</div></div>'
+      + '<div class="roster-badges">'
+      + '<span class="badge role-badge ' + roleKey + '">' + esc(ROLE_LABELS[p.role] || p.role) + '</span>'
+      + '<span class="badge result-badge ' + winKey + '">' + esc(winLabel) + '</span>'
+      + '</div>'
+      + '<div class="sub">4心理機能 ' + esc(stack) + '</div>'
+      + '<div class="roster-stats">'
+      + '<span class="stat-pill">発言 ' + esc(speechCount) + '</span>'
+      + '<span class="stat-pill">疑われ ' + esc(suspectedCount) + '</span>'
+      + '</div>'
+      + '</div>';
+  }).join("");
+  return '<div class="cards">' + cards + '</div>';
+}
+
+function renderFailure() {
+  if (log.status === "done") return "";
+  const f = log.failure || {};
+  return '<div class="alert"><strong>この実行は完走していません（' + esc(log.status) + "）</strong><br>"
+    + "種別: <code>" + esc(f.kind || "不明") + "</code><br>" + esc(f.message || "") + "<br>"
+    + "到達フェーズ: " + esc(log.phase || "") + "。ここまでの発言と投票は下に表示している。</div>";
+}
+
+function renderCards() {
+  const r = log.result || {};
+  const winnerClass = r.winner === "village" ? "village" : (r.winner === "werewolf" ? "werewolf" : "");
+  const wolves = (log.players || []).filter((p) => p.role === "werewolf")
+    .map((p) => identityOf(p) + " / " + p.player_id + " / " + p.function).join("、") || "—";
+  const cards = [
+    ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[r.winner] || "決着なし") + "</span>"],
+    ["勝ったMBTI", esc(winningMbti())],
+    ["人狼だったMBTI", esc(wolves)],
+    ["処刑された人", r.executed ? who(r.executed) : "—"],
+    ["最も疑われた人", esc(topOf("suspected_by_count"))],
+    ["最も発言した人", esc(topOf("speech_count"))],
+    ["決着方法", r.tie_break ? esc("同数得票のため " + r.tie_break.method) : "最多得票が1人"],
+  ];
+  return '<div class="cards">' + cards.map((c) =>
+    '<div class="card"><div class="label">' + esc(c[0]) + '</div><div class="value">' + c[1] + "</div></div>"
+  ).join("") + "</div>";
+}
+
+function renderMetrics() {
+  const rows = (log.metrics && log.metrics.per_player) || [];
+  if (!rows.length) return "<p>集計はありません。</p>";
+  const head = ["ID", "心理機能", "MBTI", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
+  const body = rows.map((r) => "<tr>" + [
+    r.player_id,
+    r.function + (FUNCTION_LABELS[r.function] ? "（" + FUNCTION_LABELS[r.function] + "）" : ""),
+    identityOf(r),
+    ROLE_LABELS[r.role] || r.role,
+    r.speech_count, r.avg_chars, r.final_vote || "—",
+    r.win === null || r.win === undefined ? "—" : (r.win ? "勝ち" : "負け"),
+    r.suspicion_count, r.suspected_by_count, r.question_count,
+    r.rebuttal_count, r.agreement_count, r.hypothesis_count,
+  ].map((v) => "<td>" + esc(v) + "</td>").join("") + "</tr>").join("");
+  return '<div class="scroll"><table><thead><tr>' + head.map((h) => "<th>" + esc(h) + "</th>").join("")
+    + "</tr></thead><tbody>" + body + "</tbody></table></div>";
+}
+
+function renderTimeline() {
+  const turns = log.turns || [];
+  if (!turns.length) return "<p>発言はまだ記録されていません。</p>";
+  let html = '<p class="discussion-note">このゲームはワンナイト人狼形式です。途中結果はなく、議論ログのあとに1回だけ投票と結果があります。'
+    + '発言する順番はあらかじめ決められたターン割り当てに従っており、参加者が自分の判断で発言タイミングを選んでいるわけではありません。</p>';
+  html += '<div class="chat-log">';
+  turns.forEach((t, index) => {
+    const p = players[t.player_id];
+    const roleKey = p && p.role === "werewolf" ? "werewolf" : "village";
+    const flags = [];
+    if (t.parse_failed) flags.push("形式が崩れた応答");
+    if (t.wait_seconds) flags.push(t.wait_seconds + "秒");
+    html += '<div class="chat-row role-' + roleKey + '">'
+      + (p ? chatAvatarHtml(p) : '<div class="chat-avatar chat-avatar-muted">?</div>')
+      + '<div class="chat-bubble-wrap">'
+      + '<div class="chat-meta">発言' + esc(String(index + 1).padStart(2, "0")) + ' ' + who(t.player_id)
+      + flags.map((f) => '<span class="chat-flag">' + esc(f) + "</span>").join("")
+      + '</div>'
+      + '<div class="chat-bubble">' + esc(t.speech_text) + '</div>'
+      + '</div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderVotes() {
+  const votes = log.votes || [];
+  if (!votes.length) return "<p>投票はまだ記録されていません。</p>";
+  const counts = (log.result || {}).vote_counts || {};
+  const tally = Object.keys(counts).map((k) => k + " " + counts[k] + "票").join("、");
+  const body = votes.map((v) => "<tr><td>" + who(v.voter) + "</td><td>" + who(v.target) + "</td>"
+    + '<td class="wrap">' + esc(v.reason) + "</td><td>"
+    + (v.fallback ? "乱数で決定" : (v.invalid_retry_count ? "再要求" + v.invalid_retry_count + "回" : "—"))
+    + "</td></tr>").join("");
+  return (tally ? "<p>得票: " + esc(tally) + "</p>" : "")
+    + '<div class="scroll"><table><thead><tr><th>投票者</th><th>投票先</th><th class="wrap">理由</th><th>備考</th></tr></thead><tbody>'
+    + body + "</tbody></table></div>";
+}
+
+function renderConditions() {
+  const c = log.config || {};
+  const t = log.timing || {};
+  const b = log.brain || {};
+  const items = [
+    ["run_id", log.run_id], ["series_id", log.series_id],
+    ["参加人数", (c.player_count || "") + "人"], ["内部発言セット数", c.turn_count],
+    ["seed", c.seed], ["base_seed", c.base_seed],
+    ["役職割当方式", c.role_assignment_mode], ["心理機能", (c.functions || []).join("、")],
+    ["history_mode", c.history_mode],
+    ["使用した脳", [b.provider, b.model, b.endpoint_kind].filter(Boolean).join(" / ")],
+    ["実行環境", t.machine_name], ["開始", t.started_at], ["終了", t.ended_at],
+    ["所要時間", (t.elapsed_seconds || 0) + "秒"], ["AI待機時間", (t.ai_wait_seconds || 0) + "秒"],
+    ["プロンプト版", ((log.players || [])[0] || {}).agent_prompt_version],
+    ["schema_version", log.schema_version],
+  ];
+  return '<div class="panel"><dl class="kv">' + items.map((i) =>
+    "<dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1] === undefined || i[1] === null || i[1] === "" ? "—" : i[1]) + "</dd>"
+  ).join("") + "</dl></div>";
+}
+
+document.getElementById("head-sub").textContent =
+  log.run_id + "  /  " + (log.timing || {}).started_at + "  /  状態: " + log.status;
+
+const statusChip = document.getElementById("status-chip");
+statusChip.textContent = log.run_id;
+statusChip.className = "status-chip" + (log.status === "done" ? " done" : (log.status === "failed" ? " failed" : ""));
+
+document.getElementById("app").innerHTML = [
+  renderFailure(),
+  '<h2 id="sec-roster">参加者</h2>', renderRoster(),
+  '<h2 id="sec-discussion">議論ログ</h2>', renderTimeline(),
+  '<h2 id="sec-votes">投票</h2>', renderVotes(),
+  '<h2 id="sec-cards">結果</h2>', renderCards(),
+  '<h2 id="sec-metrics">メトリクス</h2>', renderMetrics(),
+  '<h2 id="sec-conditions">実行条件</h2>', renderConditions(),
+].join("");
+
+document.getElementById("foot-note").innerHTML = [
+  "MBTIおよび心理機能は、実在人物の診断や評価ではない。AIエージェントの振る舞いを分けるためのフィクション設定として扱っている。",
+  hasConfirmedMbti()
+    ? "MBTIタイプが確定しているプレイヤーはそのタイプ名で表示している。確定していないプレイヤーは主機能からの候補2タイプ（要求定義書6.5）を表示している。"
+    : "MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。",
+  "このファイルは実行結果を埋め込んだ自己完結HTMLで、外部との通信を行わない。",
+].map(esc).join("<br>");
+</script>
+</body>
+</html>

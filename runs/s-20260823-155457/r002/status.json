@@ -1,0 +1,14 @@
+{
+  "run_id": "s-20260823-155457-r002",
+  "series_id": "s-20260823-155457",
+  "status": "failed",
+  "phase": "failed",
+  "turn": 1,
+  "turn_count": 4,
+  "started_at": "2026-08-23T15:57:47+09:00",
+  "updated_at": "2026-08-23T15:58:30+09:00",
+  "error": {
+    "kind": "interrupted",
+    "message": "利用者が実行を中断しました。"
+  }
+}

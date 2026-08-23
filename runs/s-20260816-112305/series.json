@@ -1,0 +1,140 @@
+{
+  "series_id": "s-20260816-112305",
+  "status": "done",
+  "config": {
+    "player_count": 4,
+    "turn_count": 10,
+    "game_count": 10,
+    "functions": [
+      "Ne",
+      "Si",
+      "Fi",
+      "Te"
+    ],
+    "mbti_types": [
+      "ENTP",
+      "ISFJ",
+      "INFP",
+      "ESTJ"
+    ],
+    "role_assignment_mode": "seeded_random",
+    "role_composition": {
+      "werewolf": 3,
+      "villager": 1
+    },
+    "seed": 42,
+    "base_seed": 42,
+    "history_mode": "none",
+    "history_scope": null,
+    "brain": {
+      "provider": "gemini",
+      "model": "",
+      "temperature": 0.8,
+      "max_output_chars": 200,
+      "timeout_seconds": 120,
+      "max_retries": 3
+    },
+    "machine_name": "yukawayrounoAir"
+  },
+  "game_count": 10,
+  "created_at": "2026-08-16T11:23:05+09:00",
+  "started_at": "2026-08-16T11:23:05+09:00",
+  "ended_at": "2026-08-16T12:31:37+09:00",
+  "elapsed_seconds": 4112.731,
+  "ai_wait_seconds": 4111.853,
+  "success_count": 10,
+  "failure_count": 0,
+  "current_run_id": null,
+  "runs": [
+    {
+      "run_index": 1,
+      "run_id": "s-20260816-112305-r001",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p4",
+      "elapsed_seconds": 443.438,
+      "error_kind": null
+    },
+    {
+      "run_index": 2,
+      "run_id": "s-20260816-112305-r002",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p4",
+      "elapsed_seconds": 421.947,
+      "error_kind": null
+    },
+    {
+      "run_index": 3,
+      "run_id": "s-20260816-112305-r003",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p2",
+      "elapsed_seconds": 404.512,
+      "error_kind": null
+    },
+    {
+      "run_index": 4,
+      "run_id": "s-20260816-112305-r004",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p1",
+      "elapsed_seconds": 398.582,
+      "error_kind": null
+    },
+    {
+      "run_index": 5,
+      "run_id": "s-20260816-112305-r005",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p4",
+      "elapsed_seconds": 428.897,
+      "error_kind": null
+    },
+    {
+      "run_index": 6,
+      "run_id": "s-20260816-112305-r006",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p3",
+      "elapsed_seconds": 410.542,
+      "error_kind": null
+    },
+    {
+      "run_index": 7,
+      "run_id": "s-20260816-112305-r007",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p3",
+      "elapsed_seconds": 411.919,
+      "error_kind": null
+    },
+    {
+      "run_index": 8,
+      "run_id": "s-20260816-112305-r008",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p4",
+      "elapsed_seconds": 399.017,
+      "error_kind": null
+    },
+    {
+      "run_index": 9,
+      "run_id": "s-20260816-112305-r009",
+      "status": "done",
+      "winner": "village",
+      "executed": "p4",
+      "elapsed_seconds": 393.909,
+      "error_kind": null
+    },
+    {
+      "run_index": 10,
+      "run_id": "s-20260816-112305-r010",
+      "status": "done",
+      "winner": "werewolf",
+      "executed": "p2",
+      "elapsed_seconds": 399.766,
+      "error_kind": null
+    }
+  ]
+}

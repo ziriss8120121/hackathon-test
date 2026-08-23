@@ -1,0 +1,35 @@
+{
+  "player_count": 4,
+  "turn_count": 10,
+  "game_count": 10,
+  "functions": [
+    "Ne",
+    "Si",
+    "Fi",
+    "Te"
+  ],
+  "mbti_types": [
+    "ENTP",
+    "ISFJ",
+    "INFP",
+    "ESTJ"
+  ],
+  "role_assignment_mode": "seeded_random",
+  "role_composition": {
+    "werewolf": 3,
+    "villager": 1
+  },
+  "seed": 50,
+  "base_seed": 42,
+  "history_mode": "none",
+  "history_scope": null,
+  "brain": {
+    "provider": "gemini",
+    "model": "",
+    "temperature": 0.8,
+    "max_output_chars": 200,
+    "timeout_seconds": 120,
+    "max_retries": 3
+  },
+  "machine_name": "yukawayrounoAir"
+}

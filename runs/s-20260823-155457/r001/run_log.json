@@ -1,0 +1,402 @@
+{
+  "schema_version": "1",
+  "run_id": "s-20260823-155457-r001",
+  "series_id": "s-20260823-155457",
+  "run_index": 1,
+  "status": "done",
+  "phase": "finished",
+  "config": {
+    "player_count": 4,
+    "turn_count": 4,
+    "game_count": 3,
+    "functions": [
+      "Ne",
+      "Si",
+      "Fi",
+      "Te"
+    ],
+    "mbti_types": [
+      "ENTP",
+      "ISFJ",
+      "INFP",
+      "ESTJ"
+    ],
+    "role_assignment_mode": "seeded_random",
+    "role_composition": {
+      "werewolf": 3,
+      "villager": 1
+    },
+    "seed": 42,
+    "base_seed": 42,
+    "history_mode": "none",
+    "history_scope": null,
+    "brain": {
+      "provider": "gemini",
+      "model": "",
+      "temperature": 0.8,
+      "max_output_chars": 200,
+      "timeout_seconds": 120,
+      "max_retries": 3
+    },
+    "machine_name": "yukawayrounoAir"
+  },
+  "brain": {
+    "provider": "gemini",
+    "model": "gemini-3.1-flash-lite",
+    "endpoint_kind": "free_api",
+    "name": "gemini:gemini-3.1-flash-lite"
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "function": "Ne",
+      "role": "werewolf",
+      "agent_prompt_version": "v1",
+      "mbti_type": "ENTP",
+      "display_name": "討論者",
+      "function_stack": [
+        "Ne",
+        "Ti",
+        "Fe",
+        "Si"
+      ]
+    },
+    {
+      "player_id": "p2",
+      "function": "Si",
+      "role": "werewolf",
+      "agent_prompt_version": "v1",
+      "mbti_type": "ISFJ",
+      "display_name": "擁護者",
+      "function_stack": [
+        "Si",
+        "Fe",
+        "Ti",
+        "Ne"
+      ]
+    },
+    {
+      "player_id": "p3",
+      "function": "Fi",
+      "role": "werewolf",
+      "agent_prompt_version": "v1",
+      "mbti_type": "INFP",
+      "display_name": "仲介者",
+      "function_stack": [
+        "Fi",
+        "Ne",
+        "Si",
+        "Te"
+      ]
+    },
+    {
+      "player_id": "p4",
+      "function": "Te",
+      "role": "villager",
+      "agent_prompt_version": "v1",
+      "mbti_type": "ESTJ",
+      "display_name": "幹部",
+      "function_stack": [
+        "Te",
+        "Si",
+        "Ne",
+        "Fi"
+      ]
+    }
+  ],
+  "speaking_order": [
+    "p4",
+    "p3",
+    "p1",
+    "p2"
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "player_id": "p4",
+      "speech_text": "まずは議論を開始します。現状、情報が皆無なので、各々が誰を怪しいと考えているか、根拠とともに簡潔に主張してください。議論を効率的に進めるため、ターン終了時には投票先を絞り込みましょう。p1、p2、p3の意見を聞かせてください。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 1.351
+    },
+    {
+      "turn": 1,
+      "player_id": "p3",
+      "speech_text": "まだ何も情報がない段階で、効率を求めて投票先を急ぐのは少し不安を感じます。p4さんが議論を回してくれるのは助かりますが、誰かを追い詰めるよりも、まずは皆さんの考えを聞いて、誠実に話し合いたいですね。今のところ、誰が怪しいといった確信はありません。皆さんはどう感じていますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.393
+    },
+    {
+      "turn": 1,
+      "player_id": "p1",
+      "speech_text": "p4さんの効率重視の姿勢は議論を活性化させる良い一手かもしれませんし、逆に性急に誰かを吊ろうとする意図があるという可能性も否定できませんね。また、p3さんの慎重な態度は誠実にも見えますが、人狼が目立たないよう潜伏しているという見方もできそうです。現状では全員に可能性がある気がして、誰か一人を疑うというよりは、発言の論理性をもう少し深掘りして様子を見たいところです。皆さんはどう思いますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.911
+    },
+    {
+      "turn": 1,
+      "player_id": "p2",
+      "speech_text": "p4さんが提案した効率的な進行と、それに対するp3さんの慎重な姿勢、そしてp1さんが指摘したそれぞれの可能性、どれも理解できます。p3さんは議論を急ぐことに懸念を示されていましたが、私も今は情報を整理すべきだと思います。まずは皆さんの発言に矛盾がないか、過去の言葉と照らし合わせて慎重に見極めていきたいですね。現時点で誰かを疑う根拠はないので、もう少し様子を見守るべきではないでしょうか。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 10.797
+    },
+    {
+      "turn": 2,
+      "player_id": "p4",
+      "speech_text": "ターン2に入りました。皆さん慎重なのは理解しますが、議論は停滞しています。p1、p2、p3は疑わしい点を指摘せず、様子見に終始していますね。現状、投票先を絞るために、消去法で最も発言の論理が不明瞭なp1さんを現時点での懸念対象とします。皆さんは誰を疑いますか？具体的な名前を挙げて議論を加速させてください。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.73
+    },
+    {
+      "turn": 2,
+      "player_id": "p3",
+      "speech_text": "p4さんが急にp1さんを疑い始めたことに、少し違和感を感じています。議論を加速させたいお気持ちは分かりますが、まだ何も決まっていない段階で誰かを特定するのは早計ではないでしょうか。私は皆さんの言葉をもう少し丁寧に聞いて、納得できる根拠を探したいです。今は誰かを攻撃するよりも、慎重に話し合う姿勢を大切にしたいですね。p4さんは、なぜ今このタイミングでp1さんを選んだのか、もう少し詳しく教えてもらえ…",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.727
+    },
+    {
+      "turn": 2,
+      "player_id": "p1",
+      "speech_text": "p4さんが急に私を指名したのは議論を動かすための戦術かもしれませんし、あるいは私を排除して誰か別の人の視線を逸らそうとする意図があるのかもしれませんね。p3さんが指摘するように、まだ根拠が薄い段階での断定には少し違和感があります。p4さんの狙いは何なのか、あるいはp2さんが沈黙を守っていることにも何か別の思惑があるのか、もう少し多角的に検討する余地がありそうですね。皆さんはどう感じますか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.622
+    },
+    {
+      "turn": 2,
+      "player_id": "p2",
+      "speech_text": "p4さんが先ほど議論を加速させると仰っていた通り、p1さんを具体的に指名したことは一つの進行だと思います。しかし、p1さんとp3さんが仰るように、現時点で根拠なく特定の方を懸念対象とするのは少し性急に映りますね。私も先ほど、まずは皆さんの発言の矛盾を確認し、慎重に見極めるべきだと申し上げました。現段階で誰かを決めるのではなく、p4さんがp1さんを選んだ根拠をもう少し掘り下げ、全員の考えを整理する…",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 9.117
+    },
+    {
+      "turn": 3,
+      "player_id": "p4",
+      "speech_text": "議論が停滞しています。私がp1を挙げたのは、議論を前進させるための試金石です。皆さんが様子見を続ける間、人狼は潜伏しやすくなります。ターン3ですので、そろそろ投票先を確定させましょう。皆さんの消極的な態度は、人狼が目立つのを避けているようにも見えます。誰が最も怪しいか、今すぐ名前を挙げて議論を結論に導いてください。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.698
+    },
+    {
+      "turn": 3,
+      "player_id": "p3",
+      "speech_text": "p4さんが議論を動かそうとする気持ちは理解できますが、根拠なく誰かを指名して結論を急ぐ姿勢には、やはり納得がいきません。皆が慎重になるのは、納得できる理由がまだ見つからないからではないでしょうか。私は、誰かを排除することよりも、全員が納得できる言葉が出るまで対話を続けたいです。今の流れだと、誰かを吊るために焦っているように見えてしまい、かえって不安を感じてしまいます。もう少し丁寧に向き合いません…",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.809
+    },
+    {
+      "turn": 3,
+      "player_id": "p1",
+      "speech_text": "p4さんが焦っているように見えるのは、議論を深めるためか、あるいは特定の誰かを吊り上げるための誘導という可能性もありますね。一方で、p3さんの慎重さが潜伏を狙う人狼の戦術である可能性も否定できません。p2さんはどう考えていますか？このまま決め打ちするよりも、皆さんの動機をもう少し多角的に検討し、納得感のある結論を導き出したいですね。何が最善の選択なのか、一緒に整理していきませんか？",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.68
+    },
+    {
+      "turn": 3,
+      "player_id": "p2",
+      "speech_text": "p4さんはターン2から一貫して議論の停滞を懸念し、p1さんを試金石として指名されましたね。一方でp3さんは一貫して慎重な対話を求めています。私は先ほどから発言の矛盾を確認すべきだと述べてきましたが、現時点で特定の誰かを決めつける根拠は見当たりません。p4さんが仰る通り時間も迫っていますが、皆さんのこれまでの発言を振り返り、納得できる論理を見つけるため、もう少し慎重に議論を続けるのはいかがでしょう…",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.649
+    },
+    {
+      "turn": 4,
+      "player_id": "p4",
+      "speech_text": "最終ターンです。議論はこれ以上停滞させられません。皆、慎重論を繰り返すだけで投票の決断を避けていますが、これは人狼に利するだけです。私は一貫して議論を加速させる姿勢を貫きました。停滞を放置せず、最も議論を攪乱している印象を受けるp3に投票します。皆さんも自身の判断で、今すぐ投票先を確定させてください。これが最善の結論です。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.711
+    },
+    {
+      "turn": 4,
+      "player_id": "p3",
+      "speech_text": "p4さんが私を疑う根拠として「議論を攪乱している」と挙げましたが、私はただ皆さんと誠実に対話をしたいだけです。焦って誰かを排除しようとする姿勢こそが、今の状況を不透明にしているように感じてなりません。私は皆さんの言葉を最後まで信じて議論したい。p4さんの強引な進め方には、どうしても納得感を持つことができません。私はやはり、慎重に話し合うべきだと強く感じています。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.712
+    },
+    {
+      "turn": 4,
+      "player_id": "p1",
+      "speech_text": "p4さんがp3を指名したことで議論が動きましたが、これが正当な推理なのか、それとも場を混乱させるための誘導なのか見極めが必要ですね。p3さんの誠実な態度が生存戦略の一部である可能性もあれば、p4さんの強引さが逆に狼としての焦りから来ているという見方もできます。どちらを信じるべきか判断が難しいですが、皆さんはこの対立をどう捉えますか？納得できる選択をしたいですね。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.822
+    },
+    {
+      "turn": 4,
+      "player_id": "p2",
+      "speech_text": "p4さんはターン2から一貫して議論の停滞を懸念し、今回はp3さんを指名されましたね。p3さんは当初から慎重な対話を求めており、言動に一貫性があります。一方でp4さんの強引な誘導には、結論を急ぐ意図を感じてしまいます。私は皆さんのこれまでの発言を振り返り、慎重に判断すべきだと考えてきましたが、p4さんの焦燥感と強引な指名に違和感を覚えます。私はp4さんに投票するのが最も納得できると考えます。",
+      "referenced_history_ids": [],
+      "parse_failed": false,
+      "retry_count": 0,
+      "wait_seconds": 8.539
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p4",
+      "target": "p3",
+      "reason": "議論において終始「慎重な対話」を強調するだけで、人狼を見つけるための具体的な分析や他者への疑義提示を行わず、議論の停滞を招くことで人狼の潜伏を助長しているため。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.334
+    },
+    {
+      "voter": "p3",
+      "target": "p4",
+      "reason": "議論の初期から一貫して、根拠が曖昧なまま特定の人物を執拗に指名し、議論を強引に進めようとする姿勢に非常に強い違和感を感じます。慎重な対話を求める私の姿勢を攪乱と決めつけるのは納得できず、自身の焦燥を隠すための誘導のように見えます。村の平穏を乱す言動を考慮し、p4に投票します。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 9.487
+    },
+    {
+      "voter": "p1",
+      "target": "p4",
+      "reason": "p4は一貫して議論を急かしており、その焦りが人狼特有の誘導や強引さである可能性があります。対照的にp3は一貫した慎重な姿勢を見せており、p2もp4の強引な指名に違和感を示しています。村人陣営の混乱を誘うp4の挙動は疑わしく、彼を処刑することで議論の停滞が解消される可能性があると判断しました。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 9.27
+    },
+    {
+      "voter": "p2",
+      "target": "p4",
+      "reason": "p4さんはターン2から一貫して議論を加速させる姿勢を見せていましたが、最終ターンで突然p3さんを指名するなど、その焦燥感と強引な誘導には違和感を覚えます。私はこれまで各人の発言に矛盾がないか慎重に振り返ってきましたが、p4さんの行動は議論を納得のいく形で導くよりも、特定の個人を排除しようとする意図が強く感じられるため、最も疑わしいと判断しました。",
+      "invalid_retry_count": 0,
+      "fallback": false,
+      "parse_failed": false,
+      "wait_seconds": 8.614
+    }
+  ],
+  "result": {
+    "executed": "p4",
+    "executed_role": "villager",
+    "executed_function": "Te",
+    "executed_mbti_type": "ESTJ",
+    "executed_display_name": "幹部",
+    "winner": "werewolf",
+    "vote_counts": {
+      "p3": 1,
+      "p4": 3
+    },
+    "tie_break": null
+  },
+  "metrics": {
+    "per_player": [
+      {
+        "player_id": "p1",
+        "function": "Ne",
+        "mbti_types": "ENFP / ENTP",
+        "mbti_type": "ENTP",
+        "display_name": "討論者",
+        "role": "werewolf",
+        "speech_count": 4,
+        "avg_chars": 191.2,
+        "final_vote": "p4",
+        "win": true,
+        "elapsed_seconds": 169.997,
+        "suspicion_count": 3,
+        "suspected_by_count": 2,
+        "question_count": 9,
+        "rebuttal_count": 2,
+        "agreement_count": 0,
+        "hypothesis_count": 6,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p2",
+        "function": "Si",
+        "mbti_types": "ISTJ / ISFJ",
+        "mbti_type": "ISFJ",
+        "display_name": "擁護者",
+        "role": "werewolf",
+        "speech_count": 4,
+        "avg_chars": 197.5,
+        "final_vote": "p4",
+        "win": true,
+        "elapsed_seconds": 169.997,
+        "suspicion_count": 2,
+        "suspected_by_count": 1,
+        "question_count": 1,
+        "rebuttal_count": 3,
+        "agreement_count": 0,
+        "hypothesis_count": 1,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p3",
+        "function": "Fi",
+        "mbti_types": "ISFP / INFP",
+        "mbti_type": "INFP",
+        "display_name": "仲介者",
+        "role": "werewolf",
+        "speech_count": 4,
+        "avg_chars": 179.8,
+        "final_vote": "p4",
+        "win": true,
+        "elapsed_seconds": 169.997,
+        "suspicion_count": 2,
+        "suspected_by_count": 3,
+        "question_count": 4,
+        "rebuttal_count": 0,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0
+      },
+      {
+        "player_id": "p4",
+        "function": "Te",
+        "mbti_types": "ESTJ / ENTJ",
+        "mbti_type": "ESTJ",
+        "display_name": "幹部",
+        "role": "villager",
+        "speech_count": 4,
+        "avg_chars": 146.5,
+        "final_vote": "p3",
+        "win": false,
+        "elapsed_seconds": 169.997,
+        "suspicion_count": 1,
+        "suspected_by_count": 6,
+        "question_count": 2,
+        "rebuttal_count": 0,
+        "agreement_count": 0,
+        "hypothesis_count": 0,
+        "parse_failed_count": 0
+      }
+    ]
+  },
+  "timing": {
+    "started_at": "2026-08-23T15:54:57+09:00",
+    "ended_at": "2026-08-23T15:57:47+09:00",
+    "elapsed_seconds": 169.997,
+    "ai_wait_seconds": 169.974,
+    "machine_name": "yukawayrounoAir"
+  },
+  "failure": null
+}
