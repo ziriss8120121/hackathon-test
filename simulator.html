@@ -1,116 +1,109 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MBTI人狼シミュレーター（見た目）</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.preview-banner {
-  background: #332812;
-  border: 1px solid #6c5230;
-  color: #f0d9a8;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
-  font-size: 13px;
-}
-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  min-inline-size: 0;
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBTI人狼 操作画面（見た目）</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .preview-banner {
+      background: #fff7e8;
+      border: 1px solid #efcc8a;
+      color: #7a4e00;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 0 0 16px;
+      font-size: 13px;
+    }
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      min-inline-size: 0;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <h1>MBTI人狼シミュレーター</h1>
-  <p class="sub">条件を設定して対戦を開始し、完了後に同じ画面で会話と結果を確認する。会話は逐次表示しない。</p>
-</header>
-<main>
-  <p class="preview-banner">
-    これは操作画面の見た目です。公開ページからは対戦を開始できません。
-    実行するには、リポジトリを clone してローカルで <code>python -m mbti_werewolf ui</code> を起動してください。
-    <a href="./">結果一覧へ戻る</a>
-  </p>
-  <section class="panel" id="setup-panel">
-    <h2>1. 実験条件</h2>
-    <form id="config-form">
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand">MBTI人狼 <span class="brand-accent">操作画面</span></div>
+      <nav>
+        <a href="./simulator.html">実行</a>
+        <a href="./">実験一覧</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <p class="preview-banner">
+      これは操作画面の見た目です。公開ページからは試合を開始できません。
+      実行するには、リポジトリを clone してローカルで
+      <code>python -m mbti_werewolf ui</code> を起動してください。
+      <a href="./">結果一覧へ戻る</a>
+    </p>
+    <h1>実験を実行する</h1>
+    <p class="sub">条件を選んで開始します。長い実行はコマンドの方が安全です。</p>
+    <form class="panel" id="run-form">
       <fieldset disabled>
-      <div class="grid">
-        <label>参加人数
-          <input type="number" name="player_count" value="4">
-        </label>
-        <label>議論ターン数
-          <input type="number" name="turn_count" value="3">
-        </label>
-        <label>試合回数
-          <input type="number" name="game_count" value="1">
-        </label>
-        <label>seed
-          <input type="number" name="seed" value="42">
-        </label>
-        <label>役職割当方法
-          <select name="role_assignment_mode">
-            <option selected>seeded_random（seed付きランダム）</option>
-          </select>
-        </label>
-        <label>history_mode
-          <select name="history_mode">
-            <option selected>none（過去ログを渡さない）</option>
-          </select>
-        </label>
-        <label>人狼の人数
-          <input type="number" name="werewolf_count" value="1">
-        </label>
-        <label>脳（provider）
-          <select name="provider">
-            <option selected>stub（LLMを呼ばない・即時）</option>
-            <option>ollama（ローカル実行）</option>
-            <option>gemini（無料枠API）</option>
-          </select>
-        </label>
-        <label>モデル名
-          <input type="text" name="model" placeholder="例: gemma3:4b" value="">
-        </label>
-        <label>発言の文字数上限
-          <input type="number" name="max_output_chars" value="200">
-        </label>
-      </div>
-      <label class="inline">心理機能（上級者向け・主機能を直接指定）
-        <input type="text" name="functions" value="Ne, Si, Fi, Te">
-      </label>
-      <p class="hint">
-        既定はMBTIタイプそのもので定義した4人ロースター（討論者ENTP・擁護者ISFJ・仲介者INFP・幹部ESTJ）です。
-        上の欄は、その4人の主機能がそのまま入っています。ここを書き換えると参加人数以上の主機能を上から順に割り当てる旧来の指定方法になり、
-        MBTIタイプの表示は書き換えた分だけ外れます（候補2タイプ表示に戻ります）。
-      </p>
-      <h2>2. 実行</h2>
-      <div class="actions">
-        <button type="button" disabled>対戦開始</button>
-        <button type="button" class="ghost" disabled>条件を編集し直す</button>
-      </div>
-      <p class="hint">公開ページでは実行できません。</p>
+        <div class="grid">
+          <label>人物プール
+            <select name="pool_id">
+              <option selected>pool-001</option>
+            </select>
+          </label>
+          <label>パターンセット
+            <select name="pattern_set_id">
+              <option selected>pattern-set-001</option>
+            </select>
+          </label>
+          <label>ルールセット
+            <select name="rule_set_id">
+              <option selected>onenight-8p-v0.7</option>
+            </select>
+          </label>
+          <label>Trial数
+            <input name="trial_count" type="number" value="1">
+          </label>
+          <label>Trial範囲（例 3-7）
+            <input name="trial_range" placeholder="空なら全部" value="">
+          </label>
+          <label>seed
+            <input name="base_seed" type="number" value="42">
+          </label>
+          <label>max_rounds
+            <input name="max_rounds" type="number" value="6">
+          </label>
+          <label>max_speeches
+            <input name="max_speeches" type="number" value="40">
+          </label>
+          <label>max_speech_chars
+            <input name="max_speech_chars" type="number" value="200">
+          </label>
+          <label>脳
+            <select name="brain_provider">
+              <option value="stub">stub</option>
+              <option value="ollama" selected>ollama</option>
+              <option value="gemini">gemini</option>
+            </select>
+          </label>
+          <label>モデル
+            <input name="brain_model" placeholder="省略可" value="gemma3:4b">
+          </label>
+          <label>人格プロンプト版
+            <input name="persona_prompt_version" value="v2">
+          </label>
+          <label>Judge基準版
+            <input name="judge_criteria_version" value="v1">
+          </label>
+          <label>ケース絞り込み
+            <input name="cases" placeholder="例: c00" value="c00">
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" disabled>実行する</button>
+        </div>
+        <p class="muted">公開ページでは実行できません。</p>
       </fieldset>
     </form>
-  </section>
-  <section class="panel">
-    <h2>3. 状態</h2>
-    <div class="status-line">
-      <span class="dot"></span>
-      <strong>未実行</strong>
-      <span class="muted">この公開ページでは試合を回せません。</span>
-    </div>
-    <div class="progress"><div class="bar"></div></div>
-  </section>
-  <section class="panel">
-    <h2>5. 過去の実行</h2>
-    <p class="muted">過去の試合は <a href="./">結果一覧</a> から開きます。</p>
-  </section>
-</main>
-<footer>
-  MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。
-</footer>
+  </main>
 </body>
 </html>

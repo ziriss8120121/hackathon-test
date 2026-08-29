@@ -47,73 +47,63 @@ a.card:hover { border-color: var(--accent); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
 th { color: var(--muted); font-weight: 600; }
-td.wrap, th.wrap { white-space: normal; }
+td.wrap, th.wrap { white-space: normal; overflow-wrap: anywhere; }
 .scroll { overflow-x: auto; }
 a { color: var(--accent); }
 .note { color: var(--muted); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+
+/* 狭い画面では表を1行1ブロックへ折り返す（設計書7.6）。 */
+@media (max-width: 640px) {
+  table, tbody { display: block; width: 100%; }
+  thead { display: none; }
+  tr { display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  td { display: flex; gap: 10px; padding: 2px 0; border: none; white-space: normal; }
+  td::before { content: attr(data-label); flex: 0 0 5.5em; color: var(--muted); font-size: 11px; }
+}
 </style>
 </head>
 <body>
 <main>
   <h1>MBTI人狼 実行結果</h1>
-  <p class="sub">開発環境なしで結果を見るための公開ページ。24件。対戦の新規実行はできない。<a href="simulator.html">操作画面の見た目</a> / <a href="runs/latest.html">最新の試合</a></p>
-  <h2>観察用の試合</h2>
+  <p class="sub">開発環境なしで結果を見るための公開ページ。実験1件、ケース1件。実行はできない。<a href="runs/latest.html">最新の結果</a>　<a href="simulator.html">操作画面の見た目</a></p>
+  <h2>実験の分析</h2>
   <div class="cards">
-<a class="card" href="runs/s-20260823-155457/r001/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260823-155457-r001</div></a>
-<a class="card" href="runs/s-20260816-112305/r010/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</div><div class="muted">s-20260816-112305-r010</div></a>
-<a class="card" href="runs/s-20260816-112305/r009/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value village">村人陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）</div><div class="muted">s-20260816-112305-r009</div></a>
-<a class="card" href="runs/s-20260816-112305/r008/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260816-112305-r008</div></a>
-<a class="card" href="runs/s-20260816-112305/r007/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p4（Te）→ ESTJ（幹部）</div><div class="muted">s-20260816-112305-r007</div></a>
-<a class="card" href="runs/s-20260816-112305/r006/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p4（Te）→ ESTJ（幹部）</div><div class="muted">s-20260816-112305-r006</div></a>
-<a class="card" href="runs/s-20260816-112305/r005/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260816-112305-r005</div></a>
-<a class="card" href="runs/s-20260816-112305/r004/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</div><div class="muted">s-20260816-112305-r004</div></a>
-<a class="card" href="runs/s-20260816-112305/r003/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</div><div class="muted">s-20260816-112305-r003</div></a>
-<a class="card" href="runs/s-20260816-112305/r002/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260816-112305-r002</div></a>
-<a class="card" href="runs/s-20260816-112305/r001/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260816-112305-r001</div></a>
-<a class="card" href="runs/s-20260816-003934/r001/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p3（Fi）→ INFP（仲介者）</div><div class="muted">s-20260816-003934-r001</div></a>
-<a class="card" href="runs/s-20260815-212647/r001/result.html"><div class="label">gemini / gemini-3.1-flash-lite</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p3（Fe）→ ESFJ / ENFJ</div><div class="muted">s-20260815-212647-r001</div></a>
-<a class="card" href="runs/s-20260815-194748/r001/result.html"><div class="label">ollama / gemma3:4b</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">p3（Fe）→ ESFJ / ENFJ</div><div class="muted">s-20260815-194748-r001</div></a>
+<p class='muted'>分析済みの実験はまだない。`analyze` のあとで pages を再実行する。</p>
   </div>
-  <h2>すべての実行</h2>
+  <h2>すべての実験</h2>
   <div class="scroll">
     <table>
       <thead>
         <tr>
-          <th>run_id</th><th>状態</th><th>勝敗</th><th class="wrap">勝ったMBTI</th>
-          <th>脳</th><th>所要</th><th>開始</th><th>人数</th>
+          <th class="wrap">実験</th><th>状態</th><th>Trial</th><th>完了ケース</th><th>分析</th>
         </tr>
       </thead>
       <tbody>
-<tr><td><a href="runs/s-20260823-155457/r001/result.html">s-20260823-155457-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>169.997秒</td><td>2026-08-23T15:54:57+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r010/result.html">s-20260816-112305-r010</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</td><td>gemini / gemini-3.1-flash-lite</td><td>399.766秒</td><td>2026-08-16T12:24:58+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r009/result.html">s-20260816-112305-r009</a></td><td>完了</td><td class="village">村人陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）</td><td>gemini / gemini-3.1-flash-lite</td><td>393.909秒</td><td>2026-08-16T12:18:24+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r008/result.html">s-20260816-112305-r008</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>399.017秒</td><td>2026-08-16T12:11:45+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r007/result.html">s-20260816-112305-r007</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p4（Te）→ ESTJ（幹部）</td><td>gemini / gemini-3.1-flash-lite</td><td>411.919秒</td><td>2026-08-16T12:04:53+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r006/result.html">s-20260816-112305-r006</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p4（Te）→ ESTJ（幹部）</td><td>gemini / gemini-3.1-flash-lite</td><td>410.542秒</td><td>2026-08-16T11:58:02+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r005/result.html">s-20260816-112305-r005</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>428.897秒</td><td>2026-08-16T11:50:53+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r004/result.html">s-20260816-112305-r004</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</td><td>gemini / gemini-3.1-flash-lite</td><td>398.582秒</td><td>2026-08-16T11:44:15+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r003/result.html">s-20260816-112305-r003</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p3（Fi）→ INFP（仲介者）、p4（Te）→ ESTJ（幹部）</td><td>gemini / gemini-3.1-flash-lite</td><td>404.512秒</td><td>2026-08-16T11:37:30+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r002/result.html">s-20260816-112305-r002</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>421.947秒</td><td>2026-08-16T11:30:28+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-112305/r001/result.html">s-20260816-112305-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENTP（討論者）、p2（Si）→ ISFJ（擁護者）、p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>443.438秒</td><td>2026-08-16T11:23:05+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260816-003934/r001/result.html">s-20260816-003934-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p3（Fi）→ INFP（仲介者）</td><td>gemini / gemini-3.1-flash-lite</td><td>128.503秒</td><td>2026-08-16T00:39:34+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-212647/r001/result.html">s-20260815-212647-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p3（Fe）→ ESFJ / ENFJ</td><td>gemini / gemini-3.1-flash-lite</td><td>129.594秒</td><td>2026-08-15T21:26:47+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-212419/r001/result.html">s-20260815-212419-r001</a></td><td>失敗</td><td class="">—</td><td class='wrap'>（決着していません）</td><td>gemini / gemini-3.1-flash-lite</td><td>25.882秒</td><td>2026-08-15T21:24:19+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-212321/r001/result.html">s-20260815-212321-r001</a></td><td>失敗</td><td class="">—</td><td class='wrap'>（決着していません）</td><td>gemini / gemini-2.5-flash-lite</td><td>0.515秒</td><td>2026-08-15T21:23:21+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-210707/r001/result.html">s-20260815-210707-r001</a></td><td>失敗</td><td class="">—</td><td class='wrap'>（決着していません）</td><td>gemini / gemini-2.5-flash-lite</td><td>3.011秒</td><td>2026-08-15T21:07:07+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-195432/r001/result.html">s-20260815-195432-r001</a></td><td>完了</td><td class="village">村人陣営の勝ち</td><td class='wrap'>p2（Ti）→ ISTP / INTP、p3（Fe）→ ESFJ / ENFJ、p4（Si）→ ISTJ / ISFJ</td><td>stub / stub</td><td>0.004秒</td><td>2026-08-15T19:54:32+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-195432-2/r001/result.html">s-20260815-195432-2-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p3（Fe）→ ESFJ / ENFJ</td><td>stub / stub</td><td>0.003秒</td><td>2026-08-15T19:54:32+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-195432-2/r002/result.html">s-20260815-195432-2-r002</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p4（Si）→ ISTJ / ISFJ</td><td>stub / stub</td><td>0.003秒</td><td>2026-08-15T19:54:32+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-195432-2/r003/result.html">s-20260815-195432-2-r003</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENFP / ENTP</td><td>stub / stub</td><td>0.004秒</td><td>2026-08-15T19:54:32+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-194748/r001/result.html">s-20260815-194748-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p3（Fe）→ ESFJ / ENFJ</td><td>ollama / gemma3:4b</td><td>169.827秒</td><td>2026-08-15T19:47:48+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-191613/r001/result.html">s-20260815-191613-r001</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p3（Fe）→ ESFJ / ENFJ</td><td>stub / stub</td><td>0.01秒</td><td>2026-08-15T19:16:13+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-191613/r002/result.html">s-20260815-191613-r002</a></td><td>完了</td><td class="werewolf">人狼陣営の勝ち</td><td class='wrap'>p2（Ti）→ ISTP / INTP</td><td>stub / stub</td><td>0.01秒</td><td>2026-08-15T19:16:13+09:00</td><td>4</td></tr>
-<tr><td><a href="runs/s-20260815-191613/r003/result.html">s-20260815-191613-r003</a></td><td>完了</td><td class="village">村人陣営の勝ち</td><td class='wrap'>p1（Ne）→ ENFP / ENTP、p2（Ti）→ ISTP / INTP、p3（Fe）→ ESFJ / ENFJ</td><td>stub / stub</td><td>0.009秒</td><td>2026-08-15T19:16:13+09:00</td><td>4</td></tr>
+<tr><td data-label="実験" class="wrap">e-20260829-222633</td><td data-label="状態">完了</td><td data-label="Trial">1</td><td data-label="完了ケース">1</td><td data-label="分析">未生成</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h2>実モデルで完走したケース</h2>
+  <div class="cards">
+<a class="card" href="runs/e-20260829-222633/t001/c00-mixed/result.html"><div class="label">混合構成</div><div class="value werewolf">人狼陣営の勝ち</div><div class="muted">ollama / gemma3:4b</div><div class="muted">e-20260829-222633-t001-c00</div></a>
+  </div>
+  <h2>すべてのケース</h2>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="wrap">ケース</th><th>構成</th><th>状態</th><th>勝敗</th>
+          <th class="wrap">脳</th><th>ラウンド</th><th>開始</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td data-label="ケース" class="wrap"><a href="runs/e-20260829-222633/t001/c00-mixed/result.html">e-20260829-222633-t001-c00</a></td><td data-label="構成">混合構成</td><td data-label="状態">完了</td><td data-label="勝敗" class="werewolf">人狼陣営の勝ち</td><td data-label="脳" class="wrap">ollama / gemma3:4b</td><td data-label="ラウンド">6</td><td data-label="開始">2026-08-29T22:26:33+09:00</td></tr>
       </tbody>
     </table>
   </div>
   <p class="note">
-    MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
-    MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。
+    MBTIは実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
+    1 Trialは混合構成1ケースと同質構成16ケースの17ケースで構成される。指標は暫定であり、版によって変わる。
   </p>
 </main>
 </body>
