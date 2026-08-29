@@ -1,19 +1,21 @@
 # AIテスト_設計書
 
-MBTI人狼AI先行テストについて、要件定義書の要件をどう実現するかを定義する。
+MBTI構成の異なるAIエージェント集団によるワンナイト人狼実験について、要件定義書の要件をどう実現するかを定義する。
 
 ## 0. 文書情報
 
 | 項目 | 内容 |
 | --- | --- |
-| バージョン | 1.1 |
-| 最終更新 | 2026-08-15 |
-| 1.1の変更点 | 実装（`playgrounds/mbti-werewolf`）で確定した事項と本書との差分を0.4に追加した。 |
+| バージョン | 2.1 |
+| 最終更新 | 2026-08-29 |
 | 作成者 | ゆうじろう（Engineer） |
-| 上位文書 | [要件定義書](./system-requirements.md) / [要求定義書](./requirements.md) |
+| 上位文書 | [要件定義書](./system-requirements.md) v2.0 / [要求定義書](./requirements.md) v2.0-draft |
+| 参照する正本 | [ルール文書v0.6](./m-plus-experiment/01_werewolf-rules_v0.6.md) / [Agent設定文書v1](./m-plus-experiment/02_agent-settings_v1.md) / [実験計画文書v1](./m-plus-experiment/03_experiment-plan_v1.md) |
 | Confluence版 | [AIテスト_設計書](https://mayuun2.atlassian.net/wiki/spaces/hackathon/pages/1998901)（章ごとに子ページへ分割。図は`docs/diagrams/`のPNGを参照している） |
 | 本書の役割 | 要件定義書の「システムが何を満たすべきか」を、「どう実現するか」として確定する。 |
-| 本書の読者 | 実装担当（Engineer）。画面の見せ方はDesignerも参照する。 |
+| 本書の読者 | 実装担当（Engineer）。画面の見せ方はDesignerも参照する。実行規模と段階実行はしらまゆ（実行担当）も参照する。 |
+| 2.0の変更点 | v1.1（4人簡略版人狼のAI先行テスト）の設計を破棄し、要件定義書v2.0に対応する設計へ全面刷新した。v1.1の章番号・要件ID参照・出力schemaは本書に引き継がれていない。 |
+| 2.1の変更点 | ルール文書v0.6とAgent設定文書v1を反映した。v2.0で仮置きしていたルールを実際のルールへ置き換え、夜の順序、怪盗の2段階処理、追放判定、棄権と無効試合、回答機会の上限を修正した。乱数フォールバックを全廃し、発言ごと・投票ごとのprivate memoを追加した。`case_log.json` の出力形式が変わっている（6.7）。 |
 
 ### 0.1 本書の位置づけ
 
@@ -21,19 +23,24 @@ MBTI人狼AI先行テストについて、要件定義書の要件をどう実�
 | --- | --- | --- |
 | 要求定義書 | なぜ作るか、何がほしいか | 上位。変更はConfluenceが正本。 |
 | 要件定義書 | システムは何を満たすべきか | 上位。本書の要件IDはここを指す。 |
-| **設計書（本書）** | **どう実現するか** | **構成、処理順序、データ構造、実装順序を確定する。** |
+| **設計書（本書）** | **どう実現するか** | **構成、処理順序、データ構造、指標算出、実装順序を確定する。** |
+| [ルール文書v0.6](./m-plus-experiment/01_werewolf-rules_v0.6.md) | ゲームのルールはどうなっているか | 参照。本書はルールを外部データとして読み込む構造にする（0.5、4.1）。公開議論の1点だけ改訂を提案する（12.1）。 |
+| [Agent設定文書v1](./m-plus-experiment/02_agent-settings_v1.md) | エージェントに何を与え、何を与えないか | 参照。プロンプトの前提部と情報の非対称性の根拠にする（4.7、5.2）。 |
+| [実験計画文書v1](./m-plus-experiment/03_experiment-plan_v1.md) | 何を観察し、何を統制するか | 参照。統制条件と観察用ログの項目を引き継ぐ（3.1、5.3、6.7）。 |
 
 ### 0.2 設計方針
 
-以降のすべての判断は、この3点を優先して決めている。
+以降のすべての判断は、この5点を優先して決めている。1から3はv1.1から引き継ぐ方針、4と5はv2.0で追加した方針である。
 
 | 方針 | 内容 | 根拠 |
 | --- | --- | --- |
 | 無料で完結させる | 課金が発生しうる経路を構成に持ち込まない。既定はローカル実行。 | 要件2.1、NF-01、NF-02 |
-| 脳を差し替え可能にする | 推論手段はインターフェースの裏に隔離し、ゲーム進行から独立させる。 | F-15、F-16、NF-08 |
-| 出力ファイルを唯一の状態にする | データベースを持たず、`runs/` 配下のファイルだけを状態とする。画面はその上の薄い読み取り層にする。 | F-40、F-41、NF-15、AC-16 |
+| 脳を差し替え可能にする | 推論手段はインターフェースの裏に隔離し、ゲーム進行から独立させる。JudgeもエージェントもBrainを通す。 | F-58、IF-01、IF-02、NF-10 |
+| 出力ファイルを唯一の状態にする | データベースを持たず、`runs/` 配下のファイルだけを状態とする。画面はその上の薄い読み取り層にする。 | F-52、F-53、NF-17 |
+| 実行・評価・分析を分離する | ゲーム実行、Judge評価、分析生成を別コマンドにし、それぞれ独立に再実行できる。 | F-39、F-41、F-45、IF-09、NF-18 |
+| 変わる部分を外部データにする | ルール、人物プール、人格プロンプト、Judge評価基準、指標定義をコードから出し、バージョンで識別する。 | F-07、NF-11 |
 
-3番目が本設計の中心である。画面から実行してもコマンドから実行しても同じファイル群を書くため、片方の経路だけで作られた結果がもう片方から見えないという事態が起きない。
+4番目がv2.0の中心である。1,700ケースの実行には日単位の時間がかかるため、Judgeの評価基準や指標の定義を変えるたびにゲームを再実行する構成では実験が終わらない。ゲームの生データを一度取れば、評価と分析だけを何度でも作り直せる形にする。
 
 ### 0.3 要件定義書で保留した決定の確定
 
@@ -41,37 +48,96 @@ MBTI人狼AI先行テストについて、要件定義書の要件をどう実�
 
 | 保留項目 | 本書での決定 | 詳細 |
 | --- | --- | --- |
-| 推論手段の選定 | ローカルのOllamaを既定とし、Gemini無料枠を比較用に併設する。テスト用のStubも用意する。 | 1.2、5.5 |
-| 初回4人の心理機能 | `Ne` / `Ti` / `Fe` / `Si` の4種に固定する。 | 4.3 |
-| 役職割当方式 | seed付きランダム。 | 4.4 |
-| 同数得票時の決着方法 | seed付きランダムで1人を選び、決着方法をログに残す。 | 4.5 |
-| 指標算出方法 | 確実に取る指標はコードで集計。できれば取る指標はv1でルールベース、AI分類はv2以降。 | 9章 |
-| 出力schema詳細 | 本書6章で確定する。 | 6章 |
+| ゲームルールの詳細 | [ルール文書v0.6](./m-plus-experiment/01_werewolf-rules_v0.6.md)の内容を採用し、ルールセットをJSONの外部データとして持つ。公開議論の方式だけは要求定義書のFR-15を優先し、ルール文書へv0.7としての改訂を提案する。 | 0.5、4.1、4.2 |
+| 8人の選定方式 | seed付きの非復元抽出を既定とし、パターンセットとして保存して再利用できる形にする。 | 6.3 |
+| 議論の終了条件と上限 | ラウンド制の問い合わせと4つの終了条件で打ち切る。既定値は段階実行で見直す。 | 4.5 |
+| 自信度の尺度 | 1〜5の5段階。 | 5.3 |
+| Judgeのラベル定義 | 発言ラベル9種、公開スタンス（対象・向き・強度1〜3）。 | 5.5 |
+| 指標と統計方法 | 正確性・収束・判断変化の指標を9.1〜9.3で定義。RQ1はTrialを単位とした対応あり比較、RQ2は記述統計中心の探索的分析。 | 9章 |
+| 推論手段の選定 | エージェントはローカルのOllamaを既定、Judgeも同じ既定。Gemini無料枠を比較用、Stubをテスト用に併設する。 | 1.2、5.6 |
+| 出力schema詳細 | 本書6章で確定する。v1出力との非互換は0.6にまとめる。 | 6章、0.6 |
 | 操作画面の実装方式 | FastAPIのローカルサーバー + 素のHTML/JS。ビルド工程を持たない。 | 7章 |
-| 実行の起動方法 | 単一ワーカーでの非同期実行 + 画面からの1秒間隔ポーリング。 | 8.3 |
-| 結果ビューの生成方式 | 実行完了時に、データを埋め込んだ自己完結HTMLを生成する。 | 7.5 |
-| 性能の閾値 | 本書では決めない。初回実測後に上位文書へ反映する。 | 14章 |
+| 実行の起動方法 | 単一ワーカーでの非同期実行 + 画面からのポーリング。長時間実行はコマンド起動。 | 8.3、8.4 |
+| 生データの保存・公開方法 | ケースの生データはリポジトリに含め、Transcriptの重複表現を持たない。公開は結果ビューと分析HTMLのみ。 | 6.1、6.10、7.6 |
+| 実行規模と段階実行 | 呼び出し回数を試算し、1 Trial → 5 Trial → 本実行の3段階で実測して判断する。 | 1.3、11章 |
+| 使用モデルの確定 | 本書では決めない。段階実行の品質確認後に上位文書へ反映する。 | 14章 |
+| Trial数の確定 | 本書では決めない。段階実行の実測後に上位文書へ反映する。 | 14章 |
+| 人物プールの人数構成 | 本書では決めない。プールの生成方式と保存形式だけを定める。 | 6.3、14章 |
 
-### 0.4 実装で確定した事項と本書との差分
+### 0.4 v1実装から流用する部分と作り直す部分
 
-実装（`playgrounds/mbti-werewolf`）を進める中で、本書の記述を変えた方がよいと判断した点と、
-本書が決めていなかったために実装側で決めた点を1か所にまとめる。該当する章の記述はこの表を優先する。
+v2.0は `playgrounds/mbti-werewolf` を拡張する。パッケージを新設せず、同じパッケージ内でモジュールを入れ替える。流用と作り直しの境界を以下に確定する。
 
-| 対象 | 本書の当初の記述 | 実装での確定 | 理由 |
-| --- | --- | --- | --- |
-| 1.1 言語 | Python 3.12以上 | **Python 3.9以上**（確認した実機は3.9.6） | 実機にはmacOS同梱の3.9.6しか入っておらず、新しいPythonの導入自体が要件NF-04（導入容易性）の障壁になる。3.9で動く書き方にそろえた。3.12でもそのまま動く。 |
-| 1.1 依存 | バージョンは実装時に記録する | `requirements.txt` に固定。ライセンスと料金区分は[無料構成の確認記録](./free-stack-check.md)に記載 | 要件NF-02の根拠を1ファイルに集めた。 |
-| 1.1 推論（既定） | 既定はOllama | **`config/default.json` の既定は `stub`** | Ollamaが未導入の環境でも `clone` 直後に1試合が完走し、出力と画面を確認できる。実際の観察は `--brain ollama` で行う。 |
-| 5.1 脳のインターフェース | `generate(system, user)` | `generate(request)`。`Request` は `system` / `user` / `expect_keys` / `choices` / `tag` を持つ | 期待するキーと選択肢を渡せないと、Brain側で形式の検証とリトライができない。引数の追加ではなくオブジェクトにまとめ、今後の追加で署名が変わらないようにした。 |
-| 3.5 試合ごとのseed | `base_seed + run_index` | **`base_seed + run_index - 1`** | 当初の式では単発実行で seed 42 を指定すると実際には43が使われる。1試合目が指定値そのままになる式に変えた。複数試合の再現性は変わらない。 |
-| 4.4 発言順 | 規定していなかった | seed付きランダムで決め、`run_log.speaking_order` に残す | 順番を固定すると先頭の心理機能だけが常に文脈なしで話すことになり、機能ごとの発言量の比較に偏りが入る。 |
-| 4.3 心理機能 | 初回MVPは4種を固定 | 4種を既定にしたうえで、8種すべてを `agents/functions.py` に定義 | 8人版（要件F-08）を設定変更だけで試せるようにした。定義を増やすコストがほぼないため先に入れた。 |
-| 6.3 設定 | — | `base_seed` と `brain.max_retries` を追加 | 前者は試合ごとにseedをずらした際の元の値を残すため。後者は5.4のリトライ回数を設定値にするため。 |
-| 6.4 状態 | — | `status.json` に `series_id` を追加 | 画面が1ファイル読むだけでseriesを特定できるようにした。 |
-| 6.1 構成 | — | `pyproject.toml` を追加。プロンプトは `system_speak` / `user_speak` / `system_vote` / `user_vote` の4ファイル | 前者は `pip install -e .` で `python -m mbti_werewolf` を使えるようにするため。後者はuser側の文面もコードから出し、版として比較できるようにするため（要件F-14）。 |
-| 7.4 API | 6エンドポイント | `GET /api/series/{series_id}` を追加 | 多試合実行の進捗（何試合目か）は試合単位の `status.json` では表せない。 |
-| 10章 テスト | 6本 | `test_web_api.py` と `test_cli.py` を追加（計37件） | 画面から実行する経路が要件の主経路になったため、受入基準AC-13〜AC-16を自動で確認できるようにした。 |
-| 13章 出力容量 | 100試合実行後に実測する | 1試合あたり**約32KB**（stub実測）。100試合で約3.2MB | 桁が分かれば保存方針を判断できるため先に測った。実LLMでは発言が長くなるため増えるが桁は変わらない。 |
+| 現行モジュール | v2.0での扱い | 理由 |
+| --- | --- | --- |
+| `brains/base.py`、`stub.py`、`ollama.py`、`gemini.py`、`factory.py` | **流用**。`Request` に `expect_keys` と `choices` があるため、個別判断・発言意欲・Judgeの呼び出しも同じ形で通る。`factory` はエージェント用とJudge用で別インスタンスを返せるようにする。 | 脳の抽象はv2.0の要求（F-58、IF-02）をそのまま満たしている。ここを作り直す理由がない。 |
+| `engine/tiebreak.py` | **廃止**。ルールv0.6は同数得票者の全員を追放するため、乱数で1人を選ぶ処理が不要になる。 | 4.6。ファイルは削除せず残すが、v2.0の実行経路からは呼ばない。 |
+| `engine/view.py` | **流用のうえ拡張**。`viewer_id` を取る構造は維持し、他者の年齢・性別の開示、人狼の仲間情報、占い師・怪盗の取得情報を追加する。 | 情報の非対称性を1か所に閉じる設計（F-16、F-17）はv2.0でより重要になる。 |
+| `agents/mbti_types.py` | **流用のうえ拡張**。`TYPE_STACKS` の16タイプはそのまま使う。`DISPLAY_NAMES` を4タイプから16タイプへ拡張し、候補2タイプへのフォールバックは削除する。 | v2.0ではMBTIタイプが必ず確定するため、主機能から候補を推定する経路が不要になる。 |
+| `agents/functions.py` | **流用**。心理機能の定義は人格プロンプトの材料として使う。 | 8種の定義は要求定義書6.2の人格説明の土台になる。 |
+| `record/pages.py` | **流用のうえ拡張**。GitHub Pagesの生成対象にTrial・実験・RQの分析HTMLを追加する。 | 生成の枠組みは変わらない。 |
+| `config.py` | **作り直し**。実験・Trial・ケースの3層になり、`player_count` や `turn_count` を持たなくなる。 | v1の設定は1試合1層を前提としている。 |
+| `runner.py` | **作り直し**。実験 → Trial → ケースの3層の実行管理と再開処理になる。 | v1は series → run の2層で、再開機能を持たない。 |
+| `engine/game.py` | **作り直し**。夜の役職処理、自由議論、2時点の個別判断、投票が新しいフェーズ構成になる。 | v1は昼議論と投票だけで、ターン固定の進行になっている。 |
+| `engine/roles.py` | **作り直し**。役職が5種になり、開始時役職と最終役職を区別する。 | v1は人狼・村人の2種のみ。 |
+| `agents/agent.py` | **作り直し**。発言意欲の判断、個別判断、夜行動の呼び出しが増える。 | v1は発言と投票の2種のみ。 |
+| `agents/prompts/v1/` | **新設**。`prompts/v2/` を作り、v1は削除せず残す。 | プロンプト版の比較を残す（F-07）。 |
+| `record/run_log.py`、`metrics.py`、`summary.py`、`timeline.py`、`series.py`、`result_view.py` | **作り直し**。schemaと出力単位が変わる。 | 6章の新schemaに合わせる。 |
+| `web/app.py`、`web/static/` | **作り直し**。実験 → Trial → ケースの3階層になる。 | v1は run 単位の1画面構成。 |
+
+新設するモジュールは `experiment.py`、`engine/rules.py`、`engine/night.py`、`engine/discussion.py`、`engine/vote.py`、`agents/persona.py`、`judge/`、`analysis/` である（6.1）。
+
+### 0.5 ルール文書・Agent設定文書との対応
+
+チーム管理のルール文書とAgent設定文書は `docs/m-plus-experiment/` に置かれている。本書はこれらを正本として参照し、内容を本書へ重複して書かない。
+
+| 文書 | 本書での扱い |
+| --- | --- |
+| [`01_werewolf-rules_v0.6.md`](./m-plus-experiment/01_werewolf-rules_v0.6.md) | ゲームルールの正本。公開議論の方式を除き、内容をそのまま採用する（4.2）。 |
+| [`02_agent-settings_v1.md`](./m-plus-experiment/02_agent-settings_v1.md) | Agent設定の正本。記憶、人狼経験、AI非認識、MBTI非開示の条件を採用する（5.2）。 |
+| [`03_experiment-plan_v1.md`](./m-plus-experiment/03_experiment-plan_v1.md) | 先行実験（WORLD A / B）の計画。統制条件の考え方をTrialの条件固定へ引き継ぐ（3.1、6.6）。 |
+| [`04_world-A-result_v1.md`](./m-plus-experiment/04_world-A-result_v1.md) / [`05_world-B-result_v1.md`](./m-plus-experiment/05_world-B-result_v1.md) | 先行実験の実行結果。記録すべき項目の実例として参照する（6.7、6.10）。 |
+| [`06_behavior-tendencies-used_v1.md`](./m-plus-experiment/06_behavior-tendencies-used_v1.md) | 実行時に使用した行動傾向文の記録。人格プロンプトの形式の土台にする（5.2）。 |
+
+**ルールの持ち方**
+
+| 項目 | 方針 |
+| --- | --- |
+| 保存場所 | ルールをコードに埋め込まず、`data/rules/{rule_set_id}.json` として外部データにする |
+| 識別 | 全ケースに `rule_set_id` と `rule_set_version` を記録する。ルール版が違う結果は識別情報で区別できる |
+| ルール文書との関係 | ルールJSONはルール文書の機械可読な写しとして扱う。ルール文書を変更したらJSONを更新し、版を上げる |
+
+**ルール文書v0.6から変更を提案する1点**
+
+ルール文書v0.6の§1は「公開議論は3ラウンド行う。各ラウンドでGMは参加者8体全員に1回ずつ発言機会を与え」と定めている。これは要求定義書のFR-15および課題A6が求める「個人の発言順・発言回数を事前に固定しない」と矛盾する。
+
+本書は要求定義書を優先し、公開議論を自由議論として設計する（3.3、4.5）。ルール文書へは、公開議論の節を自由議論へ差し替える**v0.7としての改訂を提案する**。改訂が承認されるまで、実装で使うルールセットIDは `onenight-8p-v0.7-draft` とし、`status: "proposed"` を持たせる。
+
+要求定義書がFR-15を要件にした理由は、性格構成による主導・沈黙・発言量の偏りを観察することである。3ラウンド固定では全員の発言回数が揃うため、この観察ができない。研究目的に直結する要件であるため、ルール側を合わせる判断とした。
+
+先行実験（WORLD A / B）は3ラウンド固定で実行されているため、本システムでその2ゲームを再現することはできない。先行実験の結果は、記録項目と議論内容の実例として参照するが、v2.0の分析対象データには含めない。
+
+### 0.6 v1出力との非互換
+
+v2.0はv1の出力schemaを引き継がない。過去の `runs/` を読むコードを書く場合は、この非互換を前提にする。
+
+| 区分 | v1 | v2.0 |
+| --- | --- | --- |
+| 実行単位のファイル | `run_log.json` | `case_log.json`（別ファイル名。混在しても判別できる） |
+| schemaバージョン | `schema_version: "1"` | `schema_version: "2"` |
+| 実行の階層 | series → run（2層） | experiment → trial → case（3層） |
+| 識別子 | `series_id`、`run_id` | `experiment_id`、`trial_id`、`case_id`（`run_id` は廃止） |
+| プレイヤーの性格 | `function`（心理機能1つ） | `mbti`（16タイプ）。`function` フィールドは廃止 |
+| 役職 | `role`（werewolf / villager） | `initial_role` と `final_role`（werewolf / seer / thief / villager）。`role` フィールドは廃止 |
+| 議論 | `turns`（ターン固定） | `discussion`（ラウンドと発言・見送りの記録）。`turn` フィールドは廃止 |
+| 個別判断 | なし | `pre_discussion_answers`、`pre_vote_answers` を追加。発言と投票に `memo` を追加 |
+| 追放 | `executed`（単一） | `executed`（配列）。0人・1人・複数人を表せる |
+| 応答失敗の扱い | `fallback`（seed付き乱数で補完） | `parse_failed`、`skipped`、`abstained`、`ability_used`。乱数補完は廃止 |
+| 会話評価 | `metrics.per_player` にルールベースの語数（`suspicion_count` など） | 別ファイル `judge.json`。語数系の列は廃止 |
+| 集計CSV | `metrics.csv`（1行=1プレイヤー） | `trial_metrics.csv`（1行=1プレイヤー×ケース）、`experiment_metrics.csv`（1行=1ケース）、`speech_labels.csv`（1行=1発言） |
+| 人が読む出力 | `summary.md`、`timeline.md`、`series_summary.md` | `summary.md`、`transcript.md`、`trial_report.md`、`experiment_report.md`、`rq1.md`、`rq2.md` |
+
+v1の `runs/` 配下は削除しない。`schema_version` とファイル名で区別できるため、過去の結果はそのまま残す（F-37）。
 
 ---
 
@@ -79,48 +145,106 @@ MBTI人狼AI先行テストについて、要件定義書の要件をどう実�
 
 ### 1.1 採用するもの
 
+v1.1の構成を維持する。v2.0で依存を追加しない。
+
 | 区分 | 採用 | 料金・ライセンス | 選定理由 |
 | --- | --- | --- | --- |
-| 言語 | Python 3.9以上（実機は3.9.6） | PSF License（無料） | 標準ライブラリだけで乱数のseed管理、JSON、CSV、日時、HTTPサーバーが揃う。macOS同梱のPythonで動くため、言語処理系の追加インストールが不要になる。 |
+| 言語 | Python 3.9以上（実機は3.9.6） | PSF License（無料） | 標準ライブラリだけで乱数のseed管理、JSON、CSV、日時、HTTPサーバー、統計計算の一部が揃う。macOS同梱のPythonで動くため、言語処理系の追加インストールが不要になる。3.12でもそのまま動く。 |
 | Web層 | FastAPI + uvicorn | MIT / BSD（無料） | 非同期の受け付けと静的ファイル配信を少ない記述で用意できる。 |
 | HTTP通信 | httpx | BSD（無料） | Ollamaにも Gemini にも同じクライアントで届く。ベンダーSDKを入れずに済む。 |
 | 画面 | 素のHTML / CSS / JavaScript | 無料 | npmとビルド工程を持たない。差し替え前提の画面に build を挟む価値がない。 |
-| 推論（既定） | Ollama + `gemma3:4b` | Ollama本体はMIT。`gemma3:4b` は Gemma Terms of Use（無償利用可、OSIオープンソースではない）。 | ローカル完結で回数制限がない。100試合以上の実行はこの経路しか成立しない。 |
-| 推論（比較用） | Gemini API 無料枠（`gemini-3.1-flash-lite`） | 無料枠のまま利用（課金を有効化しない） | ローカル小型モデルで議論が成立しない場合の品質比較用。 |
-| 推論（テスト用） | Stub（LLMを呼ばない） | 無料 | LLMなしで1試合を完走できるため、進行とファイル出力を即時・無課金で検証できる。 |
-| テスト | pytest | MIT（無料） | 再現性と役職漏れの検査を自動化する。 |
-| 保存・共有 | GitHub / GitHub Pages | 無料枠 | 要件のIF-03、IF-04。 |
+| 推論（既定） | Ollama + `gemma3:4b` | Ollama本体はMIT。`gemma3:4b` は Gemma Terms of Use（無償利用可、OSIオープンソースではない）。 | ローカル完結で回数制限がない。1,700ケースの実行はこの経路しか成立しない。 |
+| 推論（比較用） | Gemini API 無料枠（`gemini-3.1-flash-lite`） | 無料枠のまま利用（課金を有効化しない） | ローカル小型モデルで自由議論が成立しない場合の品質比較用。 |
+| 推論（テスト用） | Stub（LLMを呼ばない） | 無料 | LLMなしで1 Trialを完走できるため、17ケースの生成、条件固定の検査、分析出力を即時・無課金で検証できる。 |
+| 統計 | Python標準の `statistics` と自前実装 | 無料 | 使う検定はWilcoxon符号付順位検定とFriedman検定の2つで、順位計算だけで済む。SciPyを入れると導入容易性（NF-04）を下げるため入れない（9.4）。 |
+| テスト | pytest | MIT（無料） | 再現性、条件固定、情報漏れの検査を自動化する。 |
+| 保存・共有 | GitHub / GitHub Pages | 無料枠 | 要件のIF-05、IF-06。 |
 
-依存パッケージは `playgrounds/mbti-werewolf/requirements.txt` に固定する。実際にインストールした値は fastapi 0.128.8 / uvicorn 0.39.0 / httpx 0.28.1 / pytest 8.4.2 である（2026-08-15時点）。各パッケージのライセンスと料金区分、課金経路がないことの確認結果は[無料構成の確認記録](./free-stack-check.md)に残している。
+依存パッケージは `playgrounds/mbti-werewolf/requirements.txt` に固定する。各パッケージのライセンスと料金区分、課金経路がないことの確認結果は[無料構成の確認記録](./free-stack-check.md)に残す。
 
-経路ごとに必要な依存が違う点は実装で分けている。`stub` でのCLI実行は標準ライブラリだけで動き、httpxはOllamaとGeminiのときだけ、FastAPIとuvicornは操作画面のときだけ読み込む。
+経路ごとに必要な依存が違う点はv1.1と同じ扱いにする。`stub` でのCLI実行は標準ライブラリだけで動き、httpxはOllamaとGeminiのときだけ、FastAPIとuvicornは操作画面のときだけ読み込む。
 
 ### 1.2 推論手段を3つ用意する理由
 
-要件のF-15は脳の差し替えを求めているが、差し替え先が実在しないと要件を満たしたか確認できない。そのため最初から3実装を並べる。
-
 | 実装 | 用途 | 回数の制約 | 品質 |
 | --- | --- | --- | --- |
-| `StubBrain` | 進行・出力・画面の検証、CI、受入基準AC-01〜AC-05の確認 | なし | 議論としては無意味（固定文＋seed付き乱数の投票） |
-| `OllamaBrain` | 本命。1試合の観察、多試合実行、夜間実行 | なし（ローカル） | 小型モデル相応 |
-| `GeminiBrain` | 品質比較。ローカルで議論が成立しない場合の判断材料 | 無料枠の1日あたり上限に依存 | 高い |
+| `StubBrain` | 進行・出力・分析・画面の検証、CI、条件固定の検査 | なし | 議論としては無意味（固定文＋seed付き乱数の判断） |
+| `OllamaBrain` | 本命。段階実行と本実行、夜間実行 | なし（ローカル） | 小型モデル相応 |
+| `GeminiBrain` | 品質比較。ローカルで自由議論や個別判断が成立しない場合の判断材料 | 無料枠の1日あたり上限に依存 | 高い |
 
-1試合あたりの推論呼び出し回数は、4人・3ターン・投票1回で **発言12回 + 投票4回 = 16回** である。無料枠の1日あたり上限が仮に250回なら15試合前後、1,000回なら60試合前後で頭打ちになる。要件のF-23が想定する100試合以上はローカル実行でしか成立しない。この計算が「既定をOllamaにする」判断の根拠である。
+v2.0では `StubBrain` の役割がv1.1より重い。17ケースの条件固定（F-11、NF-06）、再開処理（F-53）、分析出力（F-60〜F-64）は、LLMの品質と無関係に正しさを検証できる。これらをStubで自動テストできるようにすることが、長時間実行の前に不具合を潰す唯一の手段になる。
 
-Gemini無料枠の実際の上限はモデル・プロジェクト・時期で変わり、固定値として扱えない。実装時にAI Studioの使用量画面で確認し、確認日と値を `docs/` の実行メモに残す。
+Gemini無料枠の実際の上限はモデル・プロジェクト・時期で変わり、固定値として扱えない。実装時にAI Studioの使用量画面で確認し、確認日と値を `docs/` の実行メモに残す。1.3の試算どおり1ケースで約80回の呼び出しが必要なため、無料枠では数ケースで頭打ちになる。Geminiは品質比較専用であり、本実行の経路にしない。
 
-### 1.3 無料であることの確認手順
+### 1.3 実行規模の試算と段階実行
 
-要件のNF-01、NF-02、AC-07を満たしたと判断するための手順を定める。
+要件のNF-07、NF-08、AC-21にあたる。所要時間はAI応答待ちで決まるため、呼び出し回数から見積る。
+
+**1ケースあたりの推論呼び出し回数**
+
+| フェーズ | 呼び出し数 | 内訳 |
+| --- | --- | --- |
+| 開始時の役職処理 | 3 | 占い師の確認対象の選択1回、怪盗の確認対象の選択1回、怪盗の交換判断1回。人狼の相互確認は情報付与のみで推論しない（4.2） |
+| 議論前の個別判断 | 8 | 8人 × 1回 |
+| 自由議論 | 8 × `max_rounds` | 各ラウンドで8人へ「発言するか」を問い合わせる（4.5）。既定 `max_rounds` = 6 なら48回 |
+| 投票前の個別判断 | 8 | 8人 × 1回 |
+| 投票 | 8 | 8人 × 1回 |
+| 小計（ゲーム実行） | **75** | 既定値の場合 |
+| Judge事後評価 | 発言数 ÷ `judge_batch_size` | 発言最大48件、既定バッチ8件なら最大6回 |
+| 合計 | **約81** | |
+
+発言ごと・投票ごとのprivate memo（5.3）は、発言や投票と同じ呼び出しの中で返させるため、呼び出し回数を増やさない。
+
+**所要時間の試算**
+
+v1.1の実測（4人3ターン、呼び出し16回で約170秒）から、1呼び出しあたり約10.6秒として計算する。
+
+| 単位 | 呼び出し数 | 試算 |
+| --- | --- | --- |
+| 1ケース | 約81回 | 約14分 |
+| 1 Trial（17ケース） | 約1,380回 | 約4時間 |
+| 100 Trial（1,700ケース） | 約138,000回 | **約400時間（連続実行で約17日）** |
+
+100 Trialを1台のMacで連続実行することは成立しない。要求定義書の100 Trialは目標値として扱い、実測後に規模を決める。
+
+自由議論を採用したことで、ルール文書v0.6の3ラウンド固定（議論の呼び出しが24回に固定される）と比べて呼び出しが約1.5倍になっている。要求定義書FR-15を満たすための代償であり、規模を縮める必要が出た場合は `max_rounds` の既定値を下げることで調整する（下表）。
+
+**段階実行**
+
+| 段階 | 内容 | 目的 | 試算 |
+| --- | --- | --- | --- |
+| 段階0 | Stubで1 Trial | 17ケースの生成、条件固定、再開、分析出力の検証 | 数分 |
+| 段階1 | 実モデルで1ケース | 自由議論と個別判断が成立するかの確認、1呼び出しあたりの実測 | 約15分 |
+| 段階2 | 実モデルで1 Trial | 17ケースの所要時間と出力容量の実測、Trial比較の確認 | 約4時間（夜間1回） |
+| 段階3 | 実モデルで5 Trial | 連続実行の安定性、失敗率、再開の実地確認 | 約20時間 |
+| 段階4 | 本実行 | 段階3の実測から、Trial数、`max_rounds`、Judge粒度、分散台数を決めて実行 | 実測後に決定 |
+
+段階2を終えた時点で、`max_rounds` と `judge_batch_size` の既定値を実測に合わせて見直す。段階3を終えた時点で、100 Trialを実行するかTrial数を減らすかを上位文書へ反映する。
+
+**所要時間を縮める手段**
+
+段階4で規模が足りない場合に使える手段を、効果の大きい順に挙げる。どれもデータの意味を変えるため、使う場合は変更を記録して結果を区別する。
+
+| 手段 | 効果 | 副作用 |
+| --- | --- | --- |
+| `max_rounds` を下げる | ゲーム実行の呼び出しが最も大きい項目なので効果が直接出る。6→4で75回→59回、6→3で75回→51回 | 議論が短くなり、収束や判断変化の観察幅が狭まる。3まで下げるとルール文書v0.6の3ラウンドと同じ回数になるが、見送りを許す点は保たれる |
+| Trialを複数のMacへ分割する | 台数分だけ短縮する。4台で25 Trialずつなら1台約100時間 | 実行環境がTrialごとに変わる。`machine_name` で区別する |
+| `judge_batch_size` を上げる | Judgeの呼び出しが減る。8→16で6回→3回 | 1回の出力が長くなり、小型モデルの形式崩れが増える |
+| 発言の字数上限を下げる | 1呼び出しの生成時間が短くなる | 発言内容が薄くなる |
+| Trial数を減らす | 比例して短縮する | 検出力が下がる。RQ1の差が出ても偶然と区別しにくくなる |
+
+`max_rounds` を下げる手段を先に置いた理由は、呼び出し回数の内訳で自由議論が全体の6割を占めるためである。ここを触らずに他を最適化しても総時間は変わらない。
+
+### 1.4 無料であることの確認手順
 
 | 確認 | 手順 |
 | --- | --- |
-| 課金経路がない | Ollamaのみを使う構成で1試合を完走する。APIキーを環境変数に設定しない状態で成功すること。 |
+| 課金経路がない | Ollamaのみを使う構成で1ケースを完走する。APIキーを環境変数に設定しない状態で成功すること。エージェントとJudgeの両方をOllamaで通すこと。 |
 | 依存が無料 | `requirements.txt` の各パッケージのライセンスと料金区分を一覧にして `docs/` に残す。 |
 | モデルの重みが無償利用可 | 使用するモデルの利用規約を実装時に確認し、確認日とあわせて記録する。 |
 | Geminiが無料枠のまま | AI Studioで課金を有効化しない。課金を有効化すると無料枠を外れるため、有効化しないこと自体を運用ルールにする。 |
 
-Gemini無料枠は、入出力がGoogleの製品改善に使われる可能性がある。本テストで扱うのは架空の心理機能設定と人狼の会話だけなので支障はないが、認証情報や実データをプロンプトに含めない（NF-11）。
+Gemini無料枠は、入出力がGoogleの製品改善に使われる可能性がある。本実験で扱うのは架空の人物設定と人狼の会話だけなので支障はないが、認証情報や実データをプロンプトに含めない（NF-13）。
 
 ---
 
@@ -132,17 +256,24 @@ Gemini無料枠は、入出力がGoogleの製品改善に使われる可能性�
 flowchart TB
     subgraph CLIENT["利用者側"]
         SCR["操作画面<br/>index.html + app.js"]
-        VIEW["結果ビュー<br/>result.html（自己完結）"]
+        VIEW["結果ビュー / 分析HTML<br/>（自己完結）"]
     end
 
     subgraph SERVER["ローカルサーバー（FastAPI）"]
         API["REST API"]
     end
 
+    subgraph MASTER["data/（外部データ）"]
+        MD["persons / patterns<br/>rules / prompts<br/>judge criteria"]
+    end
+
     subgraph CORE["中核（推論手段に依存しない）"]
-        RUNNER["Runner<br/>実行の管理と進捗記録"]
-        ENGINE["GameEngine<br/>フェーズ進行と勝敗判定"]
-        AGENT["Agent<br/>プロンプト組み立て"]
+        EXP["ExperimentBuilder<br/>Trialと17ケースの生成"]
+        RUNNER["Runner<br/>実行管理・進捗・再開"]
+        ENGINE["CaseEngine<br/>フェーズ進行と勝敗判定"]
+        AGENT["Agent<br/>人格プロンプト組み立て"]
+        JUDGE["Judge<br/>発言単位の事後評価"]
+        ANA["Analyzer<br/>指標算出とRQ分析"]
         PROTO["BrainProtocol<br/>インターフェース"]
     end
 
@@ -153,261 +284,345 @@ flowchart TB
     end
 
     subgraph STORE["runs/（唯一の状態）"]
-        FILES["config.json / status.json<br/>run_log.json / summary.md<br/>timeline.md / metrics.csv<br/>result.html"]
+        FILES["experiment.json / trial.json<br/>status.json / case_log.json<br/>judge.json / transcript.md<br/>metrics CSV / 分析MD・HTML"]
     end
 
-    CLIPATH["CLI<br/>python -m mbti_werewolf run"]
+    CLIRUN["CLI<br/>experiment / judge / analyze"]
 
     SCR -->|"HTTP"| API
     API --> RUNNER
-    CLIPATH --> RUNNER
+    CLIRUN --> RUNNER
+    CLIRUN --> JUDGE
+    CLIRUN --> ANA
+    MD --> EXP
+    MD --> ENGINE
+    MD --> AGENT
+    MD --> JUDGE
+    EXP --> RUNNER
     RUNNER --> ENGINE
     ENGINE --> AGENT
     AGENT --> PROTO
+    JUDGE --> PROTO
     PROTO --> STUB
     PROTO --> OLLAMA
     PROTO --> GEMINI
     RUNNER -->|"書く"| FILES
+    JUDGE -->|"読む・書く"| FILES
+    ANA -->|"読む・書く"| FILES
     API -->|"読む"| FILES
     VIEW -.->|"サーバー不要で開く"| FILES
 ```
+
+`Judge` と `Analyzer` が `Runner` を経由せず直接 `runs/` を読み書きする点がv1.1との構造上の違いである。ゲーム実行が終わったケースに対して、評価と分析だけを後から何度でも回せる（0.2の4番目の方針、F-41、F-45、NF-18）。
 
 ### 2.2 コンポーネントの責務
 
 | コンポーネント | 責務 | 持たない責務 |
 | --- | --- | --- |
-| Web層（`web/app.py`） | HTTPの受け付け、`runs/` の読み取り、静的ファイル配信 | ゲームのルール、推論の呼び出し |
-| Runner（`runner.py`） | 実行単位の管理、seedの割り振り、進捗と出力の書き込み、失敗の記録 | 発言の生成、勝敗の判定 |
-| GameEngine（`engine/game.py`） | フェーズ進行、投票集計、同数の決着、勝敗判定 | プロンプトの文面、HTTP通信 |
-| PublicViewBuilder（`engine/view.py`） | プレイヤー視点の公開情報だけを組み立てる | 推論、記録 |
-| Agent（`agents/agent.py`） | 心理機能と役職からプロンプトを作り、応答を解釈する | HTTP通信、リトライ制御 |
+| Web層（`web/app.py`） | HTTPの受け付け、`runs/` の読み取り、静的ファイル配信 | ゲームのルール、推論の呼び出し、分析の算出 |
+| ExperimentBuilder（`experiment.py`） | 人物プールからのパターン選定、役職割当、Trialと17ケースの生成、条件固定の検査 | 実行、記録 |
+| Runner（`runner.py`） | 実験・Trial・ケースの実行管理、seedの割り振り、進捗と出力の書き込み、失敗の記録、未完了ケースからの再開 | 発言の生成、勝敗の判定、評価、分析 |
+| RuleSet（`engine/rules.py`） | ルールJSONの読み込み、検証、役職構成とフェーズ定義の提供 | 進行の制御 |
+| CaseEngine（`engine/game.py`） | フェーズ進行、開始時処理の呼び出し、議論の呼び出し、投票集計、同数の決着、勝敗判定 | プロンプトの文面、HTTP通信 |
+| NightResolver（`engine/night.py`） | 役職ごとの開始時処理と最終役職の確定 | 議論、投票 |
+| DiscussionRunner（`engine/discussion.py`） | ラウンドの構成、問い合わせ順の決定、終了条件の判定、発言と見送りの記録 | 誰が発言するかの決定（各Agentが決める） |
+| VoteResolver（`engine/vote.py`） | 投票の収集、検証、得票集計 | 勝敗判定 |
+| PublicViewBuilder（`engine/view.py`） | プレイヤー視点で与えてよい情報だけを組み立てる | 推論、記録 |
+| Agent（`agents/agent.py`） | 人格・役職・取得情報からプロンプトを作り、応答を解釈する | HTTP通信、リトライ制御 |
+| PersonaBuilder（`agents/persona.py`） | MBTIタイプと心理機能スタックから人格設定文を組み立てる | ゲームのルール |
+| Judge（`judge/judge.py`） | Transcriptの発言単位の評価、公開スタンス系列の導出 | ゲーム進行、指標の統計処理 |
 | Brain実装（`brains/*.py`） | 推論手段への通信、応答形式の検証、リトライ、待機時間の計測 | ゲームのルール |
-| Recorder（`record/*.py`） | `run_log.json` を組み立て、他の出力を導出する | 推論、進行 |
+| Recorder（`record/*.py`） | `case_log.json` を組み立て、他の出力を導出する | 推論、進行、統計 |
+| Analyzer（`analysis/*.py`） | 指標算出、Trial・実験・RQ別の集計と検定 | 推論、ゲーム進行 |
+
+`DiscussionRunner` が「誰が発言するかを決めない」ことが要件F-20・F-21の担保点である。システムは問い合わせる順番と上限だけを管理し、発言するかどうかの判断はAgentの応答に置く。
 
 ### 2.3 依存の方向
 
-依存は外から内へ一方向にする。`engine` と `agents` は `brains` の具体実装を直接importしない。参照するのは `brains/base.py` のインターフェースだけである。
+依存は外から内へ一方向にする。`engine`、`agents`、`judge` は `brains` の具体実装を直接importしない。参照するのは `brains/base.py` のインターフェースだけである。`analysis` は `runs/` のファイルだけを入力にし、`engine` にも `brains` にも依存しない。
 
 ```text
-web  ─→ runner ─→ engine ─→ agents ─→ brains/base（インターフェース）
-cli  ─→ runner                              ↑
-                          brains/factory ───┘（設定から実装を選んで注入する）
+web  ─→ runner ─→ experiment ─→ engine ─→ agents ─→ brains/base（インターフェース）
+cli  ─→ runner                                            ↑
+cli  ─→ judge   ───────────────────────────────────────────┤
+cli  ─→ analysis ─→ runs/（ファイルのみ）                   │
+                              brains/factory ──────────────┘（設定から実装を選んで注入する）
 ```
 
-推論手段を追加するときに触るのは `brains/` 配下と設定の選択肢だけになる。これがF-15の「ゲーム進行部分を作り直さずに済む」を構造として担保する部分である。
+`analysis` が `engine` に依存しないため、指標の定義を変えてもゲーム進行のテストが壊れない。逆に、ゲーム進行を変えても分析コードは `case_log.json` のschemaが同じなら動く。この分離が、長時間実行したデータを保持したまま分析をやり直せる根拠である（NF-18）。
 
 ---
 
 ## 3. 処理シーケンス
 
-### 3.1 画面から1試合を実行する（正常系）
+### 3.1 実験からTrialと17ケースを生成する
 
-要件のF-51からF-54にあたる主経路である。実行開始の応答をすぐ返し、進捗はポーリングで見せる。会話は実行完了後にまとめて取得する。
+要件のF-01〜F-12、NF-06にあたる。ここで条件固定を作り込み、実行前に検査する。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor U as 利用者
-    participant SCR as 操作画面
-    participant API as Web層
-    participant R as Runner
-    participant E as GameEngine
+    actor U as 実行担当
+    participant CLI as CLI / 画面
+    participant EXP as ExperimentBuilder
+    participant MD as data/
     participant FS as runs/
 
-    U->>SCR: 条件を入力して「対戦開始」を押す
-    SCR->>API: POST /api/runs（config）
-    API->>API: configを検証（人数・ターン数・seed）
-    API->>FS: run_id を発行し config.json と status.json を作成
-    API->>R: 実行をワーカーに渡す
-    API-->>SCR: 202 Accepted（run_id, status=queued）
-    Note over SCR,API: 応答をすぐ返すので、画面は固まらない
+    U->>CLI: 実験条件を指定（プールID、Trial数、seed、各バージョン）
+    CLI->>MD: 人物プール・パターンセット・ルールセットを読む
+    MD-->>CLI: persons / patterns / rules
+    CLI->>EXP: 実験を生成
+    EXP->>FS: experiment_id を発行し experiment.json と persons.json を作成
 
-    par 画面は進捗を取りに来る
-        loop 1秒ごと（done または failed まで）
-            SCR->>API: GET /api/runs/{run_id}
-            API->>FS: status.json を読む
-            API-->>SCR: status, phase, turn / turn_count
-            SCR-->>U: 「議論 2/3ターン目」などを表示
+    loop trial_index = 1..N
+        EXP->>EXP: trial_seed = base_seed + trial_index - 1
+        EXP->>EXP: パターンを決める（既定は非復元抽出）
+        EXP->>EXP: 8人へ開始時役職を割り当てる
+        EXP->>EXP: 固定条件をひとまとめにする<br/>（人物・年齢・性別・役職・ルール・議論条件・各版）
+        EXP->>EXP: c00 に混合構成、c01〜c16 に同質構成16タイプを割り当てる
+        EXP->>EXP: 17ケースの条件を比較し、MBTI以外の一致を検査
+        alt 一致している
+            EXP->>FS: trial.json と各ケースの config.json / status.json を作成
+        else 一致していない
+            EXP--xCLI: ConditionMismatchError（実行前に停止）
         end
-    and Runnerが試合を進める
-        R->>FS: status.json を running に更新
-        R->>E: 1試合を進行（3.2 と 3.3 へ）
-        E-->>R: 発言・投票・結果
-        R->>FS: run_log.json / summary.md / timeline.md / metrics.csv / result.html
-        R->>FS: status.json を done に更新
     end
 
-    SCR->>API: GET /api/runs/{run_id}/log
-    API->>FS: run_log.json を読む
-    API-->>SCR: run_log.json
-    SCR-->>U: 会話タイムライン、結果カード、実行条件を表示
+    CLI-->>U: experiment_id、Trial数、ケース数、保存先を表示
 ```
 
-進捗として返すのはフェーズとターン番号だけで、発言そのものは返さない。会話を1発言ずつ流さないという要件（要件定義書1章、10章）を、APIの返す情報の範囲で担保している。
+条件の一致検査を実行前に必ず通す理由は、17ケースの実行が終わってから条件のずれに気付いた場合、約4時間のTrialが丸ごと無駄になるためである。検査は `StubBrain` を使わずに設定の比較だけで済むので、コストがない（NF-06、AC-02）。
 
-### 3.2 1ターンの発言生成
+### 3.2 1ケースを進行する
 
-F-10からF-14、およびF-17にあたる。役職の非対称性を守る箇所と、応答形式が崩れた場合の扱いをここで確定する。
+要件のF-14〜F-19、F-24〜F-29にあたる。フェーズの順序と、個別判断を挟む位置をここで確定する。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant E as GameEngine
-    participant V as PublicViewBuilder
+    participant R as Runner
+    participant E as CaseEngine
+    participant N as NightResolver
+    participant D as DiscussionRunner
+    participant V as VoteResolver
     participant A as Agent
-    participant B as Brain
-    participant L as 推論（Ollama / Gemini）
-
-    E->>E: 生存プレイヤーを発言順に並べる
-    loop 生存プレイヤーごと
-        E->>V: 公開情報を要求（viewer_id を渡す）
-        V-->>E: 生存者一覧＋既出の発言のみ<br/>他者の役職は含まない
-        E->>A: speak(公開ビュー, turn)
-        A->>A: system（ルール＋自分の役職＋心理機能の行動ルール）<br/>user（公開ビュー＋出力形式の指定）
-        A->>B: generate(prompt)
-        B->>B: 待機時間の計測を開始
-        B->>L: HTTPリクエスト
-        L-->>B: 応答テキスト
-        B->>B: JSONとして解析
-
-        alt 解析に成功
-            B-->>A: speech フィールドを返す
-        else 解析に失敗
-            loop 最大3回
-                B->>L: 再試行（temperatureを下げ、形式指定を強めて再送）
-                L-->>B: 応答テキスト
-            end
-            B-->>A: 失敗のまま返す（parse_failed = true）
-            A->>A: 応答テキストを字数上限で切り詰めて発言として扱う
-        end
-
-        A-->>E: 発言テキスト、parse_failed、待機時間
-        E->>E: turns に追加し、ai_wait_seconds に加算
-    end
-    E->>E: status.json の turn を更新
-```
-
-解析に失敗しても試合を止めずに続ける。ただし `parse_failed` を発言単位で残すため、後から「この結果は形式崩れをどれだけ含むか」を判断できる。要件のF-17が求める継続と、NF-05が求める記録の両方をこの1フィールドで満たしている。
-
-### 3.3 投票、同数の決着、勝敗判定
-
-F-04からF-06にあたる。無効票と同数得票という2つの分岐を、どちらも決定的に処理する。
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant E as GameEngine
-    participant A as Agent
-    participant B as Brain
-    participant T as TieBreaker
     participant REC as Recorder
+    participant FS as runs/
 
-    loop 生存プレイヤーごと
-        E->>A: vote(公開ビュー)
-        A->>B: generate(投票プロンプト)
-        B-->>A: target と reason を返す
-        A->>A: target が生存者に含まれるか検証
-        alt 生存者を指している
-            A-->>E: 投票先と理由
-        else 生存者以外、または解析失敗
-            A->>B: 最大3回まで再要求
-            A-->>E: それでも失敗ならseed付き乱数で投票先を決め、<br/>invalid_retry_count と fallback を記録
-        end
-    end
+    R->>FS: status.json を running に更新
+    R->>E: ケースを進行（固定条件とMBTI条件を渡す）
 
-    E->>E: 得票を集計
-    alt 最多得票が1人
-        E->>E: その1人を処刑対象にする
-    else 最多得票が複数
-        E->>T: 同数候補とseedを渡す
-        T-->>E: 処刑対象 ＋ tie_break（method, candidates）
-    end
+    E->>N: 開始時処理（占い師→人狼→怪盗の順）
+    N->>A: 占い師へ確認対象を尋ねる
+    A-->>N: 対象と理由
+    N->>N: 対象の開始時役職を占い師の取得情報に加える
+    N->>N: 人狼2人へ互いの識別情報を渡す（推論なし）
+    N->>A: 怪盗へ確認対象を尋ねる
+    A-->>N: 対象と理由
+    N->>N: 対象の開始時役職を怪盗の取得情報に加える
+    N->>A: 怪盗へ交換するかを尋ねる
+    A-->>N: 交換する / 交換しない
+    N->>N: 最終役職を確定する（交換時は怪盗のみへ通知）
+    N-->>E: night_actions と final_roles
 
-    E->>E: 処刑対象の役職を確認
-    alt 処刑対象が人狼
-        E->>E: 勝者 = 村人陣営
-    else 処刑対象が村人
-        E->>E: 勝者 = 人狼陣営
-    end
+    E->>A: 議論前の個別判断（8人）
+    A-->>E: 役職認識・疑い先・自信度・理由
+    E->>FS: pre_discussion_answers を逐次書く
 
-    E-->>REC: players, turns, votes, result, timing
-    REC->>REC: run_log.json を組み立てる
-    REC->>REC: summary.md / timeline.md / metrics.csv / result.html を導出する
+    E->>D: 自由議論を実行（3.3 へ）
+    D-->>E: discussion（発言・見送り・private memo）
+
+    E->>A: 投票前の個別判断（8人）
+    A-->>E: 疑い先・自信度・理由・投票予定先
+
+    E->>V: 投票を収集（8人）
+    V-->>E: votes（private memo 付き）と有効票の集計
+    E->>E: 追放者を決める（同率最多は全員。最多1票なら追放者なし）
+    E->>E: 追放者の最終役職から勝敗を判定（有効票0なら無効試合）
+
+    E-->>REC: 全データ
+    REC->>FS: case_log.json / transcript.md / summary.md / result.html
+    R->>FS: status.json を done に更新
 ```
 
-投票先が生存者以外になる、投票が解析できない、得票が同数になる、のどれが起きても試合は必ず終了する。要件のF-06が求める「常に1試合が終了する状態」を、乱数のseedを固定した決着で満たしている。
+怪盗の処理が2回の推論に分かれている点がv1.1と違う。ルール文書v0.6 §2-4 が、対象の開始時役職を知ったうえで交換を判断すると定めているためである（4.2）。
 
-### 3.4 実行が失敗した場合
+個別判断を「議論前」と「投票直前」の2点に置く理由は要求定義書4.1に沿う。この2点では、疑い先・自信度・理由・投票予定先という構造化された項目を取る。これに加えて、発言ごと・投票ごとに1文のprivate memoを取る（5.3）。memoは発言や投票と同じ応答の中で返させるため、呼び出し回数を増やさない。
 
-F-37、F-55、NF-07にあたる。無料枠の上限到達や通信失敗は起きる前提で設計する。
+投票前の個別判断で「投票予定先」を聞いたうえで、別途「実際の投票」を取る理由は要件F-27である。同じ質問を2回するように見えるが、非公開の判断と公開の行動が一致しないケースを観察対象にしている。両者が常に一致するなら、その事実自体が結果になる。
+
+### 3.3 自由議論の1ラウンド
+
+要件のF-20〜F-23にあたる。発言順と発言回数を事前に固定せず、かつ呼び出し回数の上限を確定させる。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant R as Runner
-    participant E as GameEngine
+    participant D as DiscussionRunner
+    participant VW as PublicViewBuilder
+    participant A as Agent
     participant B as Brain
-    participant L as 推論
-    participant FS as runs/
-    participant SCR as 操作画面
 
-    R->>E: 試合を進行
-    E->>B: generate(...)
-    B->>L: HTTPリクエスト
-    L--xB: 接続不可 / 429 / タイムアウト
-    B->>B: 指数バックオフで再試行（上限まで）
-    B--xE: BrainError（種別つき: unreachable / rate_limited / timeout / invalid_response）
-    E--xR: 例外を送出（それまでの発言と投票は保持したまま）
-    R->>FS: run_log.json を status=failed で書く（部分データを含む）
-    R->>FS: status.json に error.kind と error.message を書く
-    R->>FS: result.html を「失敗」表示つきで生成
-
-    SCR->>FS: GET /api/runs/{run_id}
-    FS-->>SCR: status=failed, error.kind
-    SCR-->>SCR: 失敗の理由と、その時点までの会話を表示
+    D->>D: round = 1
+    loop 終了条件を満たすまで
+        D->>D: 問い合わせ順を random.Random(case_seed + round) でシャッフル
+        D->>D: 直前に連続発言した人を、このラウンドの対象から外す
+        loop 対象プレイヤーごと
+            D->>VW: 公開情報を要求（viewer_id を渡す）
+            VW-->>D: 参加者の年齢・性別＋ここまでの全発言<br/>他者の役職・MBTI・個別判断は含まない
+            D->>A: speak_or_pass(公開ビュー, round)
+            A->>B: generate(expect_keys=("speak","speech"))
+            B-->>A: {"speak": true/false, "speech": "..."}
+            alt 発言する
+                A-->>D: 発言テキスト
+                D->>D: discussion へ発言として追加<br/>次のプレイヤーの公開ビューへ即反映
+            else 見送る
+                A-->>D: pass
+                D->>D: discussion へ見送りとして追加
+            end
+        end
+        D->>D: 終了条件を判定（4.5）
+        D->>D: round += 1
+    end
 ```
 
-失敗の種別を4つに分類して記録する理由は、要件のNF-07が「原因が判別できる形で終了する」ことを求めているためである。`rate_limited` が出たら別の無料手段へ切り替える判断（NF-08）に直結する。
+**なぜこの方式にしたか**
 
-### 3.5 コマンドから多試合を実行する
+自由議論の実現方式には3つの候補があった。
 
-IF-07、F-23、F-38にあたる。夜間の長時間実行は画面を開いたままにしない。
+| 候補 | 内容 | 採否 |
+| --- | --- | --- |
+| GMが次の発言者を指名する | ここまでの会話からGMが発言者を選ぶ | 却下。誰が話すかの判断がシステム側に入り、性格構成による主導・沈黙が観察できない（F-21の趣旨に反する） |
+| 全員が毎ラウンド発言意欲を申告し、最も高い1人が話す | 意欲の申告と発言を2段階に分ける | 却下。1発言あたり8回の申告＋1回の発言で呼び出しが約9倍になり、1ケースが実行不能になる |
+| **ラウンドごとに全員へ問い合わせ、各自が発言か見送りを選ぶ** | 1回の応答で意欲と発言本文を同時に返す | **採用** |
+
+採用案の要点は、1回の呼び出しで「発言するか」と「発言内容」を同時に返させることである。見送りの場合は本文が空になるので生成が短く済み、発言する場合は追加の呼び出しがいらない。呼び出し回数は `8 × max_rounds` で上限が確定するため、1ケースの所要時間が予測できる（1.3）。
+
+問い合わせ順をラウンドごとにシャッフルする理由は、順序を固定すると毎ラウンド同じ人が最初に文脈なしで話すことになり、発言量の偏りにシステム側の偏りが混ざるためである。シャッフルに使うseedを記録するので、進行制御は再現できる（F-57）。
+
+ラウンド内で発言を即座に公開ビューへ反映する点が、会話として成立させるための条件である。同じラウンドの前半で出た発言に後半の人が反応できるので、ラウンドという単位は会話の流れには現れない。
+
+### 3.4 Judgeによる事後評価
+
+要件のF-40〜F-45にあたる。ゲーム実行とは別のコマンドで動く。
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as 実行担当
     participant CLI as CLI
-    participant R as Runner
-    participant E as GameEngine
+    participant J as Judge
+    participant B as Brain（Judge用）
     participant FS as runs/
 
-    U->>CLI: python -m mbti_werewolf run --games 100 --seed 42
-    CLI->>CLI: 引数と設定ファイルを統合して config を確定
-    CLI->>R: series を作成（series_id を発行）
-    R->>FS: runs/{series_id}/series.json を作成
-
-    loop run_index = 1..100
-        R->>R: この試合のseed = base_seed + run_index - 1
-        R->>E: 1試合を進行
-        alt 成功
-            E-->>R: 試合結果
-        else 失敗
-            E--xR: BrainError
-            R->>R: この試合を failed として記録し、次の試合へ進む
+    U->>CLI: python -m mbti_werewolf judge --experiment e-...
+    CLI->>FS: 対象ケースを走査（judge.json が無い、または版が古いもの）
+    FS-->>CLI: 対象ケースの一覧
+    loop 対象ケースごと
+        CLI->>J: ケースを評価
+        J->>FS: case_log.json を読む
+        J->>J: Transcript を judge_batch_size 件ずつに分ける
+        loop バッチごと
+            J->>B: generate(発言バッチ＋参加者一覧)
+            Note over J,B: 役職・MBTI・個別判断は渡さない
+            B-->>J: 発言ごとのラベル・言及対象・公開スタンス
+            J->>J: 発言IDとの対応を検証
         end
-        R->>FS: runs/{series_id}/{run_id}/ 一式
+        J->>J: 公開スタンス系列を導出<br/>（各時点で各人の最新スタンスを1件ずつ保持）
+        J->>FS: judge.json を書く（judge_criteria_version 付き）
     end
-
-    R->>FS: series_summary.md と series.json（集計）
-    CLI-->>U: series_id、成功数、失敗数、保存先を表示
+    CLI-->>U: 評価済みケース数、失敗数を表示
 ```
 
-多試合実行では1試合の失敗で全体を止めない。100試合のうち数試合が無料枠やタイムアウトで落ちても、残りの結果から傾向を読めるようにする。試合ごとのseedを `base_seed + run_index - 1` で決めるため、1試合目は指定した `base_seed` がそのまま使われ、同じ `base_seed` を指定すれば100試合の並びごと再現できる（F-21、F-22）。
+Judgeへ役職・MBTI・個別判断を渡さない理由は2つある。1つは、正解を知っていると「人狼の発言だから疑わしい」という後付けの評価になり、公開会話から読み取れる内容の評価にならないこと。もう1つは、Judgeの評価をMBTI条件から独立させることで、性格差の評価とMBTIラベルの循環参照を避けることである（F-46）。
 
-### 3.6 実行環境を持たないメンバーが結果を見る
+公開スタンス系列を「各時点で各人の最新スタンスを1件ずつ保持する」形で導出する点が要件F-44の実現である。発言の多いプレイヤーの疑いが発言回数分だけ数えられると、疑念分布が発言量に引きずられる。各人1件に正規化することで、疑念分布は常に最大8件の分布になる。
 
-F-41、NF-15、AC-12にあたる。Biz・Designerはサーバーを起動しない。
+### 3.5 実行が失敗した場合と再開
+
+要件のF-38、F-51〜F-53、F-59、NF-09にあたる。1,700ケースの実行は途中で止まる前提にする。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as 実行担当
+    participant R as Runner
+    participant E as CaseEngine
+    participant B as Brain
+    participant L as 推論
+    participant FS as runs/
+
+    R->>E: ケースを進行
+    E->>B: generate(...)
+    B->>L: HTTPリクエスト
+    L--xB: 接続不可 / 429 / タイムアウト
+    B->>B: 指数バックオフで再試行（上限まで）
+    B--xE: BrainError（unreachable / rate_limited / timeout / invalid_response）
+    E--xR: 例外を送出（それまでの記録は保持したまま）
+    R->>FS: case_log.json を status=failed で書く（部分データを含む）
+    R->>FS: status.json に error.kind と error.message を書く
+    R->>FS: trial.json のケース状態を failed に更新
+    R->>R: 同じTrialの次のケースへ進む
+
+    Note over R,FS: 実験を止めた後
+
+    U->>R: python -m mbti_werewolf experiment --resume e-...
+    R->>FS: experiment.json と各 trial.json を読む
+    FS-->>R: Trialとケースの状態
+    R->>R: done のケースを飛ばし、未実行・失敗・中断のケースを対象にする
+    R->>R: Trialの固定条件を trial.json から復元する
+    R->>FS: 再実行したケースに attempt を加算して記録
+    R-->>U: 再開したケース数、完了数、残数を表示
+```
+
+再開時にTrialの固定条件を `trial.json` から復元する点が重要である。再開のたびにパターン選定と役職割当をやり直すと、同じTrialの中で条件が変わり、対応あり比較が崩れる。固定条件は生成時に1度だけ決めてファイルに書き、以後は読むだけにする（F-53、AC-12）。
+
+1ケースの失敗で実験を止めない。ただしTrialの17ケースのうち1つでも欠けると、そのTrialはRQ1の対応あり比較に使えない。そのため `trial.json` に `complete: true/false` を持たせ、分析側で不完全Trialを除外できるようにする（F-51、9.4）。
+
+### 3.6 分析出力を生成する
+
+要件のF-60〜F-67にあたる。生データを読むだけで、推論を呼ばない。
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as 実行担当
+    participant CLI as CLI
+    participant AN as Analyzer
+    participant FS as runs/
+
+    U->>CLI: python -m mbti_werewolf analyze --experiment e-...
+    CLI->>AN: 分析を生成
+    AN->>FS: 全ケースの case_log.json と judge.json を読む
+
+    loop ケースごと
+        AN->>AN: 正確性・収束・判断変化の指標を算出（9.1〜9.3）
+        AN->>FS: summary.md / result.html を更新
+    end
+
+    AN->>FS: trial_metrics.csv（1行=1プレイヤー×ケース）
+    AN->>FS: experiment_metrics.csv（1行=1ケース）
+    AN->>FS: speech_labels.csv（1行=1発言）
+
+    loop Trialごと
+        AN->>AN: 混合1ケースと同質16ケースを並べる
+        AN->>FS: trial_report.md / trial.html
+    end
+
+    AN->>AN: 完全なTrialだけを対象に集計
+    AN->>FS: experiment_report.md / experiment.html
+    AN->>AN: RQ1 = Trial単位の対応あり比較（9.4）
+    AN->>FS: rq1.md / rq1.html
+    AN->>AN: RQ2 = 同質16タイプの探索的比較（9.4）
+    AN->>FS: rq2.md / rq2.html
+    CLI-->>U: 対象Trial数、有効数、除外数、出力先を表示
+```
+
+分析を独立コマンドにしたことで、指標の定義を変えたら `analyze` だけを回し直せる。生データは変わらないので、旧指標での結果と新指標での結果を比べられる。`indicator_version` を各出力に書き、どの定義で出した数字かを区別する（F-65、NF-18）。
+
+### 3.7 実行環境を持たない閲覧者が結果を見る
+
+要件のF-69、NF-15、NF-17、AC-18にあたる。Biz・Designerはサーバーを起動しない。
 
 ```mermaid
 sequenceDiagram
@@ -416,89 +631,260 @@ sequenceDiagram
     participant BR as ブラウザ
     participant GH as GitHub / GitHub Pages
 
-    M->>GH: result.html を開く（またはPagesのURL）
-    GH-->>BR: result.html（結果データを埋め込み済みの1ファイル）
+    M->>GH: latest.html を開く（またはPagesのURL）
+    GH-->>BR: 分析データを埋め込み済みの1ファイル
     BR->>BR: 埋め込みデータを描画（外部通信なし）
-    BR-->>M: 結果カード、メトリクス表、タイムライン、実行条件
+    BR-->>M: 実験サマリ、RQ1・RQ2の結果
+    M->>BR: Trial比較へ移動
+    BR-->>M: 混合1ケースと同質16ケースの並び
+    M->>BR: ケース詳細へ移動
+    BR-->>M: 会話全文、両時点の判断、投票、勝敗、Judge評価
 ```
 
-`result.html` は実行結果のJSONをファイル内に埋め込んだ自己完結HTMLとして生成する。外部からデータを取得しないため、`file://` で直接開いてもGitHub Pages経由でも同じように表示される。操作画面と違ってPythonの起動を必要としないので、要件のNF-15が求める二経路の独立を満たす。
+HTMLは結果データをファイル内に埋め込んだ自己完結形式で生成する。外部からデータを取得しないため、`file://` で直接開いてもGitHub Pages経由でも同じように表示される。ケース数が多いためファイルを階層に分け、上位のHTMLから下位のHTMLへ相対リンクで移動する（7.5）。
 
 ---
 
 ## 4. ゲーム進行の設計
 
-### 4.1 フェーズの状態遷移
+### 4.1 ルールセットの外部化
+
+ルールをコードに埋め込まず、JSONとして `data/rules/` に置く。ルール文書を改訂したときにコードを触らずに差し替えられる状態にする（0.5、NF-11）。
+
+| 項目 | 決定 |
+| --- | --- |
+| 保存場所 | `data/rules/{rule_set_id}.json` |
+| 識別 | `rule_set_id` と `rule_set_version` を全ケースに記録する |
+| 検証 | 読み込み時に、役職構成の合計が参加人数と一致すること、フェーズ列に未知のフェーズがないことを検査する |
+| コード側の対応 | フェーズ名と役職種別に対応する処理を `engine/night.py` などに実装する。ルールJSONは「どの処理をどの順で呼ぶか」と「各処理のパラメータ」を持つ |
+| 未知の値 | ルールJSONに未実装のフェーズや役職があれば、実行前に `RuleSetError` で停止する |
+
+ルールJSONの構造は以下とする。値は[ルール文書v0.6](./m-plus-experiment/01_werewolf-rules_v0.6.md)の内容と、公開議論についての改訂提案（0.5）を反映している。
+
+```json
+{
+  "rule_set_id": "onenight-8p-v0.7-draft",
+  "rule_set_version": "0.7-draft",
+  "status": "proposed",
+  "source_document": "docs/m-plus-experiment/01_werewolf-rules_v0.6.md",
+  "deviation_from_source": ["public_discussion: 3ラウンド固定を自由議論へ変更（要求定義書FR-15）"],
+  "player_count": 8,
+  "center_cards": 0,
+  "role_composition": {
+    "werewolf": 2,
+    "seer": 1,
+    "thief": 1,
+    "villager": 4
+  },
+  "max_response_attempts": 3,
+  "night_phases": [
+    { "phase": "seer_inspection", "actor_role": "seer", "requires_inference": true, "target": "other_player", "reveals": "initial_role", "on_exhausted_attempts": "skip_ability" },
+    { "phase": "werewolf_recognition", "actor_role": "werewolf", "requires_inference": false },
+    { "phase": "thief_inspection", "actor_role": "thief", "requires_inference": true, "target": "other_player", "reveals": "initial_role", "on_exhausted_attempts": "skip_ability" },
+    { "phase": "thief_swap", "actor_role": "thief", "requires_inference": true, "choices": ["swap", "keep"], "effect": "swap_role", "notify_actor_final_role": true, "notify_target": false, "on_exhausted_attempts": "skip_ability" }
+  ],
+  "day_phases": ["pre_discussion_answer", "free_discussion", "pre_vote_answer", "vote"],
+  "discussion": { "mode": "free" },
+  "vote": {
+    "rounds": 1,
+    "self_vote": false,
+    "revote": false,
+    "on_exhausted_attempts": "abstain",
+    "execute": "all_top_voted",
+    "min_votes_to_execute": 2,
+    "invalid_game_if": "no_valid_votes"
+  },
+  "win_condition": {
+    "basis": "final_role",
+    "village_wins_if": "any_executed_final_role_is_werewolf"
+  }
+}
+```
+
+### 4.2 ルール文書v0.6の採用内容
+
+[ルール文書v0.6](./m-plus-experiment/01_werewolf-rules_v0.6.md)を正本として、以下を実装する。公開議論の1点だけが改訂提案であり、他はすべて文書のとおりである（0.5）。
+
+| 項目 | 実装内容 | 出典 |
+| --- | --- | --- |
+| 参加人数 | 8人。全員がAIエージェント。GM役はシステムが担う | v0.6 §1 |
+| 役職 | 人狼2人、占い師1人、怪盗1人、村人4人。中央カード・余りカードは使用しない | v0.6 §1 |
+| 開始時役職の通知 | 8枚を無作為に1枚ずつ配り、各参加者へ**自分の開始時役職だけ**を個別に通知する | v0.6 §2-1 |
+| 夜の順序 | **占い師の確認 → 人狼の相互確認 → 怪盗の確認と任意交換** | v0.6 §1、§2 |
+| 夜の襲撃・脱落 | なし。夜の処理後、全員が議論と投票に参加する | v0.6 §1 |
+| 占い師の確認 | 自分以外の1人を指定し、その人の**開始時役職**を知る | v0.6 §2-2 |
+| 人狼の相互確認 | 人狼2人へ互いの識別情報を確定情報として通知する。推論を呼ばない。公開議論で疑う演技は認めるが、内部判断で仲間を人狼候補にしない | v0.6 §2-3、§3 |
+| 怪盗の処理 | **2段階**。まず自分以外の1人を指定してその人の開始時役職を知り、**その結果を見てから**「交換する」「交換しない」を選ぶ | v0.6 §2-4 |
+| 交換の効果 | 怪盗と対象の役職を入れ替える。以後の勝敗判定は最終役職で行う | v0.6 §1 |
+| 交換後の通知 | 交換した場合、**怪盗本人には最終役職を通知する**。交換された側には交換の事実も最終役職も通知しない | v0.6 §2-4 |
+| 昼の進行 | 議論前の個別判断 → **自由議論（改訂提案）** → 投票前の個別判断 → 投票 | 0.5、4.5 |
+| 投票 | 全員が自分以外の1人へ1票。変更・棄権・複数投票はできない | v0.6 §1、§2-6 |
+| 追放判定 | **最多得票者が2体以上いるときはその全員を追放する。最多得票が1票だけの場合は誰も追放しない** | v0.6 §1、§2-6 |
+| 同数得票 | 乱数による決着を行わない。同率最多者は全員追放される | v0.6 §1 |
+| 勝敗 | 追放者の中に最終役職が人狼の参加者が1体以上いれば村人陣営の勝利。人狼が1体も追放されなければ人狼陣営の勝利。怪盗は最終役職の陣営に属する | v0.6 §1、§2-7 |
+| 回答機会 | 最初の指示＋再送2回＝**最大3回**。3回とも無効ならフェーズごとの扱いに従う | v0.6 §1 |
+| 夜の能力の失敗 | 3回とも無効なら、その夜の能力を使用しなかったものとして次の処理へ進む | v0.6 §2-2、§2-4 |
+| 発言の失敗 | 3回とも無効なら、そのラウンドの発言をスキップしたものとして記録する。空回答・無回答は正常な発言として数えない | v0.6 §2-5 |
+| 投票の失敗 | 3回とも無効なら**棄権**として扱い、その票を集計に含めない | v0.6 §1、§2-6 |
+| 無効試合 | **有効票が0票の場合**、追放判定と勝敗判定を行わず無効試合として終了する。ログに「有効票数：0」「結果：無効試合」「理由：有効投票なし」を記録する | v0.6 §1、§2-6 |
+| 秘密情報の扱い | 参加者は自分に通知された秘密情報だけを根拠として使う。通知なしに他者の役職・夜の行動を知っている前提で発言させない | v0.6 §1、§3 |
+| 発言の欺瞞 | 他者を欺くための主張は認める。ただしGMから得ていない秘密情報を捏造して「知っている」とは言わせない | v0.6 §1 |
+
+**設計上の要点**
+
+怪盗の処理が2段階である点は、推論の呼び出し回数と `PublicViewBuilder` の両方に影響する。1回目の呼び出しで対象を指定させ、その結果をビューへ加えてから2回目の呼び出しで交換の可否を判断させる。1回で「対象と交換可否」をまとめて答えさせると、対象の役職を知る前に交換を決めることになり、ルールと違う判断になる。
+
+追放者が複数になりうる点、および追放者が0人になりうる点は、v1.1の設計にない分岐である。`result.executed` を単一の `player_id` ではなく配列で持つ（6.7）。
+
+「最多得票が1票だけの場合は誰も追放しない」は、8票が8人へ1票ずつ散った場合に発生する。この場合は人狼が1体も追放されないため人狼陣営の勝利になる。追放者0人と無効試合は別の状態であり、前者は勝敗が付き、後者は付かない。
+
+### 4.3 ゲームフェーズの状態遷移
 
 ```mermaid
 stateDiagram-v2
     [*] --> setup
-    setup --> day_discussion: プレイヤー生成と役職割当が完了
-    day_discussion --> day_discussion: 残りターンあり
-    day_discussion --> vote: 指定ターン数を消化
-    vote --> tie_break: 最多得票が同数
-    vote --> judge: 最多得票が1人
-    tie_break --> judge
-    judge --> finished
+    setup --> night: 人物・MBTI・開始時役職を配置し個別通知
+    night --> pre_discussion_answer: 占い師→人狼→怪盗の処理と最終役職の確定
+    pre_discussion_answer --> free_discussion: 8人分の初期判断を取得
+    free_discussion --> free_discussion: 終了条件を満たさない
+    free_discussion --> pre_vote_answer: 終了条件を満たした
+    pre_vote_answer --> vote: 8人分の最終判断を取得
+    vote --> invalid_game: 有効票が0
+    vote --> judge_result: 有効票が1票以上
+    judge_result --> finished: 追放者あり、または追放者なしで勝敗判定
+    invalid_game --> finished: 勝敗を付けずに終了
     finished --> [*]
 
     setup --> failed
-    day_discussion --> failed
+    night --> failed
+    pre_discussion_answer --> failed
+    free_discussion --> failed
+    pre_vote_answer --> failed
     vote --> failed
     failed --> [*]
 ```
 
-### 4.2 実行状態の遷移
+`judge_result` は勝敗判定のフェーズであり、5.5のJudge（会話の事後評価）とは別のものである。名前が近いため、記録上は勝敗判定を `judge_result`、事後評価を `judge_review` として区別する。
 
-`status.json` の `status` が取る値。操作画面はこの値だけで表示を切り替える（F-52）。
+`invalid_game` は有効票が0票のときの終了で、勝敗を付けない（4.2）。`failed` は例外による終了で、両者は別の状態である。`invalid_game` で終わったケースは `status: "done"`、`result.valid: false` として記録し、分析対象から除外する（9.4）。
+
+### 4.4 実行状態の遷移
+
+`status.json` の `status` が取る値。操作画面はこの値だけで表示を切り替える（F-72）。ケース、Trial、実験の3階層で同じ値を使う。
 
 ```mermaid
 stateDiagram-v2
-    [*] --> queued: POST /api/runs を受け付けた
-    queued --> running: ワーカーが実行を開始
+    [*] --> pending: 生成された
+    pending --> running: ワーカーが実行を開始
     running --> done: 出力ファイルを書き終えた
     running --> failed: BrainError または想定外の例外
+    running --> interrupted: プロセスが終了して running のまま残った
+    failed --> running: 再開で再実行
+    interrupted --> running: 再開で再実行
+    pending --> excluded: 分析対象から外すと判断した
     done --> [*]
-    failed --> [*]
+    excluded --> [*]
 ```
 
-### 4.3 心理機能の割り当て
-
-初回MVPの4人に割り当てる心理機能は `Ne` / `Ti` / `Fe` / `Si` に固定する。要求定義書6.4の行動ルール案から、行動が最も分かれる4種を選んだ。
-
-| 心理機能 | 行動ルール（プロンプトに書く方針） | この4種に入れた理由 |
+| 状態 | 意味 | 上位への影響 |
 | --- | --- | --- |
-| `Ne` | 可能性を広げ、複数の仮説を並べる | 発言が長く仮説が多くなるため、発言量の差が出やすい |
-| `Ti` | 発言の論理矛盾を細かく指摘する | 他者の発言を引用するため、疑い方の差が出やすい |
-| `Fe` | 場の空気と協調性を見る | 同調が多く、`Ti` と対比が付く |
-| `Si` | 過去の発言やルールとのズレを見る | 将来のhistory_mode検証（F-18）で主役になる |
+| `pending` | 生成済みで未実行 | Trialは不完全 |
+| `running` | 実行中 | Trialは不完全 |
+| `done` | 完走し、出力が揃った | Trialの完了条件を満たす |
+| `failed` | 例外で終了。部分データあり | Trialは不完全。再開の対象 |
+| `interrupted` | 前回のプロセスが `running` のまま残った | 再開時に `failed` と同様に扱う |
+| `excluded` | 人が分析対象から外した。理由を必須にする | Trialは不完全として扱い、除外理由を集計に残す |
 
-`Ne` と `Ti` は攻めの向きが違い、`Fe` と `Ti` は判断軸が対立する。ログを読んだときに差が見えるかどうかがこのテストの目的なので、似た機能を並べないことを優先した。使用した機能は `config.functions` とログに残るため、後から4種を変えて比較できる。
+Trialの `complete` は、17ケースすべてが `done` のときだけ `true` になる。実験の有効Trial数は `complete: true` の件数である（9.4）。
 
-8種すべて（`Ne` / `Ni` / `Se` / `Si` / `Te` / `Ti` / `Fe` / `Fi`）は `agents/functions.py` に定義済みである。既定は上記4種だが、設定の `functions` と人数を変えるだけで8人版を試せる（要件F-08）。
+### 4.5 自由議論の終了条件と上限
 
-### 4.4 役職の割り当て
+要件F-23にあたる。4つの終了条件のいずれかを満たしたら議論を終える。すべての条件と実際に発動した条件を記録する。
 
-seed付きランダムとする。
+| 設定名 | 既定値 | 意味 |
+| --- | --- | --- |
+| `max_rounds` | 6 | ラウンドの上限。1ラウンドで最大8回の問い合わせが発生する |
+| `max_speeches` | 40 | 総発言数の上限 |
+| `max_total_chars` | 6000 | 全発言の合計文字数の上限 |
+| `max_speech_chars` | 200 | 1発言の文字数上限。超過分は切り詰める |
+| `max_consecutive_speeches` | 2 | 同じプレイヤーが連続して発言できる回数。超えた人は次のラウンドの問い合わせ対象から外す |
+| `stop_on_all_pass` | true | 1ラウンドで全員が見送ったら終了する |
+
+| 終了条件 | 記録する値 |
+| --- | --- |
+| 1ラウンドで全員が見送った | `stop_reason: "all_pass"` |
+| ラウンドが上限に達した | `stop_reason: "max_rounds"` |
+| 総発言数が上限に達した | `stop_reason: "max_speeches"` |
+| 合計文字数が上限に達した | `stop_reason: "max_total_chars"` |
+
+**「見送り」と「スキップ」を区別する**
+
+ルール文書v0.6 §2-5 は、3回とも有効な発言が得られなかった場合にそのラウンドの発言をスキップすると定めている。本書の自由議論では、これとは別に、エージェント自身が発言しないことを選ぶ「見送り」がある。両者は意味が違うため、記録上も分ける。
+
+| 種別 | 意味 | 記録 |
+| --- | --- | --- |
+| 見送り（pass） | エージェントが「今は発言しない」と判断した。自由議論の観察対象そのもの | `spoke: false`、`skipped: false` |
+| スキップ（skip） | 3回とも無効な応答で発言が得られなかった。実行上の失敗 | `spoke: false`、`skipped: true`、`parse_failed: true` |
+
+見送りは9.2・9.3の分析対象に含め、スキップは含めない。両方を `spoke: false` にまとめると、性格構成による沈黙とモデルの応答失敗が同じ値になってしまう。
+
+既定値の根拠は1.3の試算である。`max_rounds` = 6 は、ゲーム実行の呼び出しを75回に収めて1ケースを約14分に収めるための値であり、議論の質から決めた値ではない。段階2の実測で、6ラウンドの前に `all_pass` で終わることが多いか、逆に上限で打ち切られることが多いかを確認し、見直す。
+
+`max_consecutive_speeches` は、1人が話し続けて他が見送るだけの議論を避けるための上限である。発言回数を全員へ揃える処理ではなく、上限を置くだけなので、発言量の偏りは残る。要件F-20の「発言順と発言回数を事前に固定しない」に反しないことを確認したうえで採用している。この値を無効化（`null`）した実行も段階2で試し、偏りの出方を比較する。
+
+### 4.6 投票と追放判定
+
+ルール文書v0.6 §1・§2-6 をそのまま実装する。
 
 | 項目 | 決定 |
 | --- | --- |
-| 方式 | `random.Random(seed)` で生存プレイヤーから人狼を選ぶ |
-| 記録 | `role_assignment_mode: "seeded_random"` と `seed` を `config` に残す |
-| 発言順 | 同じseedで並べ替え、`run_log.speaking_order` に残す。順番を固定すると先頭の心理機能だけが常に文脈なしで話すことになり、機能ごとの発言量の比較に偏りが入る |
-| 再現性 | 同じseedなら心理機能の割当、役職、発言順がすべて一致する（F-22） |
-
-固定割当にしなかったのは、心理機能と役職の組み合わせを試合ごとに変えたいからである。要求定義書8.1が見たい差分として「同じ心理機能の役職差」を挙げているため、seedを変えるだけで組み合わせが動く方式が適している。
-
-### 4.5 同数得票の決着
-
-| 項目 | 決定 |
-| --- | --- |
-| 方式 | 同数候補の中から `random.Random(seed + turn_count)` で1人を選ぶ |
-| 記録 | `result.tie_break` に `method`、`candidates`、選ばれた `player_id` を残す |
+| 投票の収集 | 全員へ個別に1回ずつ問い合わせる。`choices` に自分以外の8人から自分を除いた7人を渡し、Brain側で候補外の値を弾く |
+| 自分への投票 | 認めない。`choices` に自分を含めない |
+| 回答機会 | 最初の指示＋再送2回＝最大3回。`max_response_attempts: 3` としてルールJSONに持つ |
+| 3回とも無効 | **棄権**として扱い、その票を集計に含めない。`abstained: true` と `attempts` を記録する。乱数によるフォールバックは行わない |
 | 再投票 | 行わない |
+| 集計 | 有効票だけを数える |
+| 有効票が0 | 追放判定・勝敗判定を行わず、無効試合として終了する。`result.valid: false`、`result.invalid_reason: "no_valid_votes"` を記録する |
+| 最多得票が1票のみ | 誰も追放しない。`result.executed: []` |
+| 最多得票が2票以上 | **同率最多者の全員を追放する**。`result.executed` に該当する全員の `player_id` を入れる |
+| 勝敗 | 追放者の中に `final_role` が `werewolf` の参加者が1体以上いれば村人陣営の勝ち。1体もいなければ人狼陣営の勝ち |
 
-再投票を選ばなかった理由は2つある。1つは推論の呼び出しが増えて待機時間が伸びること、もう1つは再投票でも同数になる可能性が残り、終了条件を保証できないことである。乱数で決めると「実力で決まった処刑ではない」という情報がログに必要になるため、`tie_break` を必ず残す。
+**v1.1の設計から変えた点**
+
+投票の解析失敗時に乱数でフォールバックしない。v1.1では試合を終了させるために乱数で投票先を決めていたが、ルールv0.6は棄権という扱いを定めている。棄権は集計から抜けるだけでゲームは終了するため、乱数を入れる必要がない。本人が決めた投票ではない値を投票先として記録すると、9.1の `vote_correct` に偽の値が混ざる。
+
+同数得票の乱数決着を持たない。ルールv0.6が同率最多者の全員追放を定めているため、決着に乱数が不要になった。`engine/tiebreak.py` は実行経路から外す（0.4）。この変更により、追放が乱数で決まるケースがなくなり、9.2の収束指標の解釈が単純になる。
+
+追放者の人数が0人、1人、2人以上のいずれにもなりうる。9.1の `village_correct` は「追放者の中に最終役職が人狼の者がいるか」で判定するため、人数によらず同じ式で計算できる。9.2では追放者数を `executed_count` として記録し、票が散った結果としての追放者0人を区別できるようにする。
+
+### 4.7 情報の非対称性の担保
+
+要件のF-16、F-17、F-26にあたる。v2.0では守るべき境界がv1より多いため、`PublicViewBuilder` を唯一の入力源にする構造とテストの両方で守る。
+
+| 与える情報 | 与えない情報 |
+| --- | --- |
+| 本人の `player_id`、年齢、性別 | 他者のMBTIラベル、他者の行動傾向文 |
+| 本人の行動傾向（ラベルを出さない形。5.2） | 他者の開始時役職・最終役職（ルールで取得した情報を除く） |
+| 本人の開始時役職 | 他者の個別判断とprivate memo |
+| 他者8人の `player_id`、年齢、性別 | 怪盗に交換された事実（交換された側へは知らせない） |
+| 全員が初対面であり、追加プロフィールが設定されていないこと | 他者が見送ったかどうか |
+| ここまでの全発言（発言者と順序を含む） | Judgeの評価結果 |
+| 人狼の場合、仲間の人狼の識別情報 | 他のケース・Trialの情報 |
+| 占い師の場合、確認した相手とその開始時役職 | WORLD区分に相当する構成種別（mixed / homogeneous） |
+| 怪盗の場合、確認した相手の開始時役職、交換の有無、交換した場合の自分の最終役職 | 得票の途中経過 |
+| ルール文書v0.6の本文（全員共通） | 自分がAI・LLMであること、この場が実験であること |
+
+| 手段 | 内容 |
+| --- | --- |
+| 構造 | `PublicViewBuilder` が唯一のプロンプト入力源になる。Agentはゲームの内部状態を直接受け取らない |
+| 検査（役職） | 自分と、ルール上知り得る相手以外の役職がプロンプト文字列に出現しないことをテストで検証する（10章 `test_role_isolation`） |
+| 検査（MBTI） | 16タイプのラベル、日本語表示名、「MBTI」「心理機能」「16タイプ」の語がプロンプトに出現しないことをテストで検証する（10章 `test_mbti_isolation`） |
+| 検査（個別判断） | 個別判断とprivate memoのテキストが他者へのプロンプトに出現しないことをテストで検証する（10章 `test_private_answer_isolation`） |
+| 検査（実験の存在） | 「実験」「シミュレーション」「AI」「エージェント」「WORLD」「構成種別」の語がプロンプトに出現しないことをテストで検証する（10章 `test_meta_isolation`） |
+
+「他者が見送ったかどうか」を与えない理由は、見送りが公開情報になると「黙っていること」が場に見える行動になり、ルールに定めのない情報を議論へ持ち込むことになるためである。見送りは記録には残すが、エージェントへは渡さない。
+
+自分がAIであることと、この場が実験であることを与えない条件は、[Agent設定文書v1](./m-plus-experiment/02_agent-settings_v1.md) §3 に定められている。MBTIの非開示と同じ扱いでテストの対象にする。この検査がないと、人格プロンプトやルール説明の文面を直したときに、うっかりメタ情報が混ざったことに気付けない。
 
 ---
 
@@ -506,7 +892,7 @@ seed付きランダムとする。
 
 ### 5.1 脳のインターフェース
 
-`brains/base.py` に置く。ゲーム進行側が知るのはこの形だけである。
+`brains/base.py` に置く。v1.1から変更しない。ゲーム進行側とJudgeが知るのはこの形だけである。
 
 ```python
 class BrainError(Exception):
@@ -516,7 +902,7 @@ class BrainError(Exception):
 class Request:
     system: str
     user: str
-    expect_keys: tuple[str, ...]  # 例: ("speech",) または ("target", "reason")
+    expect_keys: tuple[str, ...]  # 例: ("speak", "speech") / ("suspect", "confidence", "reason")
     choices: tuple[str, ...]      # 投票先など、値が限られる項目の候補
     tag: str                      # 呼び出しの識別。StubBrainの出力切替と調査に使う
 
@@ -529,70 +915,255 @@ class Brain(Protocol):
         """1回の推論。失敗時は BrainError を送出する。"""
 ```
 
-`BrainResponse` は生成テキスト、待機時間、リトライ回数、`parse_failed` を持つ。JSONの解析とリトライはBrain側の責務とし、Agentは解釈済みの結果だけを扱う。期待するキーと選択肢を `Request` にまとめたのは、今後の追加で `generate` の署名が変わらないようにするためである。
+`BrainResponse` は生成テキスト、待機時間、リトライ回数、`parse_failed` を持つ。JSONの解析とリトライはBrain側の責務とし、AgentとJudgeは解釈済みの結果だけを扱う。
 
-### 5.2 プロンプトの構成とバージョン管理
+v2.0では `tag` の値を増やす。`night_seer` / `night_thief` / `pre_discussion` / `speak` / `pre_vote` / `vote` / `judge` の7種とする。`StubBrain` はこの `tag` で返す形を切り替えるので、Stubだけで全フェーズを完走できる。
 
-| 区分 | 内容 |
+`factory` はエージェント用とJudge用で別のBrainインスタンスを返せるようにする。設定は `brain` と `judge_brain` に分ける。Judgeだけ別のモデルにする、あるいはJudgeだけGeminiにする、といった構成が設定で成立する（IF-02）。
+
+### 5.2 プロンプトの構成と行動傾向の付与
+
+要件のF-16、F-17、F-46にあたる。[Agent設定文書v1](./m-plus-experiment/02_agent-settings_v1.md)と[行動傾向の記録](./m-plus-experiment/06_behavior-tendencies-used_v1.md)を正本として、プロンプトの構成を決める。
+
+| 区分 | 内容 | 出典 |
+| --- | --- | --- |
+| system（ルール部） | ルール文書v0.6の本文、参加人数、出力形式（JSONのみ）、字数上限 | v0.6 |
+| system（前提部） | 自分の `player_id`・年齢・性別、8人全員の `player_id`・年齢・性別、全員初対面、追加プロフィールなし、年齢・性別から性格を決めつけない、自伝的記憶なし、人狼経験なし、自分がAIであることを認識しない | Agent設定文書 §2 |
+| system（役職部） | 自分の開始時役職と、ルール上知っている秘密情報 | v0.6 §2 |
+| system（傾向部） | 行動傾向1文。タイプ名も理論名も出さない | 行動傾向の記録 |
+| user | 公開ビュー（8人の年齢・性別、ここまでの全発言）、現在の状況、今回の指示 | — |
+
+**MBTIに関する語をプロンプトに書かない**
+
+傾向部には `INTJ` などのタイプ名、日本語表示名、「MBTI」「16タイプ」「心理機能」という語を書かない。Agent設定文書 §「MBTIに関する認識と管理条件」が、参加者はMBTIという概念そのものを知らないと定めているためである。
+
+技術的な理由も2つある。1つは、モデルがMBTIタイプ名に対して学習済みのステレオタイプを持っている可能性があり、意図した人格説明ではなくモデルが持つタイプ像で振る舞ってしまうこと。もう1つは、タイプ名が入力にあると、エージェント自身が会話でタイプ名を口にする可能性があることである。
+
+**行動傾向は1タイプ1文にする**
+
+[行動傾向の記録](./m-plus-experiment/06_behavior-tendencies-used_v1.md)が、先行実験で実際に使用した文面を残している。形式は次のとおりである。
+
+```text
+会話では、{判断の仕方の説明}しやすい傾向があります。ただし自由に判断してください。
+```
+
+この形式を採用する。長い人格説明を作らない理由は3つある。
+
+1つは、実行実績があること。先行実験のWORLD A・Bはこの1文で成立しており、発言内容にも傾向の差が現れている。2つは、「ただし自由に判断してください」という留保が、Agent設定文書の「絶対命令ではなく、判断や発言に自然に現れやすい傾向として扱い、Agent自身が自由に判断できる余地を残す」を文面として満たしていること。3つは、文が長くなるほど指示への追従が強まり、性格差ではなく指示追従を観察することになるためである（F-46）。
+
+`PersonaBuilder` は、16タイプについてこの1文を保持する。先行実験で使われた8タイプ（ENFP、ISTJ、INFJ、ESTP、INTJ、ESFJ、ENTP、ISFP）は記録の文面をそのまま使い、残る8タイプ（ISFJ、INTP、ENFJ、ISTP、ESFP、ESTJ、INFP、ENTJ）は要求定義書6.2の人格説明と `agents/mbti_types.py` の機能スタックから同じ形式で作る。文面は `agents/prompts/v2/tendencies.json` に置き、コードから分離する。
+
+既存の16タイプ分の文面が揃った時点で、8タイプは実績のある文、8タイプは新規作成の文という非対称が残る。段階1でこの非対称が観察に影響するかを確認し、影響がある場合は16タイプすべてを同じ手順で作り直して `v3` を発行する。
+
+**Judgeの判定語を強制しない**
+
+傾向部には、Judgeが判定する語や行動（「疑う」「同意する」「質問する」など）を書かない。書くのは判断の仕方（何を手がかりに考えるか）だけとし、どう発言するかは指示しない。これが要件F-46の担保である。行動傾向文とJudgeの評価基準（5.5のラベル定義）を並べて、判定語が傾向文に含まれていないことを実装時に確認する。
+
+**バージョン管理**
+
+プロンプトは `agents/prompts/v2/` に置き、`persona_prompt_version: "v2"` をケースごとに記録する。文面を変えたら `v3` として新しいディレクトリを作り、古い版を残す（F-07）。全ケースで使用モデル、ルール記述、前提部、出力形式を揃え、タイプ間の変更点を傾向部の1文だけに限定する（要求定義書6.5）。
+
+ファイル構成は次のとおり。
+
+| ファイル | 用途 |
 | --- | --- |
-| system | ゲームのルール、プレイヤー数、自分の `player_id`、自分の役職、心理機能の行動ルール、出力形式（JSONのみ）、字数上限 |
-| user | 公開ビュー（生存者一覧、これまでの発言）、現在のターン、今回の指示（発言または投票） |
+| `system_rules.md` | ルール文書v0.6の本文と出力形式（全タイプ共通） |
+| `system_context.md` | 前提部。年齢・性別、初対面、記憶なし、人狼経験なし、AI非認識（全タイプ共通） |
+| `system_role.md` | 役職部のテンプレート。役職と秘密情報を埋める |
+| `tendencies.json` | 16タイプの行動傾向文。`PersonaBuilder` が読む |
+| `user_night_seer.md` | 占い師の確認対象の選択 |
+| `user_night_thief_inspect.md` | 怪盗の確認対象の選択（1段階目） |
+| `user_night_thief_swap.md` | 怪盗の交換判断（2段階目） |
+| `user_pre_discussion.md` | 議論前の個別判断 |
+| `user_speak.md` | 発言するかどうか、発言内容、private memo |
+| `user_pre_vote.md` | 投票前の個別判断 |
+| `user_vote.md` | 実際の投票とprivate memo |
 
-プロンプトは `agents/prompts/v1/` に4ファイルとして置き、`agent_prompt_version: "v1"` をログに残す（F-14）。`system_speak.md` / `user_speak.md` / `system_vote.md` / `user_vote.md`。user側の文面もコードから出し、版として比較できるようにする。文面を変えたら `v2` として新しいディレクトリを作り、古い版を残す。
+### 5.3 個別判断とprivate memoの設計
 
-### 5.3 役職の非対称性の担保
+要件のF-24、F-25にあたる。非公開の内面情報を、次の4時点で取得する。
 
-要件のF-11は村人エージェントへの入力に他者の役職が含まれないことを求めている。これをコードの構造とテストの両方で守る。
+| 時点 | 名称 | 内容 | 出典 |
+| --- | --- | --- | --- |
+| 議論前 | 議論前の個別判断 | 役職認識、疑い先、自信度、理由 | 要求定義書F-24 |
+| 発言ごと | private memo | その発言をした短い判断理由（1文） | 実験計画文書「観察用ログ」 |
+| 投票前 | 投票前の個別判断 | 疑い先、自信度、理由、投票予定 | 要求定義書F-25 |
+| 投票ごと | private memo | その投票先を選んだ短い判断理由（1文） | 実験計画文書「観察用ログ」 |
 
-| 手段 | 内容 |
+**発言ごと・投票ごとのprivate memoを取る理由**
+
+[実験計画文書v1](./m-plus-experiment/03_experiment-plan_v1.md)の「観察用ログ」が、各Agentが明示的に出力した短い判断理由を保存項目に挙げている。先行実験のWORLD A・Bの結果は、発言と投票の両方にmemoを付けて記録している。
+
+呼び出し回数は増えない。発言や投票と同じ1回の応答の中に `memo` フィールドを持たせ、同時に返させる（5.4）。1.3の試算に影響しない。
+
+実験計画文書の注記どおり、モデルの隠れた思考過程（chain-of-thought）を要求しない。取得するのは、実験用に明示的に生成させた短い判断理由だけである。プロンプトでは1文・40字以内を指示する。
+
+この設計は要求定義書FR-28の「発言ごとの非公開心理状態は取得しない」と矛盾する。要求定義書側の見直しを別途提案する（12章）。
+
+**自信度の尺度**
+
+1〜5の5段階とする。0〜100の連続値を使わない理由は、小型モデルが返す値が特定の数（70、80）へ偏り、刻みも安定しないためである。5段階なら選択肢としてプロンプトに列挙でき、`Request.choices` で値を検証できる。
+
+| 値 | 意味 |
 | --- | --- |
-| 構造 | `PublicViewBuilder` が唯一のプロンプト入力源になる。Agentはゲームの内部状態を直接受け取らない。 |
-| 検査 | 自分以外の `role` がプロンプト文字列に出現しないことをテストで検証する（10章 `test_role_isolation`）。 |
+| 1 | まったく自信がない |
+| 2 | あまり自信がない |
+| 3 | どちらとも言えない |
+| 4 | やや自信がある |
+| 5 | 強く自信がある |
 
-初回MVPは人狼1人なので仲間情報は不要だが、8人版で人狼が複数になった場合に備え、公開ビューは `viewer_id` を引数に取る形にしておく。
+**議論前の個別判断（`tag: pre_discussion`）**
+
+```json
+{
+  "role_awareness": "自分は占い師で、p5の役職を確認した。",
+  "suspect": "p3",
+  "confidence": 2,
+  "reason": "まだ発言がないため、確認した情報以外の手がかりがない。"
+}
+```
+
+`suspect` は自分以外の `player_id`、または判断できない場合の `"unknown"` を許す。議論前は情報がほぼないため、`"unknown"` が多く出ることを想定する。`"unknown"` を許さない設計にすると根拠のない指名を強制することになり、判断変化の分析が歪む。
+
+**投票前の個別判断（`tag: pre_vote`）**
+
+```json
+{
+  "suspect": "p3",
+  "confidence": 4,
+  "reason": "序盤と終盤で主張が変わり、根拠を聞かれたときに答えを変えた。",
+  "planned_vote": "p3"
+}
+```
+
+投票直前では `suspect` に `"unknown"` を許さない。議論を終えた時点で最も疑っている相手を1人挙げてもらう。`planned_vote` は `suspect` と一致しなくてよい。一致しない場合、その不一致自体が分析対象になる（9.3）。
 
 ### 5.4 応答形式と失敗時の扱い
 
-出力はJSONのみを要求する。
+出力はJSONのみを要求する。フェーズごとの期待形は以下である。
 
-| 用途 | 期待する形 |
-| --- | --- |
-| 発言 | `{"speech": "..."}` |
-| 投票 | `{"target": "p3", "reason": "..."}` |
+| 用途 | `tag` | 期待する形 |
+| --- | --- | --- |
+| 占い師の確認 | `night_seer` | `{"target": "p5", "reason": "..."}` |
+| 怪盗の確認（1段階目） | `night_thief_inspect` | `{"target": "p2", "reason": "..."}` |
+| 怪盗の交換判断（2段階目） | `night_thief_swap` | `{"swap": true, "reason": "..."}` または `{"swap": false, "reason": "..."}` |
+| 議論前の判断 | `pre_discussion` | `{"role_awareness": "...", "suspect": "p3", "confidence": 2, "reason": "..."}` |
+| 発言 | `speak` | `{"speak": true, "speech": "...", "memo": "..."}` または `{"speak": false, "memo": "..."}` |
+| 投票前の判断 | `pre_vote` | `{"suspect": "p3", "confidence": 4, "reason": "...", "planned_vote": "p3"}` |
+| 投票 | `vote` | `{"target": "p3", "memo": "..."}` |
+| Judge | `judge` | 5.5を参照 |
+
+**解析と再送**
+
+ルール文書v0.6 §1 が「最初の指示を含めて回答機会は最大3回」と定めている。`max_response_attempts: 3` をルールJSONに持ち（4.1）、実装はこの値に従う。
 
 | 段階 | 処理 |
 | --- | --- |
 | 1 | `json.loads` で解析する |
 | 2 | 失敗したら最初の `{` から最後の `}` までを切り出して再解析する（前置きを付ける小型モデル向け） |
-| 3 | それでも失敗したら、temperatureを下げて最大3回まで再送する |
-| 4 | 最終的に失敗したら、発言は生テキストを字数上限で切り詰め、投票はseed付き乱数で決める。どちらも `parse_failed` または `fallback` を記録する |
+| 3 | それでも失敗したら、temperatureを下げて同じ指示を再送する。**再送は最大2回**（1回目の指示と合わせて最大3回） |
+| 4 | 3回とも無効だった場合、フェーズごとの扱いに従う（下表） |
 
-発言の字数上限は設定値 `max_output_chars` で持つ。小型モデルは長文になりやすく、待機時間が伸びてタイムラインも読みにくくなるため、プロンプトでの指示と実装側の切り詰めの二重で抑える。
+内容の検証も解析の失敗と同じ扱いにする。自分自身の指定、存在しない `player_id`、`choices` に含まれない値は無効な回答として再送の対象になる（v0.6 §2-2、§2-4、§2-6）。
 
-### 5.5 脳の実装
+| フェーズ | 3回とも無効だった場合の扱い |
+| --- | --- |
+| `night_seer` | **その夜の能力を使用しなかったものとして扱う**。`ability_used: false`、`skip_reason: "exhausted_attempts"` を記録する |
+| `night_thief_inspect` | 同上。確認も交換も行わず、怪盗の最終役職は怪盗のままになる |
+| `night_thief_swap` | 同上。交換は実行されず、最終役職は怪盗のままになる |
+| `pre_discussion` | `suspect: "unknown"`、`confidence: null`、`parse_failed: true` として記録する |
+| `speak` | **そのラウンドの発言をスキップしたものとして記録する**。`spoke: false`、`skipped: true`、`parse_failed: true`。空回答・無回答を発言として数えない |
+| `pre_vote` | `parse_failed: true` として記録し、`suspect` と `planned_vote` は `null` にする |
+| `vote` | **棄権として扱い、その票を集計に含めない**。`abstained: true`、`parse_failed: true` を記録する |
+
+**v1.1の設計から変えた点**
+
+乱数によるフォールバックをすべて廃止した。v1.1は夜の役職処理と投票で、ゲームを終了させるためにseed付き乱数で値を埋めていた。ルールv0.6は、夜については能力の未使用、投票については棄権という扱いを明示しており、どちらも乱数を必要としない。
+
+これは分析の正確さの面でも望ましい。乱数で埋めた投票先を記録すると、9.1の `vote_correct` に本人が選んでいない値が混ざる。乱数で埋めた占い先を記録すると、性格構成による確認先の選び方の分析に偽の値が混ざる。`fallback` フィールドは廃止し、失敗は `parse_failed`、`skipped`、`abstained`、`ability_used` で表す。
+
+`speak` の扱いも変えた。v1.1は生テキストが空でなければ切り詰めて発言として採用していたが、v0.6 §2-5 が「空回答または無回答は正常な発言として数えない」と定めているため、JSON解析に3回失敗した場合はスキップとして記録する。ただしJSONの解析だけが失敗し `speech` に相当する生テキストが取れている場合は、2段目の切り出しで救えるため実際のスキップは稀になる。
+
+発言の字数上限は `max_speech_chars`（4.5）で持つ。小型モデルは長文になりやすく、待機時間が伸びてTranscriptも読みにくくなるため、プロンプトでの指示と実装側の切り詰めの二重で抑える。
+
+### 5.5 Judgeの設計
+
+要件のF-40〜F-45にあたる。
+
+| 項目 | 決定 |
+| --- | --- |
+| 呼び出し | `judge_brain` として、エージェントとは別のBrainインスタンスを使う。設定で別モデルを指定できる |
+| 入力 | 発言バッチ（既定8件）、参加者一覧（`player_id`、年齢、性別）、その発言までのTranscript要約なし全文 |
+| 渡さない情報 | 役職、最終役職、MBTI、個別判断、投票、勝敗（3.4の理由） |
+| 出力 | 発言ごとのラベル、言及対象、公開スタンス |
+| 評価基準の保存 | `judge/criteria/v1/` に置き、`judge_criteria_version: "v1"` を記録する |
+| 再実行 | `judge.json` が無いケース、または `judge_criteria_version` が指定と違うケースを対象にする |
+| 旧評価の保持 | 版が違う評価は `judge.{version}.json` として別ファイルに保存し、上書きしない（F-45） |
+
+**発言ラベル（9種）**
+
+| ラベル | 定義 |
+| --- | --- |
+| `suspect` | 特定の相手を疑う、または人狼だと主張する |
+| `defend` | 特定の相手をかばう、または人狼でないと主張する |
+| `claim` | 自分の役職や自分が得た情報を主張する |
+| `question` | 特定の相手または全体へ問いを投げる |
+| `rebut` | 直前までの主張へ反論する |
+| `agree` | 他者の主張に同意する |
+| `hypothesis` | 複数の可能性や仮定を並べる |
+| `intent` | 自分の投票先や方針を表明する |
+| `other` | 上記に当てはまらない |
+
+1つの発言に複数のラベルが付くことを許す。`suspect` と `hypothesis` が同時に付く発言は普通にありうるため、単一選択にすると情報が落ちる。
+
+**公開スタンス**
+
+| 項目 | 内容 |
+| --- | --- |
+| `target` | スタンスの対象の `player_id`。対象がない発言は `null` |
+| `direction` | `suspect` または `defend` |
+| `strength` | 1（弱い）/ 2（中）/ 3（強い） |
+
+1発言に複数のスタンスが含まれる場合は配列で持つ。強度を3段階にした理由は、自信度と同じく小型モデルの安定性を優先したためである。
+
+**公開スタンス系列の導出**
+
+Judgeの出力から、`speech_id` の順に次の処理を行う。
+
+1. 各プレイヤーの「現在の公開スタンス」を保持するテーブルを持つ。初期値は全員 `null`。
+2. 発言を1件処理するたびに、その発言者のスタンスを最新の値で置き換える。同じ発言に複数のスタンスがある場合は `strength` が最大のものを採用し、同値なら最後に現れたものを採用する。
+3. その時点のテーブルから疑念分布を作る。`direction` が `suspect` のスタンスについて、対象ごとに人数を数える。1人1件なので、分布の合計は最大8になる。
+4. 各発言時点の分布を `stance_series` として保存する。
+
+この処理により、発言回数の多いプレイヤーの疑いが分布へ重複して数えられない（F-44）。分布はJudgeの出力から機械的に導出するので、Judgeを呼び直さずに算出方法を変えられる。
+
+### 5.6 脳の実装
 
 | 実装 | 通信先 | 備考 |
 | --- | --- | --- |
-| `StubBrain` | なし | 心理機能ごとの固定文テンプレートに乱数で語を差し込む。投票はseed付き乱数。待機時間は0。 |
-| `OllamaBrain` | `http://localhost:11434/api/generate` | モデル名は設定値。Ollamaが起動していない場合は `unreachable` を返す。 |
-| `GeminiBrain` | Gemini APIのHTTPエンドポイント | APIキーは環境変数 `GEMINI_API_KEY` から読む。未設定なら選択できない。429は `rate_limited` に分類する。 |
+| `StubBrain` | なし | `tag` ごとの固定テンプレートに乱数で語を差し込む。`speak` は乱数で発言と見送りを混ぜ、発言回数が偏る実行例を作る。待機時間は0 |
+| `OllamaBrain` | `http://localhost:11434/api/generate` | モデル名は設定値。Ollamaが起動していない場合は `unreachable` を返す |
+| `GeminiBrain` | Gemini APIのHTTPエンドポイント | APIキーは環境変数 `GEMINI_API_KEY` から読む。未設定なら選択できない。429は `rate_limited` に分類する |
 
-`brains/factory.py` が `config.brain.provider` の値から実装を返す。設定の1行を変えるだけで切り替わるため、F-15の検証は「providerを変えて同じ実行ができる」ことの確認になる。
+`StubBrain` の `speak` を乱数で見送りと混ぜる点は、v2.0で追加する挙動である。全員が毎回発言するStubでは、発言回数の偏りを扱う分析コード（9.2、9.3）と、`all_pass` による終了条件（4.5）をテストできない。
 
-使用した脳は `run_log.json` の `brain` に `provider`、`model`、`endpoint_kind` として残す（F-16）。
+`brains/factory.py` が `brain.provider` と `judge_brain.provider` の値から実装を返す。使用した脳は `case_log.json` の `brain` と `judge.json` の `judge_brain` に、`provider`、`model`、`endpoint_kind` として残す（F-35、AC-14）。
 
-### 5.6 無料枠が尽きた場合
+### 5.7 無料枠が尽きた場合
 
 ```mermaid
 flowchart LR
     A["GeminiBrain で実行"] --> B{"429 rate_limited?"}
     B -->|"いいえ"| C["続行"]
-    B -->|"はい"| D["status.json に error.kind=rate_limited を記録"]
-    D --> E["provider を ollama に変更して再実行"]
-    E --> F["run_log の brain が変わるため<br/>結果の比較時に区別できる"]
+    B -->|"はい"| D["status.json に error.kind=rate_limited を記録<br/>ケースを failed にして次へ"]
+    D --> E["provider を ollama に変更"]
+    E --> F["--resume で未完了ケースから再開"]
+    F --> G["case_log の brain が変わるため<br/>分析時に区別できる"]
 ```
 
-無料枠の上限に達したときは、自動で別の脳に切り替えない。切り替わったことに気付かないまま結果を比較すると、品質差の原因が分からなくなるためである。失敗として明示的に止め、人が設定を変えて再実行する（NF-08）。
+無料枠の上限に達したときは、自動で別の脳に切り替えない。切り替わったことに気付かないまま結果を比較すると、品質差の原因が分からなくなるためである。失敗として明示的に記録し、人が設定を変えて再開する（NF-10）。
+
+同一Trialの17ケースが違うモデルで実行された場合、そのTrialはMBTI構成以外の条件が揃っていないことになる。分析側で、Trial内のモデルが一致しないTrialを検出して警告する（9.4、NF-06）。
 
 ---
 
@@ -604,224 +1175,624 @@ flowchart LR
 playgrounds/mbti-werewolf/
   README.md
   requirements.txt
-  pyproject.toml                # pip install -e . で python -m mbti_werewolf を使えるようにする
+  pyproject.toml
   config/
-    default.json                # 既定の実験条件
+    default.json                  # 既定の実験条件
+  data/                           # 外部データ（実行結果ではない）
+    persons/
+      pool-001.json               # 人物プール100人
+    patterns/
+      pattern-set-001.json        # 8人パターンの集合
+    rules/
+      onenight-8p-v0.7-draft.json # ルールセット（4.1、4.2）
   src/mbti_werewolf/
-    __main__.py                 # ui / run のサブコマンド
-    config.py                   # 設定の読み込みと検証
-    runner.py                   # 実行管理、進捗と出力の書き込み
+    __main__.py                   # ui / experiment / judge / analyze / pages のサブコマンド
+    config.py                     # 設定の読み込みと検証
+    experiment.py                 # 人物選定、役職割当、Trialと17ケースの生成、条件固定の検査
+    runner.py                     # 実行管理、進捗、逐次保存、再開
     engine/
-      game.py                   # フェーズ進行
-      roles.py                  # 役職割当
-      view.py                   # PublicViewBuilder
-      tiebreak.py               # 同数の決着
+      rules.py                    # ルールセットの読み込みと検証
+      game.py                     # CaseEngine（フェーズ進行）
+      roles.py                    # 役職割当と最終役職
+      night.py                    # 開始時の役職処理
+      discussion.py               # 自由議論のラウンド制御
+      vote.py                     # 投票の収集と集計
+      view.py                     # PublicViewBuilder
+      tiebreak.py                 # v1.1の同数決着。v2.0では呼ばない（0.4）
     agents/
       agent.py
-      functions.py              # 心理機能の行動ルール
-      prompts/v1/
-        system_speak.md
-        user_speak.md
-        system_vote.md
-        user_vote.md
+      persona.py                  # PersonaBuilder（行動傾向文の組み立て）
+      mbti_types.py               # 16タイプと機能スタック
+      functions.py                # 心理機能の説明
+      prompts/
+        v1/                       # v1.1の4ファイル。削除せず残す
+        v2/
+          system_rules.md
+          system_context.md
+          system_role.md
+          tendencies.json         # 16タイプの行動傾向文（5.2）
+          user_night_seer.md
+          user_night_thief_inspect.md
+          user_night_thief_swap.md
+          user_pre_discussion.md
+          user_speak.md
+          user_pre_vote.md
+          user_vote.md
+    judge/
+      judge.py
+      stance.py                   # 公開スタンス系列の導出
+      criteria/
+        v1/
+          system_judge.md
+          user_judge.md
+          labels.json             # ラベル定義（5.5）
     brains/
-      base.py                   # Brain / BrainError / Request
+      base.py                     # Brain / BrainError / Request
       stub.py
       ollama.py
       gemini.py
       factory.py
+    analysis/
+      indicators.py               # ケース単位の指標算出（9.1〜9.3）
+      stats.py                    # 順位ベースの検定（9.4）
+      trial_report.py
+      experiment_report.py
+      rq_report.py
     record/
-      run_log.py
-      metrics.py
-      summary.py                # summary.md
-      timeline.py               # timeline.md
-      series.py                 # series_summary.md
-      result_view.py            # result.html
+      case_log.py
+      transcript.py
+      summary.py
+      case_metrics.py
+      result_view.py
+      pages.py
     web/
-      app.py                    # FastAPI
+      app.py                      # FastAPI
       static/
         index.html
         app.js
         style.css
   tests/
-    test_engine.py
-    test_reproducibility.py
+    test_experiment.py
+    test_condition_fixation.py
+    test_rules.py
+    test_night.py
+    test_discussion.py
+    test_private_answers.py
+    test_vote.py
     test_role_isolation.py
+    test_mbti_isolation.py
+    test_private_answer_isolation.py
     test_brain_parse.py
-    test_tiebreak.py
+    test_judge.py
+    test_stance.py
+    test_resume.py
+    test_analysis.py
     test_failure_record.py
     test_web_api.py
     test_cli.py
 
 runs/
-  s-20260815-170000/            # series
-    series.json
-    series_summary.md
-    r001/
-      config.json
-      status.json
-      run_log.json
-      summary.md
-      timeline.md
-      metrics.csv
-      result.html
+  e-20260901-210000/              # 実験
+    experiment.json
+    persons.json                  # 使用したプールのスナップショット
+    experiment_metrics.csv         # 1行 = 1ケース
+    speech_labels.csv              # 1行 = 1発言
+    experiment_report.md
+    experiment.html
+    rq1.md / rq1.html
+    rq2.md / rq2.html
+    manipulation_check.md         # MBTI条件の操作確認（9.4）
+    t001/                         # Trial
+      trial.json
+      trial_metrics.csv           # 1行 = 1プレイヤー × ケース
+      trial_report.md
+      trial.html
+      c00-mixed/                  # ケース
+        config.json
+        status.json
+        case_log.json
+        judge.v1.json
+        transcript.md
+        summary.md
+        result.html
+      c01-ISTJ/
+      c02-ISFJ/
+      ...
+      c16-ESFP/
 ```
 
-1試合だけの実行も1試合のseriesとして扱う。多試合実行と構造を分けないことで、集計と画面の一覧処理を1本にできる。
+人物プールとパターンを `data/` に置き、`runs/` には使用したスナップショットを置く。`data/` を後から書き換えても、過去の実験結果が指す人物定義は変わらない（F-03、F-09）。
 
 ### 6.2 識別子の命名
 
 | 識別子 | 形式 | 例 |
 | --- | --- | --- |
-| `series_id` | `s-YYYYMMDD-HHMMSS` | `s-20260815-170000` |
-| `run_id` | `{series_id}-r{run_index:03d}` | `s-20260815-170000-r001` |
+| `experiment_id` | `e-YYYYMMDD-HHMMSS` | `e-20260901-210000` |
+| `trial_id` | `{experiment_id}-t{trial_index:03d}` | `e-20260901-210000-t001` |
+| `case_id` | `{trial_id}-c{case_index:02d}` | `e-20260901-210000-t001-c00` |
+| `person_id` | `pe{index:03d}` | `pe042` |
+| `pool_id` | `pool-{index:03d}` | `pool-001` |
+| `pattern_id` | `pt{index:03d}` | `pt007` |
+| `player_id` | `p{seat:d}`（1〜8） | `p3` |
+| `speech_id` | `{case_id}-s{order:03d}` | `e-20260901-210000-t001-c00-s012` |
 
-`run_id` が `series_id` を含むため、APIは `run_id` だけを受け取れば保存先を特定できる。
+`case_index` は構成種別に対応させる。`00` が混合構成、`01`〜`16` が同質構成で、順序は `agents/mbti_types.py` の `TYPE_STACKS` の定義順（ISTJ, ISFJ, INFJ, INTJ, ISTP, ISFP, INFP, INTP, ESTP, ESFP, ENFP, ENTP, ESTJ, ESFJ, ENFJ, ENTJ）に固定する。ケースIDから構成種別が分かるため、ディレクトリ名にもタイプ名を含める（`c01-ISTJ`）。
 
-### 6.3 設定（config.json）
+`case_id` が `trial_id` と `experiment_id` を含むため、`case_id` だけを受け取れば保存先を特定できる。
+
+`player_id` は座席番号であり、人物IDとは別に持つ。Trial内では `player_id` と `person_id` の対応を固定するので、17ケースを通じて `p3` は同じ人物を指す。エージェントへは `player_id` だけを見せ、`person_id` は見せない。
+
+### 6.3 マスタデータ
+
+**人物プール（`data/persons/pool-001.json`）**
 
 ```json
 {
-  "player_count": 4,
-  "turn_count": 3,
-  "game_count": 1,
-  "functions": ["Ne", "Ti", "Fe", "Si"],
-  "role_assignment_mode": "seeded_random",
-  "role_composition": { "werewolf": 1, "villager": 3 },
-  "seed": 42,
+  "pool_id": "pool-001",
+  "count": 100,
+  "generated_at": "2026-09-01T12:00:00+09:00",
+  "composition": {
+    "mbti": { "ISTJ": 7, "ISFJ": 7, "...": 0 },
+    "age": { "20-29": 25, "30-39": 25, "40-49": 25, "50-59": 25 },
+    "gender": { "male": 50, "female": 50 }
+  },
+  "composition_source": "（人数構成の根拠資料の識別情報）",
+  "assignment_mode": "seeded_random_independent",
+  "seed": 1001,
+  "persons": [
+    { "person_id": "pe001", "mbti": "ENTP", "age": 34, "gender": "male" }
+  ]
+}
+```
+
+`assignment_mode: "seeded_random_independent"` は、MBTIの人数構成と年齢・性別の人数構成をそれぞれ満たしたうえで、両者を独立にランダムに対応付けることを示す。要求定義書8.2の「MBTIと年齢・性別の間に根拠のない関係を持たせない」を実装で表す値である。
+
+`composition` の具体的な人数は本書では決めない（14章）。プールの生成コマンドは人数構成を設定として受け取る。
+
+**パターンセット（`data/patterns/pattern-set-001.json`）**
+
+```json
+{
+  "pattern_set_id": "pattern-set-001",
+  "pool_id": "pool-001",
+  "selection_mode": "seeded_random_without_replacement",
+  "seed": 2001,
+  "patterns": [
+    { "pattern_id": "pt001", "person_ids": ["pe003", "pe011", "pe024", "pe037", "pe049", "pe058", "pe072", "pe090"] }
+  ]
+}
+```
+
+| 選定方式 | 内容 |
+| --- | --- |
+| `seeded_random_without_replacement` | 100人から8人を復元なしで選ぶ。同じ人物が1パターン内に重複しない。既定 |
+| `fixed` | あらかじめ列挙したパターンをそのまま使う |
+
+パターンをファイルとして保存する理由は、同じ8人の組み合わせを別の実験で再利用できるようにするためと、Trialごとにどの8人を使ったかを実験結果から独立して確認できるようにするためである（F-06、F-09）。
+
+**役職割当**
+
+役職は `engine/roles.py` が `trial_seed` から割り当てる。ルール文書v0.6 §1 の「8枚を無作為に1枚ずつ配る」に合わせ、`[人狼, 人狼, 占い師, 怪盗, 村人, 村人, 村人, 村人]` の配列を `random.Random(trial_seed)` でシャッフルし、`p1` から `p8` の順に配る。先行実験の[WORLD A結果](./m-plus-experiment/04_world-A-result_v1.md)が記録している手順と同じである。Trialごとに1回だけ決め、`trial.json` に保存する。17ケースはこれを読むだけで、再計算しない。
+
+| 項目 | 決定 |
+| --- | --- |
+| 方式 | `random.Random(trial_seed)` で8人をシャッフルし、ルールセットの `role_composition` の順に割り当てる |
+| 記録 | `role_assignment_mode: "seeded_random"` と `trial_seed` を `trial.json` に残す |
+| 再現性 | 同じ `trial_seed` なら、パターン選定と役職割当が一致する（F-57） |
+| 固定 | 開始時役職はTrial内で固定する。最終役職はケースごとの結果として記録する（4.2） |
+
+### 6.4 設定（config/default.json と experiment.json）
+
+```json
+{
+  "pool_id": "pool-001",
+  "pattern_set_id": "pattern-set-001",
+  "rule_set_id": "onenight-8p-v0.7-draft",
+  "trial_count": 1,
+  "trial_range": null,
   "base_seed": 42,
-  "history_mode": "none",
-  "history_scope": null,
+  "pattern_selection_mode": "seeded_random_without_replacement",
+  "discussion": {
+    "max_rounds": 6,
+    "max_speeches": 40,
+    "max_total_chars": 6000,
+    "max_speech_chars": 200,
+    "max_consecutive_speeches": 2,
+    "stop_on_all_pass": true
+  },
+  "persona_prompt_version": "v2",
+  "judge_criteria_version": "v1",
+  "judge_batch_size": 8,
+  "indicator_version": "v1",
   "brain": {
     "provider": "stub",
     "model": "",
     "temperature": 0.8,
-    "max_output_chars": 200,
     "timeout_seconds": 120,
-    "max_retries": 3
+    "max_transport_retries": 3
+  },
+  "judge_brain": {
+    "provider": "stub",
+    "model": "",
+    "temperature": 0.2,
+    "timeout_seconds": 180,
+    "max_transport_retries": 3
   },
   "machine_name": "yuujirou-mba-m2"
 }
 ```
 
-`base_seed` は試合ごとにseedをずらした際の元の値である。1試合目の `seed` は `base_seed` そのものになる。`machine_name` は環境変数または設定で与える。要件のF-36が求める実行環境の記録であり、誰のPCで回した結果かを後から比較するために使う。既定の `provider` は `stub` である。Ollamaが未導入でもclone直後に1試合が完走し、出力と画面を確認できる。実際の観察は `--brain ollama` で行う。
+| 項目 | 意味 |
+| --- | --- |
+| `trial_range` | `[開始, 終了]` の形でTrial範囲を指定する。分割実行に使う（F-55）。`null` なら1から `trial_count` まで |
+| `base_seed` | Trialごとのseedの元の値。`trial_seed = base_seed + trial_index - 1` とする。Trial 1は `base_seed` そのままになる |
+| `brain.max_transport_retries` | 接続失敗やタイムアウトの再試行回数。**応答内容の無効による再送とは別**である（下の注記） |
+| `judge_brain.temperature` | エージェントより低くする。評価は揺れない方がよいため |
+| `indicator_version` | 9章の指標定義の版。分析出力に記録する |
+| `machine_name` | 環境変数または設定で与える。どのPCで回した結果かを後から比較するために使う（F-35） |
 
-### 6.4 実行状態（status.json）
+再送の回数を2種類に分けている。接続失敗やタイムアウトによる再試行は `brain.max_transport_retries` が持ち、これは通信の都合なのでルールとは無関係である。一方、応答が空・解析不能・候補外だった場合の再送は、ルール文書v0.6 §1 が定める最大3回に従うため、ルールセットの `max_response_attempts`（4.1）が持つ。この2つを1つの設定にまとめると、通信環境を変えたときにルールの回答機会も変わってしまう。
 
-画面が1秒ごとに読むファイル。小さく保つ。
+既定の `provider` は `stub` である。Ollamaが未導入でもclone直後に1 Trialが完走し、出力と分析を確認できる。実際の観察は `--brain ollama --judge-brain ollama` で行う。
+
+ケースごとの `config.json` は、上記からそのケースに関係する値だけを確定した形で持つ。どの経路で実行しても同じ形で保存される（F-56、IF-08）。
+
+### 6.5 実行状態（status.json）
+
+ケース、Trial、実験のそれぞれに置く。画面が短い間隔で読むファイルなので小さく保つ。
+
+ケースの `status.json`:
 
 ```json
 {
-  "run_id": "s-20260815-170000-r001",
-  "series_id": "s-20260815-170000",
+  "case_id": "e-20260901-210000-t001-c00",
+  "trial_id": "e-20260901-210000-t001",
+  "experiment_id": "e-20260901-210000",
+  "composition": "mixed",
+  "homogeneous_type": null,
   "status": "running",
-  "phase": "day_discussion",
-  "turn": 2,
-  "turn_count": 3,
-  "started_at": "2026-08-15T17:00:00+09:00",
-  "updated_at": "2026-08-15T17:00:41+09:00",
+  "phase": "free_discussion",
+  "round": 3,
+  "max_rounds": 6,
+  "speech_count": 14,
+  "inference_calls": 41,
+  "attempt": 1,
+  "started_at": "2026-09-01T21:00:00+09:00",
+  "updated_at": "2026-09-01T21:07:12+09:00",
   "error": null
 }
 ```
 
-失敗時は `error` に `{"kind": "rate_limited", "message": "..."}` が入る。
-
-### 6.5 実行ログ（run_log.json）
-
-出力の正本。他の出力はすべてこのファイルから導出する。
+実験の `status.json` は、Trial単位とケース単位の件数だけを持つ。
 
 ```json
 {
-  "schema_version": "1",
-  "run_id": "s-20260815-170000-r001",
-  "series_id": "s-20260815-170000",
-  "run_index": 1,
-  "status": "done",
-  "config": { "...": "6.3 と同じ内容" },
-  "brain": {
-    "provider": "ollama",
-    "model": "gemma3:4b",
-    "endpoint_kind": "local"
+  "experiment_id": "e-20260901-210000",
+  "status": "running",
+  "trial_total": 100,
+  "trial_done": 3,
+  "trial_complete": 3,
+  "case_total": 1700,
+  "case_done": 58,
+  "case_failed": 1,
+  "case_pending": 1641,
+  "current_trial_id": "e-20260901-210000-t004",
+  "current_case_id": "e-20260901-210000-t004-c07",
+  "started_at": "2026-09-01T21:00:00+09:00",
+  "updated_at": "2026-09-02T09:41:03+09:00",
+  "error": null
+}
+```
+
+失敗時は `error` に `{"kind": "rate_limited", "message": "..."}` が入る。`kind` は `unreachable` / `rate_limited` / `timeout` / `invalid_response` / `internal` の5種とする（F-59）。
+
+進行として返すのはフェーズ、ラウンド、発言数、呼び出し回数だけで、発言そのものは返さない。会話を1発言ずつ流さないという要件（要件定義書1章）を、APIの返す情報の範囲で担保している。
+
+### 6.6 Trial（trial.json）
+
+Trialの固定条件の正本。再開時はこのファイルから条件を復元する（3.5）。
+
+```json
+{
+  "schema_version": "2",
+  "trial_id": "e-20260901-210000-t001",
+  "experiment_id": "e-20260901-210000",
+  "trial_index": 1,
+  "trial_seed": 42,
+  "pool_id": "pool-001",
+  "pattern_set_id": "pattern-set-001",
+  "pattern_id": "pt001",
+  "rule_set_id": "onenight-8p-v0.7-draft",
+  "rule_set_version": "0.1",
+  "fixed_conditions": {
+    "seats": [
+      { "player_id": "p1", "person_id": "pe003", "age": 34, "gender": "male", "pool_mbti": "ENTP", "initial_role": "villager" },
+      { "player_id": "p2", "person_id": "pe011", "age": 47, "gender": "female", "pool_mbti": "ISFJ", "initial_role": "werewolf" }
+    ],
+    "role_assignment_mode": "seeded_random",
+    "discussion": { "max_rounds": 6, "max_speeches": 40, "max_total_chars": 6000, "max_speech_chars": 200, "max_consecutive_speeches": 2, "stop_on_all_pass": true },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "brain": { "provider": "ollama", "model": "gemma3:4b" },
+    "judge_brain": { "provider": "ollama", "model": "gemma3:4b" }
   },
-  "players": [
-    { "player_id": "p1", "function": "Ne", "role": "villager", "agent_prompt_version": "v1" },
-    { "player_id": "p2", "function": "Ti", "role": "werewolf", "agent_prompt_version": "v1" },
-    { "player_id": "p3", "function": "Fe", "role": "villager", "agent_prompt_version": "v1" },
-    { "player_id": "p4", "function": "Si", "role": "villager", "agent_prompt_version": "v1" }
+  "cases": [
+    { "case_id": "...-c00", "composition": "mixed", "homogeneous_type": null, "status": "done" },
+    { "case_id": "...-c01", "composition": "homogeneous", "homogeneous_type": "ISTJ", "status": "done" }
   ],
-  "speaking_order": ["p4", "p3", "p1", "p2"],
-  "turns": [
+  "complete": false,
+  "condition_check": { "passed": true, "checked_at": "2026-09-01T21:00:00+09:00", "varying_keys": ["mbti"] }
+}
+```
+
+`condition_check.varying_keys` に `["mbti"]` だけが入ることが、Trial内でMBTI構成以外が変わっていないことの記録である。検査に失敗した場合は実行前に停止する（3.1、NF-06、AC-02）。
+
+`pool_mbti` は混合構成のケースで使うMBTIである。同質構成のケースでは、これを `homogeneous_type` で置き換える。
+
+### 6.7 ケースログ（case_log.json）
+
+出力の正本。Judgeと分析以外の出力はすべてこのファイルから導出する。
+
+```json
+{
+  "schema_version": "2",
+  "case_id": "e-20260901-210000-t001-c00",
+  "trial_id": "e-20260901-210000-t001",
+  "experiment_id": "e-20260901-210000",
+  "case_index": 0,
+  "composition": "mixed",
+  "homogeneous_type": null,
+  "status": "done",
+  "attempt": 1,
+  "versions": {
+    "rule_set_id": "onenight-8p-v0.7-draft",
+    "rule_set_version": "0.1",
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "pool_id": "pool-001",
+    "pattern_id": "pt001"
+  },
+  "brain": { "provider": "ollama", "model": "gemma3:4b", "endpoint_kind": "local" },
+  "config": { "...": "6.4 のケース確定値" },
+  "players": [
     {
-      "turn": 1,
       "player_id": "p1",
-      "speech_text": "まだ判断材料が少ないので、可能性を3つ挙げます。",
-      "referenced_history_ids": [],
+      "person_id": "pe003",
+      "age": 34,
+      "gender": "male",
+      "mbti": "ENTP",
+      "initial_role": "villager",
+      "final_role": "villager"
+    }
+  ],
+  "night_actions": [
+    { "phase": "seer_inspection", "actor": "p4", "target": "p7", "revealed_initial_role": "villager", "reason": "...", "ability_used": true, "attempts": 1, "parse_failed": false, "wait_seconds": 8.9 },
+    { "phase": "werewolf_recognition", "actor": "p2", "partners": ["p6"], "requires_inference": false },
+    { "phase": "thief_inspection", "actor": "p5", "target": "p2", "revealed_initial_role": "werewolf", "reason": "...", "ability_used": true, "attempts": 1, "parse_failed": false, "wait_seconds": 9.4 },
+    { "phase": "thief_swap", "actor": "p5", "target": "p2", "swapped": true, "actor_final_role": "werewolf", "target_final_role": "thief", "target_notified": false, "reason": "...", "attempts": 1, "parse_failed": false, "wait_seconds": 8.1 }
+  ],
+  "pre_discussion_answers": [
+    {
+      "player_id": "p1",
+      "role_awareness": "自分は村人で、確認できる情報はない。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ発言がない。",
       "parse_failed": false,
-      "wait_seconds": 3.2
+      "wait_seconds": 7.7
+    }
+  ],
+  "discussion": {
+    "rounds": 4,
+    "stop_reason": "all_pass",
+    "limits": { "max_rounds": 6, "max_speeches": 40, "max_total_chars": 6000, "max_speech_chars": 200, "max_consecutive_speeches": 2 },
+    "events": [
+      {
+        "speech_id": "e-20260901-210000-t001-c00-s001",
+        "order": 1,
+        "round": 1,
+        "poll_position": 1,
+        "player_id": "p4",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "占い師です。p7を見て村人でした。",
+        "memo": "確定情報を早く出して整合性を確認させたい。",
+        "chars": 24,
+        "truncated": false,
+        "attempts": 1,
+        "parse_failed": false,
+        "wait_seconds": 10.2
+      },
+      {
+        "order": 2,
+        "round": 1,
+        "poll_position": 2,
+        "player_id": "p1",
+        "spoke": false,
+        "skipped": false,
+        "memo": "情報が少ないので他の発言を待つ。",
+        "attempts": 1,
+        "parse_failed": false,
+        "wait_seconds": 5.1
+      }
+    ]
+  },
+  "pre_vote_answers": [
+    {
+      "player_id": "p1",
+      "suspect": "p3",
+      "confidence": 4,
+      "reason": "主張が途中で変わった。",
+      "planned_vote": "p3",
+      "parse_failed": false,
+      "wait_seconds": 8.3
     }
   ],
   "votes": [
     {
       "voter": "p1",
-      "target": "p2",
-      "reason": "発言の前半と後半で結論が変わっているため。",
-      "invalid_retry_count": 0,
-      "fallback": false
+      "target": "p3",
+      "memo": "主張の変化が説明できていない。",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 7.9
     }
   ],
   "result": {
-    "executed": "p2",
-    "executed_role": "werewolf",
-    "winner": "village",
-    "tie_break": null
-  },
-  "metrics": {
-    "per_player": [
-      {
-        "player_id": "p1", "function": "Ne", "role": "villager",
-        "speech_count": 3, "avg_chars": 78, "final_vote": "p2", "win": true,
-        "suspicion_count": 2, "suspected_by_count": 0,
-        "question_count": 1, "rebuttal_count": 0, "agreement_count": 1, "hypothesis_count": 3
-      }
-    ]
+    "vote_tally": { "p3": 4, "p2": 2, "p6": 2 },
+    "valid_vote_count": 8,
+    "abstain_count": 0,
+    "top_vote_count": 4,
+    "executed": ["p3"],
+    "executed_count": 1,
+    "executed_roles": [
+      { "player_id": "p3", "initial_role": "seer", "final_role": "seer" }
+    ],
+    "no_execution_reason": null,
+    "winner": "werewolf",
+    "valid": true,
+    "invalid_reason": null
   },
   "timing": {
-    "started_at": "2026-08-15T17:00:00+09:00",
-    "ended_at": "2026-08-15T17:01:01+09:00",
-    "elapsed_seconds": 61.4,
-    "ai_wait_seconds": 54.8,
+    "started_at": "2026-09-01T21:00:00+09:00",
+    "ended_at": "2026-09-01T21:13:48+09:00",
+    "elapsed_seconds": 828.4,
+    "ai_wait_seconds": 819.7,
+    "inference_calls": 62,
     "machine_name": "yuujirou-mba-m2"
   },
   "failure": null
 }
 ```
 
-`schema_version` を持たせる理由は、実装途中でschemaを変えたときに古い実行結果を読み分けられるようにするためである。要件のNF-10が求めるリポジトリ運用の維持にも関わる（古い結果を消さずに残せる）。
+`discussion.events` が発言と見送りの両方を1つの配列に持つ点が設計上の要点である。別々の配列にすると、見送りが会話のどの位置で起きたかが失われる。`spoke: false` のイベントには `speech_id` を振らない。発言だけに連番の `speech_id` を振るので、Judgeの評価対象と1対1に対応する。
 
-`ai_wait_seconds` は各推論呼び出しの待機時間の合計、`elapsed_seconds` は実行全体の所要時間とする。両方を持つことで、待機時間が支配的なのか進行処理が重いのかを切り分けられる（F-35、NF-06）。
+`order` は発言と見送りを通した通し番号、`speech_id` の連番は発言だけの通し番号である。両方を持つ理由は、前者が議論の進行を、後者がJudgeの評価対象を表すためである。
 
-### 6.6 集計（metrics.csv）
+**v1.1のschemaから変えた項目**
 
-要件4.3の必須列を先頭に置き、要件4.4の「できれば取る指標」を後ろに足す。
+出力形式の変更なので、v1の出力とは互換にならない。既存の `runs/` は `schema_version` で読み分ける（F-37）。
 
-```text
-run_id,series_id,player_id,function,mbti_types,role,speech_count,avg_chars,final_vote,win,elapsed_seconds,suspicion_count,suspected_by_count,question_count,rebuttal_count,agreement_count,hypothesis_count
+| 項目 | v1.1 | v2.0 | 理由 |
+| --- | --- | --- | --- |
+| `night_actions` の夜の順序 | 人狼 → 占い師 → 怪盗 | 占い師 → 人狼 → 怪盗の確認 → 怪盗の交換 | ルールv0.6 §2 |
+| 怪盗のイベント | `thief_swap` の1件 | `thief_inspection` と `thief_swap` の2件 | 2段階になったため（4.2） |
+| `revealed_role` | — | `revealed_initial_role` に改名 | 見えるのが開始時役職であることを明示（v0.6 §2-2） |
+| `ability_used` | なし | 追加 | 3回失敗で能力未使用になるため（5.4） |
+| `attempts` | `invalid_retry_count` | `attempts`（1〜3） | ルールv0.6の「回答機会は最大3回」と対応させる |
+| `fallback` | あり | **削除** | 乱数フォールバックを廃止した（5.4） |
+| `memo` | なし | `discussion.events` と `votes` に追加 | 実験計画文書の観察用ログ（5.3） |
+| `skipped` | なし | `discussion.events` に追加 | 見送りとスキップを区別する（4.5） |
+| `votes[].reason` | あり | `memo` に改名 | 実験計画文書の名称に合わせる |
+| `result.executed` | 単一の `player_id` | **配列** | 追放者が0人・複数人になりうる（4.6） |
+| `result.tie_break` | あり | **削除** | 同数得票の乱数決着を廃止した（4.6） |
+| `result.executed_roles` | `executed_initial_role` / `executed_final_role` | 追放者ごとの配列 | 追放者が複数になりうるため |
+| `result.valid_vote_count` / `abstain_count` | なし | 追加 | 棄権と無効試合の判定に必要（4.6） |
+| `result.invalid_reason` | なし | 追加 | 無効試合の理由を残す。有効票0なら `"no_valid_votes"` |
+| `result.no_execution_reason` | なし | 追加 | 追放者0人のとき `"top_vote_count_is_one"` を入れる |
+
+`result.executed` を配列にしたことで、追放者0人（`[]`）、1人、2人以上を同じ形で表せる。`winner` は追放者の `final_role` に `werewolf` が含まれるかで決まるため、人数によらず同じ判定式になる。
+
+`schema_version` を持たせる理由は、実装途中でschemaを変えたときに古い実行結果を読み分けられるようにするためである（F-37）。
+
+`ai_wait_seconds` は各推論呼び出しの待機時間の合計、`elapsed_seconds` は実行全体の所要時間とする。`inference_calls` を加えたのは、1.3の試算を実測で更新するために回数が必要になるためである（NF-07）。
+
+### 6.8 Judge評価（judge.v1.json）
+
+```json
+{
+  "schema_version": "2",
+  "case_id": "e-20260901-210000-t001-c00",
+  "judge_criteria_version": "v1",
+  "judge_brain": { "provider": "ollama", "model": "gemma3:4b", "endpoint_kind": "local" },
+  "judge_batch_size": 8,
+  "evaluated_at": "2026-09-02T10:00:00+09:00",
+  "speeches": [
+    {
+      "speech_id": "e-20260901-210000-t001-c00-s001",
+      "labels": ["claim"],
+      "mentions": ["p7"],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260901-210000-t001-c00-s002",
+      "labels": ["suspect", "hypothesis"],
+      "mentions": ["p4", "p7"],
+      "stances": [{ "target": "p4", "direction": "suspect", "strength": 2 }],
+      "parse_failed": false
+    }
+  ],
+  "stance_series": [
+    {
+      "at_speech_id": "e-20260901-210000-t001-c00-s002",
+      "current_stances": { "p4": null, "p1": { "target": "p4", "direction": "suspect", "strength": 2 } },
+      "suspicion_distribution": { "p4": 1 },
+      "entropy": 0.0
+    }
+  ],
+  "timing": { "elapsed_seconds": 64.2, "ai_wait_seconds": 61.8, "inference_calls": 3 }
+}
 ```
 
-1行 = 1プレイヤー。複数試合の結果を縦に連結すれば、そのまま表計算ソフトで機能別の集計ができる。
+ファイル名に版を含める（`judge.v1.json`）ため、評価基準を `v2` にしても `v1` の評価が残る（F-45）。分析は `indicator_version` とあわせて、どの評価版を使ったかを出力する。
 
-### 6.7 人が読む出力
+### 6.9 集計CSV
 
-| ファイル | 構成 |
+3つの粒度を出す（要件4.7）。列を追加する場合は末尾に足し、既存列の意味を変えない。
+
+**`trial_metrics.csv`（1行 = 1プレイヤー × 1ケース）**
+
+```text
+experiment_id,trial_id,case_id,composition,homogeneous_type,player_id,person_id,age,gender,mbti,initial_role,final_role,speech_count,pass_count,skip_count,total_chars,avg_chars,pre_suspect,pre_confidence,final_suspect,final_confidence,planned_vote,actual_vote,abstained,suspect_changed,confidence_delta,pre_correct,final_correct,vote_correct,plan_vote_match,executed,win
+```
+
+**`experiment_metrics.csv`（1行 = 1ケース）**
+
+```text
+experiment_id,trial_id,case_id,case_index,composition,homogeneous_type,status,valid,invalid_reason,rule_set_version,persona_prompt_version,judge_criteria_version,indicator_version,brain_provider,brain_model,rounds,stop_reason,total_speeches,total_passes,total_skips,total_chars,valid_vote_count,abstain_count,top_vote_count,executed,executed_count,executed_final_roles,no_execution_reason,winner,village_correct,vote_concentration,final_entropy,convergence_round,correction_rate,deterioration_rate,mean_confidence_delta,plan_vote_mismatch_rate,elapsed_seconds,ai_wait_seconds,inference_calls,machine_name
+```
+
+`executed` と `executed_final_roles` は追放者が複数になりうるため、セル内で `|` 区切りの複数値にする。追放者0人の場合は空文字にし、`executed_count` が `0` になる。
+
+`tie_break_used` 列は持たない。同数得票の乱数決着を廃止したため、記録する対象がなくなった（4.6）。同数得票そのものは `executed_count` が2以上であることで判別できる。
+
+**`speech_labels.csv`（1行 = 1発言）**
+
+```text
+experiment_id,trial_id,case_id,speech_id,order,round,player_id,mbti,initial_role,final_role,chars,labels,mentions,stance_target,stance_direction,stance_strength,judge_criteria_version
+```
+
+`labels` と `mentions` は複数値を取るため、セル内で `|` 区切りにする。CSVをそのまま表計算ソフトで開いたときに列がずれないよう、カンマは使わない。
+
+`speech_labels.csv` に `mbti` と役職を含める理由は、Judgeへは渡さないが分析では必要になるためである。Judgeの入力と分析の入力を混同しないよう、この列は分析側で `case_log.json` から結合して付ける。
+
+### 6.10 人が読む出力
+
+| ファイル | 単位 | 構成 |
+| --- | --- | --- |
+| `transcript.md` | ケース | 発言順に「`p1`（34歳 / 男性 / ENTP / 村人）: 発言」の並び。見送りは行として出さず、末尾にプレイヤー別の発言回数と見送り回数の表を置く |
+| `summary.md` | ケース | 構成種別、8人の人物・MBTI・開始時役職・最終役職、夜の処理、議論の要点（発言数と終了理由）、議論前と投票前の判断の対比表、投票結果、勝敗、指標値、実行条件、所要時間 |
+| `trial_report.md` | Trial | 固定条件、17ケースを行に並べた比較表（構成種別、勝敗、追放者、正答、収束、判断変化）、混合構成と同質構成16タイプの差、補助分析である旨の注記 |
+| `experiment_report.md` | 実験 | Trial数、有効Trial数、ケース数、完了・失敗・除外の件数と理由、構成種別ごとの集計、実行時間の実測、使用した各バージョン |
+| `rq1.md` | 実験 | 混合構成と同質構成の比較。指標ごとの対応あり比較の結果、検定結果、効果量、根拠Trialの一覧 |
+| `rq2.md` | 実験 | 同質構成16タイプの比較。指標ごとの記述統計と順位、探索的分析である旨の注記 |
+| `manipulation_check.md` | 実験 | MBTI条件が発言傾向の差として現れているかの操作確認。RQ分析とは別に出す（9.4） |
+
+`transcript.md` に役職とMBTIを書く。エージェントへの入力（公開ビュー）とは別物であり、人が結果を読むためのファイルなので、役職とタイプが見えている方が読みやすい。混同を避けるため、エージェント入力を組み立てるのは `engine/view.py` だけに限定する（4.7）。
+
+**リポジトリへ含める範囲**
+
+| 対象 | 扱い |
 | --- | --- |
-| `summary.md` | 勝敗、勝ったMBTI、人狼だったMBTI、処刑された人、最も疑われた人、最も発言した人、実行条件、所要時間 |
-| `timeline.md` | ターンごとに「`p1`（Ne / 村人）: 発言」の並び。役職は実行後の閲覧用なので明記する |
-| `series_summary.md` | 試合数、成功・失敗数、陣営別の勝率、心理機能別の勝率とMBTI候補、合計所要時間 |
-| `history_input.json` | history_modeが `none` 以外のとき、エージェントへ渡した過去情報（Want、F-39） |
+| `data/` 配下 | commitする。人物プールとパターンは実験条件の一部である |
+| ケースの `case_log.json` / `judge.v1.json` / `status.json` / `config.json` | commitする。生データの正本 |
+| ケースの `transcript.md` / `summary.md` / `result.html` | commitする |
+| Trial・実験の分析出力とCSV | commitする |
+| GitHub Pages用の `site/` | commitしない（gitignore） |
 
-`timeline.md` には役職を書く。エージェントへの入力（公開ビュー）とは別物であり、人が結果を読むためのファイルなので、役職が見えている方が読みやすい。混同を避けるため、エージェント入力を組み立てるのは `engine/view.py` だけに限定する。
-
-MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タイプとして出す。初回MVPは1人1心理機能のため、タイプは一意に決まらない。
+1 Trial（17ケース）の出力容量は段階2で実測する。1,700ケース換算で運用が厳しい場合は、`result.html` をケース単位で持たず、Trial単位のHTMLからケースデータを参照する形へ変更する。判断は実測後に行う（NF-12、14章）。
 
 ---
 
@@ -833,78 +1804,90 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 
 | 方針 | 内容 |
 | --- | --- |
-| API契約を先に固定する | 画面はAPIの上の薄い層にする。画面を作り直してもAPIとファイル形式は変えない。 |
-| ビルド工程を持たない | npm、バンドラ、フレームワークを使わない。`index.html` と `app.js` と `style.css` の3ファイル。 |
-| 状態を画面に持たない | 実行状態の正本は `runs/` 配下のファイル。画面を再読み込みしても表示が復元できる。 |
+| API契約を先に固定する | 画面はAPIの上の薄い層にする。画面を作り直してもAPIとファイル形式は変えない |
+| ビルド工程を持たない | npm、バンドラ、フレームワークを使わない。`index.html` と `app.js` と `style.css` の3ファイル |
+| 状態を画面に持たない | 実行状態の正本は `runs/` 配下のファイル。画面を再読み込みしても表示が復元できる |
+| 分析は画面で計算しない | 指標と検定は `analyze` が算出済みの値を読むだけにする。画面とCLIで数字が違う事態を作らない |
 
-この方針の効果は、Designerが見た目を調整するときに `static/` の3ファイルだけを触ればよく、Pythonを動かせなくてもレイアウトの変更ができることである。
+4番目がv2.0で追加した方針である。RQの分析値を画面のJavaScriptで計算すると、CLIの出力と画面の表示で数字が食い違う可能性が出る。算出は `analysis/` の1か所に閉じる。
 
 ### 7.2 やらないこと
 
 初回では以下を作らない。ブラッシュアップの候補として残す。
 
-- レスポンシブ対応、デザインシステム、コンポーネント分割
+- レスポンシブ対応、デザインシステム、コンポーネント分割（結果ビュー側のスマートフォン対応は7.6で扱う）
 - 発言を1つずつ流すライブ表示（要件のスコープ外）
 - 実行の中断ボタン、同時複数実行
+- 人物プールの画面上での編集
 - ログイン、権限管理
 
 ### 7.3 画面構成
 
-1画面で完結させる（NF-14）。上から順に並べる。
+実行と確認で4つのビューを持つ。1画面で完結させるv1.1の方式は、実験 → Trial → ケースの3階層になるため成立しない。
 
-| 区画 | 内容 | 対応要件 |
+| ビュー | 内容 | 対応要件 |
 | --- | --- | --- |
-| 設定パネル | 参加人数、ターン数、試合回数、役職割当方法、seed、history_mode、脳（provider / model） | F-50 |
-| 実行ボタン | 「対戦開始」。押すと設定パネルを読み取り専用にする | F-51 |
-| 状態表示 | queued / running（フェーズとターン番号）/ done / failed。失敗時は原因の種別と本文 | F-52、F-55 |
-| 結果カード | 勝敗、勝ったMBTI、人狼だったMBTI、処刑された人、最も疑われた人、最も発言した人 | F-53 |
-| 会話タイムライン | ターンごとの発言一覧。実行完了後にまとめて表示する | F-53 |
-| メトリクス表 | 心理機能ごとの集計（MBTI候補を含む） | F-53 |
-| 実行条件 | seed、人数、ターン数、history_mode、実行環境、所要時間、使用した脳 | F-54 |
-| 過去実行の一覧 | `runs/` の走査結果から選んで表示を切り替える | F-56 |
+| 実行ビュー | 実験条件の設定パネル（人物プール、パターンセット、ルールセット、Trial数、Trial範囲、議論条件と上限、各バージョン、seed、脳）、実行ボタン、状態表示、進行位置、再開ボタン | F-70〜F-72、F-76 |
+| 実験ビュー | 実験一覧と、選んだ実験のTrial一覧（状態、完了・失敗・除外）、全体分析の要約、RQ1・RQ2へのリンク | F-62、F-68 |
+| Trialビュー | 固定条件、17ケースを並べた比較表、各ケースへのリンク | F-61、F-74 |
+| ケースビュー | 8人の一覧（人物・MBTI・開始時役職・最終役職）、夜の処理、会話全文、議論前と投票前の判断の対比、投票、勝敗、Judge評価、指標値、実行条件 | F-60、F-74、F-75 |
+
+失敗時は、ケースビューに原因の種別と、その時点までの記録を表示する（F-75）。
 
 ### 7.4 API
 
 | Method | Path | 用途 | 応答 |
 | --- | --- | --- | --- |
-| `GET` | `/api/config/default` | 設定パネルの初期値 | `config.json` の既定値 |
-| `POST` | `/api/runs` | 実行を開始する | `202` `{run_id, status}` |
-| `GET` | `/api/runs` | 実行の一覧（`runs/` を走査） | `run_id`、`status`、開始時刻、勝敗の配列 |
-| `GET` | `/api/runs/{run_id}` | 状態と進捗 | `status.json` の内容 |
-| `GET` | `/api/runs/{run_id}/log` | 結果の全データ | `run_log.json` |
-| `GET` | `/api/series/{series_id}` | 連続実行の進捗と集計 | `series.json` |
+| `GET` | `/api/config/default` | 設定パネルの初期値 | `config/default.json` の既定値 |
+| `GET` | `/api/data/pools` | 選択できる人物プールの一覧 | `pool_id`、件数、構成の配列 |
+| `GET` | `/api/data/rules` | 選択できるルールセットの一覧 | `rule_set_id`、版、`status` の配列 |
+| `POST` | `/api/experiments` | 実験を開始する | `202` `{experiment_id, status}` |
+| `GET` | `/api/experiments` | 実験の一覧（`runs/` を走査） | `experiment_id`、状態、Trial数、開始時刻の配列 |
+| `GET` | `/api/experiments/{experiment_id}` | 実験の状態と進行 | 実験の `status.json` |
+| `POST` | `/api/experiments/{experiment_id}/resume` | 未完了ケースから再開する | `202` `{experiment_id, status}` |
+| `GET` | `/api/experiments/{experiment_id}/trials` | Trialの一覧と状態 | `trial_id`、`complete`、ケース状態の配列 |
+| `GET` | `/api/trials/{trial_id}` | Trialの固定条件と17ケース | `trial.json` |
+| `GET` | `/api/cases/{case_id}` | ケースの状態と進行 | ケースの `status.json` |
+| `GET` | `/api/cases/{case_id}/log` | ケースの全データ | `case_log.json` |
+| `GET` | `/api/cases/{case_id}/judge` | ケースのJudge評価 | `judge.{version}.json` |
+| `GET` | `/api/experiments/{experiment_id}/analysis/{kind}` | 分析結果（`kind` = `experiment` / `rq1` / `rq2`） | 算出済みの分析データ |
 | `GET` | `/health` | 起動確認 | `{"status": "ok"}` |
 
-一覧をディレクトリの走査で作るため、コマンドから実行した結果も画面の一覧に現れる。要件のAC-16が求める「両経路で同じ実行と出力」を、別々の登録処理を持たない形で満たしている。
+一覧をディレクトリの走査で作るため、コマンドから実行した結果も画面の一覧に現れる。要件のAC-20が求める「両経路で同じ実行と出力」を、別々の登録処理を持たない形で満たしている。
 
-### 7.5 結果ビュー（result.html）
+分析APIが算出を行わず、`analyze` が書いたファイルを読むだけである点が7.1の4番目の方針の実装上の表れである。`analyze` を実行していない実験では、分析APIは「未生成」を返す。
 
-操作画面とは別に、実行完了時に自己完結HTMLを生成する。
+### 7.5 結果ビューと分析HTML
+
+操作画面とは別に、自己完結HTMLを生成する。
 
 | 項目 | 決定 |
 | --- | --- |
-| 生成タイミング | 実行完了時および失敗時にRunnerが書き出す |
-| データの持ち方 | `run_log.json` の内容を `<script type="application/json">` としてHTML内に埋め込む |
+| 生成タイミング | ケースの `result.html` は実行完了時および失敗時にRunnerが書き出す。Trial・実験・RQのHTMLは `analyze` が書き出す |
+| データの持ち方 | 対象データを `<script type="application/json">` としてHTML内に埋め込む |
 | 外部依存 | なし。CSSもインラインに含める |
+| 階層 | `experiment.html` → `trial.html` → `result.html` を相対リンクで結ぶ |
 | 開き方 | `file://` で直接開く、またはGitHub Pages経由 |
 
-データを埋め込む理由は、`file://` から `fetch` で別ファイルを読むとブラウザに拒否されるためである。1ファイルに閉じることで、ZIPで渡してもGitHubのPagesに置いても同じ挙動になる。
+データを埋め込む理由は、`file://` から `fetch` で別ファイルを読むとブラウザに拒否されるためである。1ファイルに閉じることで、ZIPで渡してもGitHub Pagesに置いても同じ挙動になる。
+
+階層を相対リンクで結ぶ理由は、1,700ケース分のデータを1ファイルへ埋め込むと開けない大きさになるためである。上位のHTMLには集計値だけを埋め込み、会話全文はケースの `result.html` に置く。
 
 ### 7.6 GitHub Pages
 
-公開するのは結果ビューと、操作画面の見た目（実行なし）である。対戦の実行そのものは FastAPI をローカルで動かす。
+公開するのは分析結果と結果ビューである。実験の実行そのものはFastAPIをローカルで動かす。
 
 | 項目 | 決定 |
 | --- | --- |
 | URL | https://ziriss8120121.github.io/hackathon-test/ |
-| 操作画面の見た目 | https://ziriss8120121.github.io/hackathon-test/simulator.html |
-| 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
-| 中身 | `runs/` の `result.html`、`latest.html`、それを選ぶ一覧、操作画面の静的プレビュー |
+| 最新の実験 | `runs/latest.html`（最新の実験の全体分析へ転送する） |
+| 中身 | 実験の全体分析、RQ1・RQ2、Trial比較、ケース詳細、それらを選ぶ一覧 |
 | 生成 | `python -m mbti_werewolf pages` |
 | 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート |
 | 生成物 | `site/`（gitignore。リポジトリの `main` には置かない） |
+| スマートフォン | 全体分析、RQ1・RQ2、Trial比較の3種は、幅の狭い画面で表が縦に折り返る形にする |
 
-操作画面から対戦を開始できない理由は、実行がローカルの脳（Ollama / 環境変数のAPIキー）に依存するためである。見た目だけは自己完結の HTML にして、チームがブラウザだけで確認できるようにする。結果ファイルも自己完結なので、ブラウザだけで読める。
+スマートフォン対応を分析HTMLに限る理由は、要求定義書の「最新結果のHTMLリンクを電話から開ける」という要求が、結果の確認を対象にしているためである。操作画面はローカル起動が前提なのでスマートフォンから使えず、対応する意味がない。ケースの会話全文は横に長い表を持たないので、そのままでも読める。
 
 ---
 
@@ -912,15 +1895,26 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 
 ### 8.1 起動コマンド
 
+ゲーム実行、Judge評価、分析生成を別のサブコマンドにする（IF-09）。
+
 | 目的 | コマンド |
 | --- | --- |
 | 操作画面を開く | `python -m mbti_werewolf ui` |
-| 1試合を実行する | `python -m mbti_werewolf run` |
-| 100試合を実行する | `python -m mbti_werewolf run --games 100 --seed 42` |
-| 脳を切り替える | `python -m mbti_werewolf run --brain stub` |
+| 人物プールを生成する | `python -m mbti_werewolf make-pool --count 100 --seed 1001` |
+| 8人パターンを生成する | `python -m mbti_werewolf make-patterns --pool pool-001 --count 100 --seed 2001` |
+| 1 Trialを実行する | `python -m mbti_werewolf experiment --trials 1 --seed 42` |
+| Trial範囲を指定して実行する | `python -m mbti_werewolf experiment --trials 100 --trial-range 26 50 --seed 42` |
+| 中断した実験を再開する | `python -m mbti_werewolf experiment --resume e-20260901-210000` |
+| 脳を切り替える | `python -m mbti_werewolf experiment --brain ollama --judge-brain ollama` |
+| Judge評価だけを実行する | `python -m mbti_werewolf judge --experiment e-20260901-210000` |
+| 分析だけを生成する | `python -m mbti_werewolf analyze --experiment e-20260901-210000` |
 | GitHub Pages用サイトを生成する | `python -m mbti_werewolf pages` |
 
-`ui` は内部でuvicornを起動し、既定ポートで待ち受ける。単一のコマンドで画面まで到達するため、要件のF-57とNF-04を満たす。
+`ui` は内部でuvicornを起動し、既定ポートで待ち受ける。単一のコマンドで画面まで到達するため、要件のF-77とNF-04を満たす。
+
+`judge` と `analyze` を分けた効果は、Judgeの評価基準や指標定義を変えたときに、ゲームを再実行せずに評価と分析だけを回し直せることである。段階2で4時間かけて取った1 Trialのデータに対し、評価基準を何度でも試せる（F-41、F-45、NF-18）。
+
+`--trial-range` は分割実行に使う。複数のMacで同じ `--seed` と同じプール・パターンセットを指定し、範囲だけを分けると、同じ実験の一部として実行できる。`experiment_id` は台ごとに別になるため、集約は `analyze` に複数の実験IDを渡す形で行う（14章で手順を定める）。
 
 ### 8.2 設定の優先順位
 
@@ -930,81 +1924,200 @@ MBTIの4文字は、要求定義書6.5の対応表で主機能から候補2タ�
 config/default.json  →  --config で指定したファイル  →  コマンド引数  →  画面のフォーム入力
 ```
 
-画面からの実行はフォームの値をそのままAPIに渡すため、最も優先度が高い経路になる。どの経路で実行しても、確定した設定は `runs/{run_id}/config.json` に同じ形で保存される（F-20、IF-06）。
+画面からの実行はフォームの値をそのままAPIに渡すため、最も優先度が高い経路になる。どの経路で実行しても、確定した設定は実験の `experiment.json`、Trialの `trial.json`、ケースの `config.json` に同じ形で保存される（F-56、IF-08）。
+
+Trialの固定条件は生成時に1度だけ確定し、以後は設定の優先順位の対象から外れる。再開時にコマンド引数で議論条件を変えても、既存Trialの条件は変わらない。変えたい場合は新しい実験を作る。これがないと、再開のたびにTrial内の条件が変わりうる（3.5、6.6）。
 
 ### 8.3 非同期実行の方式
 
 | 項目 | 決定 | 理由 |
 | --- | --- | --- |
-| 実行の場所 | `ThreadPoolExecutor(max_workers=1)` のワーカースレッド | 推論待ちが大半を占めるためスレッドで足りる。同時実行を1本に絞る。 |
-| 同時実行 | 1本のみ。実行中の再要求は `409` を返す | ローカルLLMを並列に叩くとメモリを食い潰し、待機時間の計測も汚れる。 |
-| 進捗の共有 | `status.json` への書き込み | プロセスをまたいでも読めるため、CLI実行の進捗も画面から見える。 |
-| 応答 | `POST` は即座に `202` を返す | 画面を待たせない（NF-14）。 |
+| 実行の場所 | `ThreadPoolExecutor(max_workers=1)` のワーカースレッド | 推論待ちが大半を占めるためスレッドで足りる。同時実行を1本に絞る |
+| 同時実行 | 1本のみ。実行中の再要求は `409` を返す | ローカルLLMを並列に叩くとメモリを食い潰し、待機時間の計測も汚れる |
+| 進捗の共有 | ケース・Trial・実験の `status.json` への書き込み | プロセスをまたいでも読めるため、CLI実行の進捗も画面から見える |
+| 応答 | `POST` は即座に `202` を返す | 画面を待たせない（NF-16） |
+| ポーリング間隔 | 実験ビューは5秒、ケースビューは2秒 | 1ケースが十数分かかるため、v1.1の1秒間隔は不要に細かい |
 
-進捗をメモリ上の辞書ではなくファイルに書く判断が、CLI実行と画面の一覧を統合できている理由である。
+進捗をメモリ上の辞書ではなくファイルに書く判断が、CLI実行と画面の一覧を統合できている理由である。数日にわたる実行では、途中で画面を閉じたりPythonのプロセスが変わったりするため、状態をプロセスの外に置く必要がある。
 
 ### 8.4 長時間実行
 
 | 条件 | 推奨する経路 |
 | --- | --- |
-| 1〜10試合、条件を変えながら試す | 操作画面 |
-| 100試合以上、夜間に回す | コマンド起動（IF-07） |
+| 1ケース、条件を変えながら試す | 操作画面 |
+| 1 Trial（約4時間）、夜間に回す | コマンド起動（IF-09）。`nohup` などでシェルから切り離す |
+| 複数Trial、数日にわたって回す | コマンド起動 + `--trial-range` による分割 + 定期的な `--resume` |
 | メモリ16GB以上の実機で回す | `qwen3.5:9b` などの中型モデルも選択可 |
 | メモリに余裕がない実機で回す | `gemma3:4b`。他アプリを閉じる |
 
-夜間実行を画面から行わない理由は、ブラウザやスリープの影響を受けるためである。コマンド起動なら `nohup` などでシェルから切り離せる。
+夜間実行を画面から行わない理由は、ブラウザやスリープの影響を受けるためである。数日規模の実行では、macOSのスリープ設定を無効にし、`caffeinate` などでスリープを抑止する。Judgeと分析は実行の後で別コマンドとして回せるため、夜間はゲーム実行だけに絞る。これにより、夜間実行が途中で止まっても、取れたケースの分だけを翌日に評価・分析できる。
 
 ---
 
-## 9. 指標集計の設計
+## 9. 分析と指標算出の設計
 
-### 9.1 確実に取る指標
+要件のF-63〜F-67、4.6にあたる。指標の定義は `indicator_version` で管理し、変更したら版を上げる。既定は `v1`。
 
-コードで数える。推論を使わないため、実行のたびに同じ値になる。
+### 9.1 正確性の指標
 
-| 指標 | 算出方法 |
+「誰が人狼か」を当てられたかを測る。判定の基準は最終役職とする（4.2）。
+
+| 指標 | 単位 | 算出方法 |
+| --- | --- | --- |
+| `village_correct` | ケース | 追放者の中に `final_role` が `werewolf` の者が1人以上いれば1、いなければ0。追放者0人なら0 |
+| `pre_correct` | プレイヤー | 議論前の `suspect` の `final_role` が `werewolf` なら1。`suspect` が `"unknown"` または欠損なら `null` |
+| `final_correct` | プレイヤー | 投票前の `suspect` の `final_role` が `werewolf` なら1。欠損なら `null` |
+| `vote_correct` | プレイヤー | 実際の投票先の `final_role` が `werewolf` なら1。棄権なら `null` |
+| `village_vote_accuracy` | ケース | 人狼以外の6人について `vote_correct` の平均。`null` は除外する |
+
+`village_correct` を「追放者の中に1人以上いれば1」とする理由は、ルールv0.6が同率最多者の全員追放と追放者0人を認めているためである（4.6）。追放者が2人以上のときは、片方が人狼なら村人陣営の勝利になるため、勝敗と同じ判定になる。
+
+`pre_correct` で `"unknown"` を0にせず `null` にする理由は、判断していないことと誤って判断したことを区別するためである。9.3の判断変化では、`null` から正しい判断へ変わった場合を「修正」と別に数える。
+
+`vote_correct` で棄権を0にせず `null` にする理由も同じである。棄権は本人が投票先を選べなかった実行上の失敗であり（5.4）、誤った投票と混ぜると正確性の指標が実行品質に汚染される。
+
+`village_vote_accuracy` を人狼以外に限る理由は、人狼本人の投票は正解を知った上での行動であり、推論の正確性ではないためである。
+
+### 9.2 収束の指標
+
+疑いが特定の人物へ集まる速さと強さを測る。仮説H1が対象にする指標である。
+
+| 指標 | 単位 | 算出方法 |
+| --- | --- | --- |
+| `vote_concentration` | ケース | 最多得票数 ÷ 有効票数。棄権があった場合、分母は8より小さくなる |
+| `final_entropy` | ケース | 最終発言時点の疑念分布の正規化エントロピー。0が完全な集中、1が完全な分散 |
+| `convergence_round` | ケース | 疑念分布の最頻対象が最終的な最多得票者と一致し、以後の全時点で変わらなくなった最初のラウンド。一致しない場合、または追放者が0人の場合は `null` |
+| `stance_change_count` | プレイヤー | 公開スタンスの対象が変わった回数 |
+| `executed_count` | ケース | 追放者の人数。0なら票が散った、2以上なら同率最多だった |
+| `pass_rate` | ケース | 見送り回数 ÷ 問い合わせ回数。スキップは分子・分母から除く（4.5） |
+| `speech_count_gini` | ケース | 8人の発言回数のジニ係数。0が完全に均等、1に近いほど1人へ偏った |
+
+エントロピーの計算は、疑念分布の各対象の比率を `p_i` として `H = -Σ(p_i × log p_i) / log n` とする。`n` は分布に現れた対象の数ではなく8（参加人数）で固定する。対象の数で正規化すると、2人にしか疑いが向いていない分布と8人に分散した分布が同じ値になりうる。
+
+`convergence_round` は「早く収束したか」を表すが、正しく収束したかは表さない。要求定義書3.2のH1が収束の速さ・強さに関する仮説であり、正確性とは分けて確認する必要があるため、9.1と別の指標群にしている。
+
+`executed_count` を持つ理由は、`vote_concentration` の解釈が追放者の人数で変わるためである。追放者0人（8票が8人へ1票ずつ散った）と追放者2人（同率最多）は、どちらも収束していない状態だが値の出方が違う。RQ分析では `executed_count` の分布を併記する。
+
+`pass_rate` と `speech_count_gini` を持つ理由は、自由議論を採用した目的が「性格構成による主導、沈黙、発言量の偏り」の観察である（要求定義書A6、0.5）ためである。ルール文書v0.6の3ラウンド固定ではこの2つの指標が定数になり、意味を持たない。自由議論を選んだ判断が妥当だったかを、この2指標の分散で確認する。段階2の実測で両指標がほぼ一定だった場合、自由議論の追加コスト（1.3で呼び出しが約1.5倍）を払う根拠が弱いことになるため、3ラウンド固定へ戻す判断材料として使う。
+
+### 9.3 判断変化の指標
+
+議論前から投票直前までに判断がどう変わったかを測る。仮説H2が対象にする指標である。
+
+| 指標 | 単位 | 算出方法 |
+| --- | --- | --- |
+| `suspect_changed` | プレイヤー | 議論前と投票前の `suspect` が違えば1。議論前が `"unknown"` の場合は別に数える |
+| `confidence_delta` | プレイヤー | 投票前の `confidence` − 議論前の `confidence` |
+| `corrected` | プレイヤー | 議論前が誤り（`pre_correct` = 0）で、投票前が正しい（`final_correct` = 1）なら1 |
+| `deteriorated` | プレイヤー | 議論前が正しく、投票前が誤りなら1 |
+| `decided_from_unknown` | プレイヤー | 議論前が `"unknown"` で、投票前に対象を決めたなら1。うち正しかった件数も数える |
+| `plan_vote_match` | プレイヤー | 投票前の `planned_vote` と実際の投票先が一致すれば1 |
+| `suspect_vote_match` | プレイヤー | 投票前の `suspect` と実際の投票先が一致すれば1 |
+| `correction_rate` | ケース | `pre_correct` が0だった人のうち `corrected` の割合 |
+| `deterioration_rate` | ケース | `pre_correct` が1だった人のうち `deteriorated` の割合 |
+| `mean_confidence_delta` | ケース | 8人の `confidence_delta` の平均。欠損は除外 |
+
+`decided_from_unknown` を `corrected` と分ける理由は、議論前に判断していない状態から判断へ至ることと、誤った判断を正しい判断へ変えることが違う現象であるためである。議論前は情報がほぼないため `"unknown"` が多く出ると想定しており、両者をまとめると `correction_rate` の分母が小さくなりすぎる。
+
+`plan_vote_match` と `suspect_vote_match` を両方持つ理由は、投票前の判断が「最も疑っている相手」と「投票予定先」の2項目に分かれているためである（5.3）。3者が一致しないケースは、非公開の判断と公開の行動のずれとして分析対象になる。
+
+### 9.4 RQ分析の統計方法
+
+**対象の絞り込み**
+
+| 条件 | 扱い |
 | --- | --- |
-| `speech_count` | `turns` のうち当該プレイヤーの件数 |
-| `avg_chars` | 発言テキストの文字数の平均 |
-| `final_vote` | `votes` の `target` |
-| `win` | `result.winner` と自分の陣営の一致 |
-| `elapsed_seconds` / `ai_wait_seconds` | 計測値 |
+| Trialの17ケースすべてが `done` | 分析対象にする |
+| 1ケースでも `done` でない | そのTrialをRQ1・RQ2の対象から除外し、除外理由を記録する |
+| ケースの `valid` が false | そのTrialを除外する。無効試合（有効票0。4.6）と実行失敗の両方を含む。`invalid_reason` で区別して記録する |
+| Trial内でモデル・各バージョンが一致しない | そのTrialを除外し、警告として記録する（5.7） |
+| `schema_version` または `indicator_version` が指定と違う | 対象から除外する |
 
-### 9.2 できれば取る指標
+除外したTrialの件数と理由は `experiment_report.md` と `rq1.md` / `rq2.md` に必ず載せる。有効Trial数が分析の検出力を決めるため、これを隠すと結果の読み方を誤る。
 
-v1はルールベースで数える。AI分類はv2以降とする。
+**RQ1: 混合構成と同質構成の比較**
 
-| 指標 | v1の判定方法 |
+Trialを分析の単位にする。各Trialについて、混合構成1ケースの指標値と、同質構成16ケースの指標値の中央値をペアにする。
+
+| 項目 | 決定 |
 | --- | --- |
-| `suspicion_count` | 他プレイヤーIDへの言及と、疑いを表す語の共起 |
-| `suspected_by_count` | 他プレイヤーの疑い発言のうち、自分が対象になった件数 |
-| `question_count` | 疑問符で終わる文の数 |
-| `rebuttal_count` | 逆接の接続表現を含む文の数 |
-| `agreement_count` | 同意を表す語を含む文の数 |
-| `hypothesis_count` | 推量を表す表現の数 |
+| 単位 | Trial（対応あり） |
+| 混合側の値 | `c00` の指標値 |
+| 同質側の値 | `c01`〜`c16` の指標値の中央値 |
+| 検定 | Wilcoxon符号付順位検定（両側） |
+| 効果量 | 対応ありの順位相関 r |
+| 併記する記述統計 | 両側の中央値、四分位範囲、有効Trial数、同数ケースの割合 |
+| 補助表示 | 混合構成と同質構成16タイプそれぞれを並べた比較（Trial分析の集約） |
 
-ルールベースを選んだ理由は2つある。1つは推論の呼び出しが1試合あたり16回から増え、無料枠と待機時間を圧迫すること。もう1つは、判定基準がコードとして固定されるため、試合間の比較が成立することである。AIに分類させると判定が揺れ、心理機能ごとの差を見たいという目的とノイズが混ざる。
+同質側を中央値にした理由は、16ケースのうち1つのタイプが極端な値を出した場合に平均が引っ張られるためである。中央値と平均の両方を出力し、`rq1.md` には中央値を検定に使ったことを明記する。
 
-精度は追わない。語彙リストは `record/metrics.py` に定数として置き、判定基準を本書と同じ場所に書き残す。数値そのものではなく機能間の相対差を見る指標として扱う。
+Wilcoxon符号付順位検定を選んだ理由は3つある。1つは指標が比率や順序尺度を含み、正規分布を仮定できないこと。2つは17ケースを1組とする対応あり構造をそのまま使えること。3つは順位計算だけで実装できるため、SciPyを追加せずに済むこと（1.1）。
+
+この比較には限界がある。混合側は1ケース、同質側は16ケースの中央値なので、両側の測定誤差の大きさが違う。この点を `rq1.md` の注記に書き、混合構成を複数ケース実行する案を今後の改善候補として残す。
+
+**RQ2: 同質構成16タイプの比較**
+
+探索的分析として扱う。あらかじめ方向を決めた仮説を置かない（要求定義書3.2）。
+
+| 項目 | 決定 |
+| --- | --- |
+| 単位 | Trial × タイプ（16条件の対応あり） |
+| 主な出力 | タイプごとの中央値、四分位範囲、有効Trial数、順位 |
+| 検定 | Friedman検定（16条件の差があるかの全体検定のみ） |
+| 事後比較 | 行わない。タイプ間の個別比較は順位の提示にとどめる |
+| 注記 | 探索的分析であること、16条件の多重比較の問題を明示する |
+
+事後比較を行わない理由は、16タイプの総当たりが120通りになり、多重比較の補正をかけると有効Trial数では何も検出できないためである。順位と分布を示し、解釈はチームの議論に委ねる（要求定義書5.3のStep 6）。
+
+**操作確認（F-47）**
+
+RQ分析とは別に、MBTI条件が発言の傾向差として現れているかを確認する出力を作る。同質構成16ケースについて、タイプごとの平均発言数、平均発言文字数、`pass_rate`、Judgeのラベル分布を並べる。差が出ない場合、行動傾向文（5.2）が効いていない可能性を示す材料になる。これはRQ1・RQ2の結果とは別のファイル（`manipulation_check.md`）に出す。
+
+先行実験で使われた8タイプと、本書で新規に作る8タイプ（5.2）を分けて集計する。新規作成分だけ差が出ない場合、文面の作り方に問題があることになり、傾向文そのものを見直す判断材料になる。
+
+### 9.5 指標定義のバージョン管理
+
+| 項目 | 決定 |
+| --- | --- |
+| 保存場所 | `analysis/indicators.py` に定数と算出関数を置く。定義の文章は本書9.1〜9.3が正本 |
+| 版の記録 | 全分析出力に `indicator_version` を書く |
+| 版を上げる条件 | 指標の算出方法を変えた場合、指標を追加・削除した場合、除外条件を変えた場合 |
+| 旧版の扱い | 旧版で出した分析出力は削除せず、`indicator_version` で区別する |
+
+指標の算出はJudgeの出力と `case_log.json` から機械的に行うため、推論を呼ばない。定義を変えても `analyze` を回し直すだけで済む（NF-18）。
 
 ---
 
 ## 10. テスト設計
 
-`StubBrain` があるため、推論なしで受入基準の大半を検証できる。
+`StubBrain` があるため、推論なしで受入基準の大半を検証できる。v2.0では、長時間実行の前に潰しておくべき箇所が増えるため、テストを20本に増やす。
 
 | テスト | 内容 | 対応要件 |
 | --- | --- | --- |
-| `test_engine` | Stubで1試合が完走し、4つの出力ファイルが揃う | F-07、AC-01〜AC-03 |
-| `test_reproducibility` | 同一設定・同一seedで2回実行し、心理機能・役職・発言順が一致する | F-22、NF-05、AC-09 |
-| `test_role_isolation` | 村人視点のプロンプトに他者の `role` が出現しない | F-11 |
-| `test_brain_parse` | 前置き付き応答、JSON崩れ、生存者以外への投票を与え、試合が完走して `parse_failed` が記録される | F-17、AC-11 |
-| `test_tiebreak` | 得票が同数になる状況で試合が終了し、`tie_break` が記録される | F-06 |
-| `test_failure_record` | 通信失敗を模して、部分ログと `error.kind` が残る | F-37、NF-07、AC-11 |
-| `test_web_api` | 画面から実行するAPIの契約。条件設定、202応答、完了後の結果取得 | F-50〜F-56、AC-13〜AC-16 |
-| `test_cli` | コマンド起動と、設定だけでの条件変更（8人版を含む） | IF-07、F-23、AC-10、AC-16 |
+| `test_experiment` | Stubで1 Trialが完走し、17ケースの出力ファイルが揃う | F-10、F-50、AC-01 |
+| `test_condition_fixation` | 17ケースの条件を比較し、MBTI以外が一致する。意図的に条件をずらすと実行前に停止する | F-11、F-12、NF-06、AC-02 |
+| `test_rules` | ルールJSONの検証。役職構成の合計不一致、未知のフェーズ、未知の役職で `RuleSetError` になる | F-14、NF-11 |
+| `test_night` | 夜が占い師→人狼→怪盗の順に進む。占い師と怪盗が見るのが開始時役職である。怪盗が確認結果を得た後に交換を判断する2段階になる。交換すると怪盗に最終役職が通知され、交換された側には通知されない。3回失敗で `ability_used: false` になる | F-15、4.2、4.7 |
+| `test_discussion` | 全員が見送ると `all_pass` で終了する。上限で `max_rounds` により打ち切られる。発言回数が全員一致しない実行例が出る。連続発言の上限が効く。見送り（`skipped: false`）とスキップ（`skipped: true`）が区別される | F-20〜F-23、4.5、AC-04 |
+| `test_private_answers` | 両時点の個別判断が8人分記録される。`"unknown"` が議論前だけで許される。欠損が `null` で残る。発言と投票に `memo` が付く | F-24、F-25、5.3、AC-05 |
+| `test_vote` | 自分への投票が候補に入らない。候補外の応答が3回まで再要求される。3回失敗で棄権になり集計から抜ける | F-18、4.6、5.4 |
+| `test_execution` | 最多得票2票以上の同率最多者が全員追放される。最多得票が1票だけなら追放者0人になる。有効票0なら無効試合になり勝敗が付かない。追放者の中に人狼が1人でもいれば村人陣営の勝利になる | 4.6、F-19 |
+| `test_role_isolation` | ルール上知り得ない役職がプロンプトに出現しない。人狼は仲間を知る | F-16、4.7 |
+| `test_mbti_isolation` | 16タイプのラベル、表示名、「MBTI」「心理機能」「16タイプ」の語がプロンプトに出現しない | F-17、5.2、4.7 |
+| `test_meta_isolation` | 「実験」「シミュレーション」「AI」「エージェント」「WORLD」「構成種別」の語がプロンプトに出現しない | 4.7、Agent設定文書 §3 |
+| `test_private_answer_isolation` | 個別判断と `memo` のテキストが他者へのプロンプトに出現しない | F-26、4.7 |
+| `test_brain_parse` | 前置き付き応答、JSON崩れ、候補外の値を与え、ケースが完走して `parse_failed`、`skipped`、`abstained`、`ability_used` が区別して記録される。乱数フォールバックが起きない | F-29、5.4、AC-17 |
+| `test_judge` | Judgeが発言単位の評価を返し、`speech_id` と1対1に対応する。評価基準版を変えると別ファイルになる | F-40、F-42、F-45、AC-06 |
+| `test_stance` | 公開スタンス系列の導出。同じ人が繰り返し疑っても疑念分布の合計が参加人数を超えない | F-44、5.5 |
+| `test_resume` | 中断後の再開で、`done` のケースを再実行せず、Trialの固定条件が復元される | F-52、F-53、AC-12 |
+| `test_analysis` | 指標算出と、不完全Trialの除外。除外理由が出力に載る | F-63〜F-65、9.4 |
+| `test_failure_record` | 通信失敗を模して、部分ログと `error.kind` が残り、Trialが不完全になる | F-38、F-59、AC-17 |
+| `test_web_api` | 画面から実行するAPIの契約。条件設定、202応答、3階層の取得、再開 | F-70〜F-76、AC-19 |
+| `test_cli` | コマンド起動と、`experiment` / `judge` / `analyze` の独立実行、`--trial-range` による分割実行 | F-55、IF-09、AC-16、AC-20 |
 
-`test_reproducibility` はStubで実行する。実際のLLMは同じseedでも出力が揺れるため、再現性の対象は割当と進行順序に限る（NF-05の「脳の出力揺れは許容する」に対応）。
+`test_condition_fixation` と `test_resume` がv2.0で最も重要なテストである。前者が壊れると研究結果が無効になり、後者が壊れると数日かけた実行データを失う。どちらもStubで完全に検証できるため、実モデルでの実行前に必ず通す。
+
+再現性の対象は、人物選定、役職割当、ケース生成、議論の問い合わせ順に限る。実際のLLMは同じseedでも出力が揺れるため、発言内容は対象にしない（NF-05）。乱数フォールバックを廃止したため（5.4）、v1.1にあった「フォールバック先が同じseedで一致する」という検証項目はなくなった。
 
 CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばないため、無料枠の消費もモデルのダウンロードも発生しない。
 
@@ -1012,21 +2125,25 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 
 ## 11. 実装順序
 
-| 段階 | 作るもの | 完了条件 |
-| --- | --- | --- |
-| M0 | 設定読み込み、GameEngine、StubBrain、`run_log.json` | Stubで1試合が完走する |
-| M1 | `summary.md`、`timeline.md`、`metrics.csv`、`result.html` | AC-03、AC-04、AC-12を満たす |
-| M2 | `OllamaBrain`、プロンプトv1、心理機能の行動ルール | 実際のモデルで議論と投票が成立する |
-| M3 | CLI（`run`）、series、`series_summary.md` | 10試合の連続実行が1コマンドで終わる |
-| M4 | Web層、操作画面、`status.json` による進捗 | AC-13〜AC-15を満たす |
-| M5 | テスト一式、無料であることの確認記録 | AC-07〜AC-11を満たす |
-| M6 | `GeminiBrain`、GitHub Pages公開 | 品質比較ができる、URLで共有できる |
+段階実行（1.3）と対応させる。M0からM4までを推論なしで作り、M5で初めて実モデルを使う。
 
-コードはM0からM6まで実装済みである。M2の実機確認（Ollama 0.32.13 + `gemma3:4b`）と Gemini 無料枠での1試合（`gemini-3.1-flash-lite`）は 2026-08-15 に完了した。GitHub Pages は結果ビューの公開用で、URLは https://ziriss8120121.github.io/hackathon-test/ である。
+| 段階 | 作るもの | 完了条件 | 対応する実行段階 |
+| --- | --- | --- | --- |
+| M0 | 設定の3層化、ルールセット読み込み、人物プールとパターンの生成、`ExperimentBuilder`、条件固定の検査 | Stubなしで1 Trialの17ケースが生成され、条件検査が通る | — |
+| M1 | `CaseEngine`、`NightResolver`、`DiscussionRunner`、`VoteResolver`、`case_log.json` | Stubで1ケースが完走する | 段階0 |
+| M2 | `Runner` の3層管理、逐次保存、`status.json`、再開 | Stubで1 Trialが完走し、中断・再開が動く | 段階0 |
+| M3 | `transcript.md`、`summary.md`、`result.html`、集計CSV | ケースの出力が揃い、人が読める | 段階0 |
+| M4 | `Judge`、公開スタンス系列、`Analyzer`、Trial・実験・RQの分析出力 | Stubで分析まで通り、テスト18本が緑になる | 段階0 |
+| M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる | 段階1 |
+| M6 | Web層と4ビュー | 画面から1 Trialを実行し、3階層をたどれる | — |
+| M7 | 1 Trialと5 Trialの実測、既定値の見直し | 所要時間と出力容量の実測から本実行の規模を決められる | 段階2、段階3 |
+| M8 | `GeminiBrain` での比較、GitHub Pages公開、本実行 | 品質比較ができ、URLで共有でき、決めた規模で実行できる | 段階4 |
 
-M0からM1までを推論なしで作る理由は、出力形式と画面の判断を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M2でモデルの品質が期待に届かなかった場合も、出力とテストを作り直さずにモデルだけを差し替えて再実行できる。
+M0からM4までを推論なしで作る理由は、条件固定と再開という「壊れると取り返しがつかない」部分を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M5でモデルの品質が期待に届かなかった場合も、実行管理と分析を作り直さずにモデルとプロンプトだけを差し替えて再実行できる。
 
-要件のMVP受入基準（AC-01〜AC-05）はM1の完了時点でStubで通る。実際の観察価値が出るのはM2以降になる。
+M4でJudgeと分析までStubで通す点がv1.1と違う。Judgeと分析の不具合は、実モデルで数時間かけたデータが揃ってから見つかると、修正して再分析するまで結果が読めない。Stubのデータは議論として無意味だが、schemaと算出経路の検証には足りる。
+
+M6のWeb層をM5より後に置いた理由は、実行の主経路が長時間のコマンド実行になるためである。v1.1では画面が主経路だったが、v2.0では画面は確認用であり、実行の成立を先に確かめる。
 
 ---
 
@@ -1034,29 +2151,64 @@ M0からM1までを推論なしで作る理由は、出力形式と画面の判�
 
 | 要件 | 本書の該当箇所 |
 | --- | --- |
-| F-01〜F-08 ゲーム進行 | 3.2、3.3、4.1、4.3、4.4、4.5 |
-| F-10〜F-14 エージェント | 5.1、5.2、5.3 |
-| F-15、F-16 脳の差し替えと記録 | 1.2、2.3、5.5、6.5 |
-| F-17 想定外応答の継続 | 3.2、5.4、10章 |
-| F-18、F-39 過去ログ参照 | 6.1、6.7（Want、M6以降） |
-| F-20〜F-24 設定と再現性 | 6.3、8.2、4.4、10章 |
-| F-30〜F-39 記録・出力 | 6.5、6.6、6.7 |
-| F-50〜F-57 操作画面 | 7.3、7.4、8.1、8.3 |
-| F-40〜F-42 共有 | 6.1、7.5 |
-| NF-01、NF-02 コスト | 1.1、1.3 |
+| F-01〜F-09 人物・実験条件の管理 | 3.1、6.1、6.2、6.3 |
+| F-10〜F-13 Trial生成と条件固定 | 3.1、6.2、6.6 |
+| F-14、F-15 ルールに基づく進行 | 4.1、4.2、4.3、3.2 |
+| F-16、F-17 入力情報の制限 | 4.7、5.2 |
+| F-18、F-19 投票と勝敗 | 4.6、6.7 |
+| F-20〜F-23 自由議論 | 3.3、4.5、6.7 |
+| F-24、F-25、F-27 個別判断 | 3.2、5.3、6.7 |
+| F-26 個別判断の非開示 | 4.7 |
+| **F-28 発言ごとの非公開心理状態を取得しない** | **満たしていない。5.3で発言ごとのprivate memoを取る設計にしている。要求定義書側の見直しを提案する（下記）** |
+| F-29 想定外応答の継続 | 5.4、10章 |
+| F-30〜F-33 記録 | 6.7、6.8、6.9、6.10 |
+| F-34、F-35 時間・環境の記録 | 6.5、6.7 |
+| F-36 相互追跡 | 6.2、6.6、6.7、6.9 |
+| F-37 schemaバージョン | 0.6、6.6、6.7 |
+| F-38 失敗時の部分記録 | 3.5、6.5 |
+| F-39 生データ・評価・分析の分離 | 0.2、2.1、2.3、6.1 |
+| F-40〜F-45 Judge | 3.4、5.5、6.8 |
+| F-46 判定語の非強制 | 5.2 |
+| F-47 操作確認 | 9.4 |
+| F-50〜F-55 実行と再開 | 3.1、3.5、4.4、6.4、6.5、8.1 |
+| F-56 設定の外部指定 | 6.4、8.2 |
+| F-57 再現性 | 6.3、6.4、10章 |
+| F-58 脳の差し替え | 1.2、2.3、5.1、5.6 |
+| F-59 失敗種別の記録 | 5.4、6.5 |
+| F-60〜F-67 分析 | 3.6、6.9、6.10、9章 |
+| F-68 進行状況の一覧 | 6.5、7.3、7.4 |
+| F-69 閲覧者向け表示 | 3.7、7.5、7.6 |
+| F-70〜F-77 操作画面 | 7.3、7.4、8.1、8.3 |
+| F-78、F-79 共有と公開 | 6.10、7.6 |
+| NF-01、NF-02 コスト | 1.1、1.4 |
 | NF-03、NF-04 可搬性と導入 | 1.1、8.1、8.4 |
-| NF-05 再現性 | 4.4、10章 |
-| NF-06 性能可視化 | 6.5（`timing`） |
-| NF-07 耐障害性 | 3.4、5.4、6.4 |
-| NF-08 継続性 | 5.5、5.6 |
-| NF-09 拡張性 | 2.3、5.3、6.1 |
-| NF-10 データ量 | 6.1、6.5（`schema_version`） |
-| NF-11 秘密情報 | 1.3、5.5（環境変数から読む） |
-| NF-13 可読性 | 6.7、7.3 |
-| NF-14 操作性 | 3.1、7.3、8.3 |
-| NF-15 二経路の維持 | 0.2、3.6、7.5 |
-| IF-01〜IF-08 | 1.1、5.5、6.1、7.4、8.1 |
-| AC-01〜AC-16 | 10章、11章 |
+| NF-05 再現性 | 6.3、10章 |
+| NF-06 実験の妥当性 | 3.1、6.6、9.4、10章 |
+| NF-07 性能可視化 | 1.3、6.7（`timing`） |
+| NF-08 実行規模 | 1.3、11章 |
+| NF-09 耐障害性 | 3.5、5.4、6.5 |
+| NF-10 継続性 | 5.6、5.7 |
+| NF-11 拡張性 | 0.2、2.3、4.1、9.5 |
+| NF-12 データ量 | 6.10、14章 |
+| NF-13 秘密情報 | 1.4、5.6（環境変数から読む） |
+| NF-14 倫理 | 6.10（`summary.md` の注記）、14章 |
+| NF-15 可読性 | 6.10、7.3 |
+| NF-16 操作性 | 6.5、7.3、8.3 |
+| NF-17 二経路の維持 | 0.2、3.7、7.5 |
+| NF-18 分析の追跡性 | 0.2、2.3、3.6、9.5 |
+| IF-01〜IF-10 | 1.1、5.1、5.6、6.1、7.4、8.1 |
+| AC-01〜AC-21 | 10章、11章 |
+
+### 12.1 上位文書へ提案する変更
+
+本書の設計と上位文書が一致していない箇所が2つある。どちらも本書だけでは決められないため、変更を提案する。
+
+| 対象 | 現在の記述 | 提案 | 理由 |
+| --- | --- | --- | --- |
+| ルール文書v0.6 §1・§2-5（公開議論） | 3ラウンド固定。各ラウンドで8体全員に1回ずつ発言機会を与える | 自由議論へ差し替え、v0.7として発行する | 要求定義書FR-15・課題A6と矛盾する。性格構成による主導・沈黙・発言量の偏りを観察できない（0.5） |
+| 要求定義書FR-28 | 発言ごとの非公開心理状態は取得しない | 発言ごと・投票ごとに短い判断理由（private memo）を取得する、へ変更する | 実験計画文書v1「観察用ログ」が保存項目に挙げており、先行実験のWORLD A・Bも取得している。呼び出し回数は増えない（5.3） |
+
+どちらも承認されるまで、ルールセットは `rule_set_id: "onenight-8p-v0.7-draft"`、`status: "proposed"` のままにする（4.1）。実装は本書の設計で進められるが、正式な版として確定しない。
 
 ---
 
@@ -1064,14 +2216,27 @@ M0からM1までを推論なしで作る理由は、出力形式と画面の判�
 
 | リスク | 設計上の対処 |
 | --- | --- |
-| 小型モデルの品質が低く議論が成立しない | 出力形式をJSONに固定し、字数上限を設ける。品質が不足する場合は `GeminiBrain` で比較して判断する（1.2、5.5）。 |
-| メモリに余裕のない実機で実行が重い | 既定モデルを小型のものにし、長時間実行は余裕のある実機へ寄せる（8.4）。 |
-| Gemini無料枠の上限に達する | 自動切り替えをせず失敗として明示する。多試合はローカルで回す（1.2、5.6）。 |
-| 発言が長すぎて待機時間が伸びる | プロンプトでの字数指示と実装側の切り詰めの二重で抑える（5.4）。 |
-| 応答形式が安定せず集計できない | 段階的な解析とリトライ、最終フォールバックを持つ。`parse_failed` を残す（5.4）。 |
-| 画面の作り込みに時間を取られる | APIを先に固定し、画面は3ファイルに閉じる。作り直しても実行側を触らない（7.1）。 |
-| 出力が増えてリポジトリが重くなる | `schema_version` を持たせて古い結果を残せる形にする。stub実測で1試合あたり約32KB、100試合で約3.2MB。実LLMでは発言が長くなるため増えるが桁は変わらない。当面は出力をそのままcommitする（6.5、[無料構成の確認記録](./free-stack-check.md)）。 |
-| 性能の閾値が決まらない | `elapsed_seconds` と `ai_wait_seconds` を必ず記録し、初回実測後に上位文書へ反映する（6.5）。 |
+| 全1,700ケースの所要時間が現実的でない | 呼び出し回数を試算し、段階実行で実測して規模を決める。短縮手段を効果の大きい順に用意する（1.3、11章）。 |
+| 自由議論が終わらない、または呼び出し回数が予測できない | 1回の応答で発言意欲と発言本文を同時に返させ、`8 × max_rounds` で上限を確定させる（3.3、4.5）。 |
+| 誰も発言せず議論が成立しない | `all_pass` で終了させ、`stop_reason` を記録する。発言数0のケースを分析側で区別できるようにする（4.5、9.4）。 |
+| Trial内の条件固定が実装のミスで崩れる | 生成時に検査して実行前に停止する。固定条件を `trial.json` に書き、再開時も再計算しない（3.1、3.5、6.6）。 |
+| 途中中断でTrialの17ケースの組が崩れる | ケース単位の状態を持ち、未完了から再開する。不完全Trialを分析から除外し、件数と理由を出力する（3.5、4.4、9.4）。 |
+| 無料枠の上限に達する | 自動切り替えをせず失敗として明示する。本実行はローカルで回す（1.2、5.7）。 |
+| Trial内で脳が切り替わり条件が崩れる | Trial内のモデル不一致を検出して警告し、そのTrialを除外する（5.7、9.4）。 |
+| Judgeの評価が変わると分析をやり直せない | Judgeをゲーム実行と分離し、版ごとに別ファイルで保存する。旧評価を残す（3.4、5.5、6.8）。 |
+| 行動傾向文がJudgeの判定語を強制してしまう | 傾向部には判断の仕方だけを書き、発言の仕方を指示しない。実装時に判定語の一致を確認する（5.2）。 |
+| モデルの学習済みMBTI像で振る舞ってしまう | プロンプトにタイプ名・表示名・「MBTI」「心理機能」の語を書かず、1文の行動傾向だけを渡す。テストで語の不在を検査する（5.2、4.7、10章）。 |
+| エージェントが自分を実験参加者だと認識してしまう | AI・実験・シミュレーション・WORLDに関する語をプロンプトへ入れず、テストで検査する（4.7、10章）。 |
+| 小型モデルが自信度や強度の値を安定して返さない | 尺度を5段階・3段階に絞り、`choices` で検証する（5.3、5.5）。 |
+| 応答形式が安定せず集計できない | 段階的な解析と最大3回の再送を持ち、失敗の扱いをフェーズごとに定める。`parse_failed`、`skipped`、`abstained`、`ability_used` を区別して残す（5.4）。 |
+| 判断を測る項目に乱数の値が混ざる | 乱数フォールバックを全廃し、失敗は欠損・棄権・能力未使用として残して分析で除外する（5.4、9.1、9.3）。 |
+| 疑念分布が発言量に引きずられる | 各人1件の最新スタンスへ正規化して分布を作る（5.5）。 |
+| 画面とCLIで分析の数字が食い違う | 算出を `analysis/` の1か所に閉じ、画面と分析APIは算出済みの値を読むだけにする（7.1、7.4）。 |
+| 出力が増えてリポジトリが重くなる | 1 Trialで容量を実測し、共有対象と除外対象を分ける。厳しい場合はケース単位のHTMLをやめる（6.10）。 |
+| ルール文書と要求定義書が矛盾したまま実装が進む | 差分を0.5に一覧化し、ルールJSONの `deviation_from_source` に残す。ルール文書側の改訂を提案し、承認まで `status: "proposed"` にする（0.5、4.1、4.2）。 |
+| 自由議論の追加コストに見合う観察が得られない | `pass_rate` と `speech_count_gini` を指標に持ち、段階2で分散を確認する。差が出なければ3ラウンド固定へ戻す判断材料にする（1.3、9.2）。 |
+| 有効Trial数が少なく差が検出できない | 除外Trialの件数と理由を分析出力に必ず載せ、検出力の限界を明示する。RQ2は事後比較を行わない（9.4）。 |
+| 混合1ケースと同質16ケースの測定誤差が違う | 検定に中央値を使い、限界を注記する。混合を複数ケース実行する案を改善候補に残す（9.4）。 |
 
 ---
 
@@ -1079,10 +2244,17 @@ M0からM1までを推論なしで作る理由は、出力形式と画面の判�
 
 | 項目 | 決める時期 |
 | --- | --- |
-| ~~依存パッケージの固定バージョン~~ | 確定済み。`requirements.txt` と[無料構成の確認記録](./free-stack-check.md)に記載 |
-| ~~プロンプトv1の具体的な文面~~ | 確定済み。`agents/prompts/v1/` に4ファイルとして配置 |
-| ~~指標判定の語彙リスト~~ | 確定済み。`record/metrics.py` の定数として配置 |
-| ~~使用するモデルの最終選定と利用規約の確認記録~~ | 確定済み。`gemma3:4b`。規約と確認日は[無料構成の確認記録](./free-stack-check.md)の4節 |
-| ~~性能の閾値~~ | 当面の目安は1試合10分以内。実測（約2分50秒）は同記録の6節 |
-| 8人版・16人版の役職構成 | MVPの結果を見てから決める |
+| 人物プールのMBTI・年齢・性別の人数構成と根拠資料 | 実行前にBizが決定する。本書は保存形式だけを定めた（6.3） |
+| 実験で固定するエージェント用モデルとJudge用モデル | 段階1・段階2の品質確認後に決定する |
+| 実際に実行するTrial数 | 段階3の実測後に上位文書へ反映する |
+| `max_rounds`、`max_speeches`、`max_total_chars`、`judge_batch_size` の最終値 | 段階2の実測後に見直す。本書の既定値は試算から置いた暫定値（1.3、4.5） |
+| ルール文書v0.7（公開議論を自由議論へ差し替え）の承認 | チームで判断する。承認までルールセットは `status: "proposed"` のまま（0.5、4.1） |
+| 要求定義書FR-28（発言ごとの非公開心理状態を取得しない）の見直し | Bizが判断する。本書は発言ごとのprivate memoを取る設計にしている（5.3） |
+| 新規作成する8タイプの行動傾向文の妥当性 | 段階1で先行実験の8タイプと並べて確認する（5.2） |
+| 1ケースの所要時間の許容上限 | 段階2の実測後に上位文書へ反映する |
+| 1,700ケースの出力容量とリポジトリ運用方針 | 段階2で1 Trialを実測して判断する（6.10） |
+| 複数Macへの分散実行の手順 | 段階3で必要と判断した場合に定める（1.3） |
+| Judgeの評価が妥当かの検証方法 | 段階2のデータを人が読んで判断する。必要なら評価基準を `v2` にする |
+| RQ1・RQ2の統計結果の解釈 | チーム3人で議論する。本書は算出方法までを定める（9.4） |
 | 画面のレイアウトと配色 | 動くものを見てからDesignerと調整する |
+| 倫理の注記の文面 | 出力に載せる文面をチームで確認する（NF-14） |
