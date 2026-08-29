@@ -1,7 +1,7 @@
 """実験 → Trial → ケースの実行管理（設計書3.5、6.1、6.5）。
 
 ケースを1件終えるごとにファイルへ書き出す。1,700ケースの実行は途中で止まる前提な
-ので、止まった時点までの結果が必ず残る形にしている。分析（M4）はまだ入っていない。
+ので、止まった時点までの結果が必ず残る形にしている。
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ from .record.result_view import (
 )
 from .record.summary import write_summary
 from .record.metrics_csv import write_experiment_metrics, write_trial_metrics
+from .record.timing import seconds_per_call, write_timing_note
 from .record.transcript import write_transcript
 
 STATUS_PENDING = "pending"
@@ -74,6 +75,7 @@ class CaseResult:
     valid: bool = False
     inference_calls: int = 0
     elapsed_seconds: float = 0.0
+    ai_wait_seconds: float = 0.0
     attempt: int = 1
     error: Optional[Dict[str, str]] = None
 
@@ -286,6 +288,14 @@ class ExperimentRunner:
         )
         summary = self._build_summary(experiment_id, exp_dir, totals, resumed)
         write_json(exp_dir / "experiment_summary.json", summary)
+        write_timing_note(
+            exp_dir / "timing.md",
+            summary,
+            {
+                "provider": self.config.brain.provider,
+                "model": self.config.brain.model,
+            },
+        )
         self._write_experiment_status(
             exp_dir, experiment_id, STATUS_DONE, totals, started_at
         )
@@ -463,6 +473,7 @@ class ExperimentRunner:
             valid=result["valid"],
             inference_calls=outcome.inference_calls,
             elapsed_seconds=outcome.elapsed_seconds,
+            ai_wait_seconds=outcome.ai_wait_seconds,
             attempt=attempt,
         )
 
@@ -560,6 +571,9 @@ class ExperimentRunner:
         self, experiment_id: str, exp_dir: Path, totals: RunTotals, resumed: bool
     ) -> Dict[str, Any]:
         ran = [r for r in totals.results if r.status != STATUS_SKIPPED]
+        calls = sum(r.inference_calls for r in ran)
+        wait = round(sum(r.ai_wait_seconds for r in ran), 3)
+        elapsed = round(sum(r.elapsed_seconds for r in ran), 3)
         return {
             "experiment_id": experiment_id,
             "directory": str(exp_dir),
@@ -570,8 +584,10 @@ class ExperimentRunner:
             "failed_count": totals.case_failed,
             "invalid_count": sum(1 for r in ran if r.status == STATUS_DONE and not r.valid),
             "trial_complete_count": totals.trial_complete,
-            "inference_calls": sum(r.inference_calls for r in ran),
-            "elapsed_seconds": round(sum(r.elapsed_seconds for r in ran), 3),
+            "inference_calls": calls,
+            "elapsed_seconds": elapsed,
+            "ai_wait_seconds": wait,
+            "seconds_per_call": seconds_per_call(wait, calls),
             "cases": [
                 {
                     "case_id": r.case_id,

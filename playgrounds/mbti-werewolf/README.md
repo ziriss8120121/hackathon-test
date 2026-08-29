@@ -51,7 +51,7 @@ Trial内の17ケースは、人物・年齢・性別・役職・seedをすべて
 ```bash
 python -m mbti_werewolf experiment                                   # 1 Trial（17ケース）
 python -m mbti_werewolf experiment --dry-run                         # 生成と条件固定の検査だけ
-python -m mbti_werewolf experiment --cases c00 --brain ollama --model gemma3:4b   # 1ケースの実測
+python -m mbti_werewolf experiment --cases c00 --brain ollama            # 1ケースの実測（モデル省略時は gemma3:4b）
 python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
 python -m mbti_werewolf experiment --trial-range 3-7                 # 分割実行
 python -m mbti_werewolf experiment --resume e-20260901-210000        # 止まった実験を続ける
@@ -128,13 +128,15 @@ JudgeがまだないTrialはRQ1・RQ2から除外し、除外理由をレポー�
 `stub` はLLMを呼ばず、決まった形の応答を返す。議論としては無意味だが、待機時間ゼロで
 1ケースが完走するため、出力形式の確認に使える。
 
-Ollamaを使う場合の準備。
+Ollamaを使う場合の準備。`--model` を省略すると `gemma3:4b` になる。実行前に接続と
+モデルの有無を確認し、無ければ警告を出す（実験は止めない）。1ケースが終わると
+`timing.md` に所要時間が残る。
 
 ```bash
 brew install ollama
 ollama serve          # 別のターミナルで動かしておく
 ollama pull gemma3:4b
-python -m mbti_werewolf experiment --cases c00 --brain ollama --model gemma3:4b
+python -m mbti_werewolf experiment --cases c00 --brain ollama
 ```
 
 Geminiの無料枠は分間・1日の上限がある。上限に達した場合は自動で切り替えず、
@@ -240,6 +242,7 @@ python -m pytest
 | `test_stance.py` | 疑念分布が発言量に引きずられない |
 | `test_analysis.py` | 不完全Trialの除外、Judge列の充填、RQ1/RQ2の注記 |
 | `test_cli.py` | コマンド起動と各サブコマンド |
+| `test_ollama.py` | Ollamaの失敗分類。実モデルは呼ばない |
 
 ---
 
@@ -258,9 +261,7 @@ src/mbti_werewolf/
   engine/         ゲーム進行（rules / case / roles / night / discussion / vote / view）
   agents/         プロンプト組み立てと応答の解釈（agent / persona / mbti_types / functions）
   brains/         推論手段（base / stub / ollama / gemini / factory）
-  record/         出力の生成（case_log / transcript / summary / case_metrics / metrics_csv / result_view / pages）
+  record/         出力の生成（case_log / transcript / summary / case_metrics / metrics_csv / result_view / pages / timing）
   judge/          発言の事後評価（judge / stance / criteria）
   analysis/       指標・検定・レポート（indicators / stats / analyzer）
 ```
-
-`analysis/` は次に追加する。指標の集計、RQ分析、Trialと実験のレポートがここに入る。

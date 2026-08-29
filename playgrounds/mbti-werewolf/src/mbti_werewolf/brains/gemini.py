@@ -36,6 +36,21 @@ class GeminiBrain(BaseBrain):
         self._api_key = os.environ.get(API_KEY_ENV, "").strip()
         self._last_call_at = 0.0
 
+    def probe(self) -> Dict[str, Any]:
+        """実行前の確認。無料枠を消費しないよう、キーの有無だけを見る。"""
+
+        if not self._api_key:
+            return {
+                "ok": False,
+                "kind": "unreachable",
+                "message": "環境変数 {} が設定されていません。".format(API_KEY_ENV),
+            }
+        return {
+            "ok": True,
+            "kind": None,
+            "message": "Gemini の APIキーは設定されています。接続確認は初回呼び出しで行います。",
+        }
+
     def _complete(self, system: str, user: str, temperature: float) -> str:
         if not self._api_key:
             raise BrainError(

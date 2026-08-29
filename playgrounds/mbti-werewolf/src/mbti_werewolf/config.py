@@ -22,6 +22,13 @@ ENV_RUNS_DIR = "MBTI_WEREWOLF_RUNS_DIR"
 
 KNOWN_PROVIDERS = ("stub", "ollama", "gemini")
 
+#: `--brain ollama` のようにモデル名を省略したときに埋める値（設計書1.2、8.1）。
+#: stub はモデルを使わないので空のままにする。
+DEFAULT_BRAIN_MODELS = {
+    "ollama": "gemma3:4b",
+    "gemini": "gemini-3.1-flash-lite",
+}
+
 
 class ConfigError(Exception):
     """実験条件が不正である。"""
@@ -70,6 +77,16 @@ class BrainConfig:
     temperature: float = 0.8
     timeout_seconds: int = 120
     max_transport_retries: int = 3
+
+    def apply_provider_defaults(self) -> None:
+        """provider に応じた既定モデルを空欄へ入れる。
+
+        設計書8.1の `experiment --cases c00 --brain ollama` は `--model` を書かない。
+        空のまま検証すると実行前に止まり、1ケース実測の入口が使えない。
+        """
+
+        if not self.model:
+            self.model = DEFAULT_BRAIN_MODELS.get(self.provider, "")
 
     def validate(self, label: str) -> None:
         if self.provider not in KNOWN_PROVIDERS:
@@ -202,6 +219,8 @@ def from_dict(raw: Dict[str, Any]) -> ExperimentConfig:
     config = ExperimentConfig(
         discussion=discussion, brain=brain, judge_brain=judge_brain, **data
     )
+    config.brain.apply_provider_defaults()
+    config.judge_brain.apply_provider_defaults()
     if not config.machine_name:
         config.machine_name = os.environ.get(ENV_MACHINE, "")
     config.validate()

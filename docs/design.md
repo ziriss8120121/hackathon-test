@@ -6,7 +6,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 
 | 項目 | 内容 |
 | --- | --- |
-| バージョン | 2.10 |
+| バージョン | 2.11 |
 | 最終更新 | 2026-08-29 |
 | 作成者 | ゆうじろう（Engineer） |
 | 上位文書 | [要件定義書](./system-requirements.md) v2.1 / [要求定義書](./requirements.md) v2.2-draft |
@@ -25,6 +25,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 | 2.8の変更点 | M3の最後の作業であるv1の削除を実施し、0.4の移行期間を終了した。実施内容を0.4へ記録し、6.1のファイル構成を実装に合わせた。0.4で「削除せず残す」としていた3つを削除へ変更した。(1) `engine/tiebreak.py` は、ルールv0.7が同数得票者の全員を追放するため呼び出し元がない。残すと「使わないが消さないコード」の判断根拠が本書だけになり、次に読む人が誤って呼ぶ余地が残る（4.6）。(2) `agents/prompts/v1/` は、v1の4人版プロンプトであり、v2.0のプロンプトと入力の形が違うため版の比較対象にならない。比較の対象になるのは `prompts/v2/` 以降である（F-07の解釈を変更）。(3) `web/` は、v1のrun単位の1画面構成のままではv2.0の3階層を表示できず、M6で作り直すまで動かせない。`requirements.txt` から `fastapi` と `uvicorn` も外した。あわせて `engine/game.py` を `engine/case.py` の名前で確定し（6.1）、`agents/functions.py` は実行経路から外れた参照用として残すことを明記した。CLIから `run` と `ui` を削除した（8.1）。10章のテスト一覧から `test_failure_record`（内容を `test_resume` へ統合）と `test_web_api`（M6へ移動）を外し、19ファイルとした。テスト関数は269本が緑である。あわせて `config/default.json` を削除した。v2.0の既定値は `config.py` が持ち、この設定ファイルは読み込まれていなかった（8.2）。指標の定義と出力形式は変わっていない。 |
 | 2.9の変更点 | M4を2つに分け、前半のM4a（Judgeと公開スタンス系列）を実装した。実装で決めた4点を反映した。(1) `Request` に `subjects` を足した。Judgeは1回の応答で発言バッチの全件に答えるため、「1件ずつ答える対象」を渡す場所が要る。`choices`（値が限られる項目の候補）とは役割が違い、兼ねさせると `speech_id` と参加者IDが同じ枠に混ざる（5.1）。(2) スタンスを含まない発言では、その発言者の直前のスタンスを残す。スタンスは「現在の立場」という状態であり、質問や役職主張のように立場を示さない発言は、直前の立場の取り下げにあたらない（5.5）。(3) 対象がないスタンスと、発言者自身へ向いたスタンスは落とす。どちらも各人1件の正規化に使えず、疑念分布の対象にならない（5.5）。(4) バッチの `speech_id` の対応が取れない応答は最大3回まで送り直し、取れた分は保持する。上限まで対応が取れなかった発言は評価を捏造せず `parse_failed: true` で残す（5.5、6.8）。あわせて `judge` サブコマンドと `--judge-brain` / `--judge-model` を追加し（8.1）、10章のテストへ `test_judge`・`test_stance` を追加した。テスト関数は323本が緑である。指標の定義と `case_log.json` の形式は変わっていない。M4bの分析出力は未実装である（11章）。 |
 | 2.10の変更点 | M4b（Analyzerと分析出力）を実装した。実装で決めた4点を反映した。(1) 分析HTMLは集計JSONを埋め込みつつ、同じ内容をPython側で表としても書き出す。7.5の「JSONを埋め込む」を守りつつ、JavaScriptが動かない環境でも読めるようにするためである。(2) Wilcoxon符号付順位検定は組数が20以下なら符号の全列挙、それを超えたら正規近似にする。SciPyを足さない（1.1、9.4）。(3) Judge評価がないTrialはRQ1・RQ2から除外する。17ケースが揃っていても、疑念分布が無い状態で収束の指標を比較すると空欄と値が混ざるためである。(4) `analyze` の後で `latest.html` を実験の `experiment.html` へ向け直す。実行中は直近ケースの `result.html` を指したままにする（7.6）。テスト関数は341本が緑である。 |
+| 2.11の変更点 | M5（Ollamaでの実行と1ケース実測）を実装した。PersonaBuilderとプロンプトv2はM1で入っていた。実装で決めた4点を反映した。(1) `--brain ollama` で `--model` を省略すると `gemma3:4b` を使う。設計書8.1の1ケース実測コマンドが、モデル名なしでも実行前に止まらないようにするためである（1.2、6.4、8.1）。Geminiも同様に `gemini-3.1-flash-lite` を埋める。(2) 実行前に `/api/tags` で接続とモデルの有無を確認する。失敗しても実験は止めず、警告を出してケースを `unreachable` などで記録する（3.5、5.6）。(3) 呼び出しに `keep_alive: 30m` を付ける。1ケースは十数分かかるため、Ollama既定の5分だと途中でモデルがアンロードされる。(4) 実験ディレクトリに `timing.md` を書き、1呼び出しあたりの待機秒を設計書1.3の試算（約10.6秒）と並べる。`experiment_summary.json` に `ai_wait_seconds` と `seconds_per_call` を足した。CIのテストはStubとHTTPの差し替えだけを使い、実モデルは呼ばない（10章）。 |
 
 ### 0.1 本書の位置づけ
 
@@ -1267,7 +1268,7 @@ Judgeの出力から、`speech_id` の順に次の処理を行う。
 | 実装 | 通信先 | 備考 |
 | --- | --- | --- |
 | `CaseStubBrain` | なし | `tag` ごとの固定テンプレートに乱数で語を差し込む。`speak` は一定間隔で見送りを返し、発言回数が偏る実行例を作る。待機時間は0 |
-| `OllamaBrain` | `http://localhost:11434/api/generate` | モデル名は設定値。Ollamaが起動していない場合は `unreachable` を返す |
+| `OllamaBrain` | `http://localhost:11434/api/generate` | モデル名を省略すると `gemma3:4b`。起動していない場合は `unreachable`。実行前に `/api/tags` で接続とモデルの有無を確認する。呼び出しは `format: json` と `keep_alive: 30m` を付ける |
 | `GeminiBrain` | Gemini APIのHTTPエンドポイント | APIキーは環境変数 `GEMINI_API_KEY` から読む。未設定なら選択できない。429は `rate_limited` に分類する |
 
 `CaseStubBrain` の `speak` に見送りを混ぜる点は、v2.0で追加した挙動である。全員が毎回発言するStubでは、発言回数の偏りを扱う分析コード（9.2、9.3）と、`all_pass` による終了条件（4.5）をテストできない。
@@ -1368,6 +1369,7 @@ playgrounds/mbti-werewolf/
       metrics_csv.py              # 集計CSVの列と書き出し（6.9）
       result_view.py              # 移行期間は case_result_view.py（0.4）
       pages.py
+      timing.py                   # 1.3の試算と実測を並べる記録
     web/                          # M6で作り直す。M3でv1を削除した（0.4）
   tests/
     conftest.py                   # ScriptedBrain とケース実行のfixture
@@ -1390,6 +1392,7 @@ playgrounds/mbti-werewolf/
     test_run_outputs.py
     test_analysis.py
     test_cli.py
+    test_ollama.py                # HTTPを差し替えて失敗分類を確かめる。実モデルは呼ばない
 
 runs/
   latest.html                     # 最新結果への転送（7.6）
@@ -1397,6 +1400,7 @@ runs/
     experiment.json
     persons.json                  # 使用したプールのスナップショット
     experiment_metrics.csv         # 1行 = 1ケース
+    timing.md                     # 1ケース実測。1呼び出しあたりの秒数と1.3の試算
     speech_labels.csv              # 1行 = 1発言
     experiment_report.md
     experiment.html
@@ -1592,7 +1596,7 @@ runs/
 
 `max_consecutive_speeches` をこの一覧に入れているのは、4.5で「無効化した実行も段階2で試して偏りの出方を比較する」と決めているためである。通せないままだと、設定ファイルに `null` と書いても既定値の2が使われ、比較したい条件が実行できない。
 
-既定の `provider` は `stub` である。Ollamaが未導入でもclone直後に1 Trialが完走し、出力と分析を確認できる。実際の観察は `--brain ollama --judge-brain ollama` で行う。
+既定の `provider` は `stub` である。Ollamaが未導入でもclone直後に1 Trialが完走し、出力と分析を確認できる。実際の観察は `--brain ollama --judge-brain ollama` で行う。`--brain ollama` で `--model` を省略すると `gemma3:4b` を使う。`--brain gemini` で省略すると `gemini-3.1-flash-lite` を使う。stub の `model` は空のままにする。
 
 ケースごとの `config.json` は、上記からそのケースに関係する値だけを確定した形で持つ。どの経路で実行しても同じ形で保存される（F-56、IF-08）。
 
@@ -2197,7 +2201,7 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 
 `judge` は既定で、指定した版の評価がまだないケースだけを見る。中断しても評価済みの分をやり直さないため、`experiment` の `--resume` にあたる引数を持たない。同じ版で評価をやり直したいときだけ `--force` を使う。
 
-`experiment` と `judge` の両方に `--judge-brain` と `--judge-model` がある。`experiment` 側は実行時点のJudge設定を `config.json` へ残すためのもので、評価そのものは行わない。指定しなければ `--brain` と同じ経路になる。実測では両方を同じモデルで回すことが多く、毎回2つ指定させると取り違えが起きるためである。
+`experiment` と `judge` の両方に `--judge-brain` と `--judge-model` がある。`experiment` 側は実行時点のJudge設定を `config.json` へ残すためのもので、評価そのものは行わない。指定しなければ `--brain` と同じ経路になる。実測では両方を同じモデルで回すことが多く、毎回2つ指定させると取り違えが起きるためである。`--brain ollama` で `--model` を省略したときは `gemma3:4b` を使う。
 
 `--trial-range` は分割実行に使う。複数のMacで同じ `--seed` と同じプール・パターンセットを指定し、範囲だけを分けると、同じ実験の一部として実行できる。`experiment_id` は台ごとに別になるため、集約は `analyze` に複数の実験IDを渡す形で行う（14章で手順を定める）。
 
@@ -2407,9 +2411,9 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 
 ## 10. テスト設計
 
-`CaseStubBrain` があるため、推論なしで受入基準の大半を検証できる。下表は19ファイルである。M4bまでにすべて揃った。
+`CaseStubBrain` があるため、推論なしで受入基準の大半を検証できる。下表は20ファイルである。M5までにすべて揃った。
 
-下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。M4bの時点で、テスト関数は341本が緑である。
+下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。M5の時点で、テスト関数は356本が緑である。実Ollamaへの接続確認1本は、サーバーが無い環境では skip する。
 
 | v2.0のファイル名 | 事情 |
 | --- | --- |
@@ -2436,7 +2440,8 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 | `test_stance` | 公開スタンス系列の導出。同じ人が繰り返し疑っても疑念分布の合計が参加人数を超えない。スタンスのない発言で直前の立場が残る。エントロピーを対象の数ではなく参加人数で正規化する | F-44、5.5、9.2 |
 | `test_resume` | 中断後の再開で、`done` のケースを再実行せず、Trialの固定条件が復元される。途中で止めて再開した17ケースの記録が、一気に実行した記録と一致する。通信失敗を模して、`error.kind` が種別ごとに残りTrialが不完全になる。失敗したケースは既定で1回作り直して再実行し、再開の対象にも残る。再開時の設定がTrialの記録と違う場合はTrialの記録が優先され、違いが表示される。ルール版が違う実験は再開しない。`--cases` で対象を絞れる | F-38、F-51〜F-53、F-59、5.7、6.5、AC-12、AC-17 |
 | `test_analysis` | WilcoxonとFriedmanがSciPyなしで動く。不完全TrialとJudge未評価のTrialがRQから除外され、除外理由が `experiment_report.md` と `rq1.md` に載る。`analyze` 後に `final_entropy` が埋まり、`speech_labels.csv` の複数値が縦棒区切りになる。RQ1は確認的/探索的の注記を出し、RQ2は探索的である旨と事後比較をしない旨を出す。`latest.html` が `experiment.html` を指す | F-63〜F-65、6.9、7.6、9.4 |
-| `test_cli` | 各サブコマンドの起動。`--dry-run` が推論を呼ばず条件固定の検査まで通り、出力を作らない。`--cases` で1ケースだけ実測できる。`--trial-range` による分割実行。不正な範囲指定で終了コード2になる | F-55、IF-09、AC-16、AC-20 |
+| `test_cli` | 各サブコマンドの起動。`--dry-run` が推論を呼ばず条件固定の検査まで通り、出力を作らない。`--cases` で1ケースだけ実測できる。`--trial-range` による分割実行。不正な範囲指定で終了コード2になる。`--brain ollama` でモデル省略時に `gemma3:4b` が入る | F-55、IF-09、AC-16、AC-20 |
+| `test_ollama` | OllamaのHTTPを差し替え、`unreachable` / `timeout` / `rate_limited` / モデルなしを分類する。`format: json` と `keep_alive` を付ける。APIキーなしで応答を受け取れる。実行前の `/api/tags` 確認。実サーバーがあるときだけ probe が成功することを見る（無いときは skip） | 5.6、1.4、NF-01、AC-07 |
 
 画面のAPIを検査する `test_web_api` は、上表から外してM6へ移した。v1の画面をM3で削除したため、検査する対象が存在しない期間ができる（0.4）。M6で画面を作り直したときに上表へ戻す。
 
@@ -2460,7 +2465,7 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M3 | `transcript.md`、`summary.md`、`result.html`と最新結果リンク、`trial_metrics.csv`、`experiment_metrics.csv`、v1の削除と5モジュールの改名 | ケースの出力が揃い、スマホから結果を開ける | 段階0 |
 | M4a | `Judge`、公開スタンス系列、`judge.v1.json`、`judge` サブコマンド | Stubで1 Trialの17ケースを評価でき、`test_judge`・`test_stance` が緑になる | 段階0 |
 | M4b | `Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列、`latest.html` の向け直し | Stubで分析まで通り、10章のテスト19ファイルが揃って緑になる | 段階0 |
-| M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる | 段階1 |
+| M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる。`--brain ollama` がモデル省略で通り、接続確認と `timing.md` が残る | 段階1 |
 | M6 | Web層と4ビュー、`test_web_api` | 画面から1 Trialを実行し、3階層をたどれる | — |
 | M7 | 1 Trialと5 Trialの実測、既定値の見直し | 所要時間と出力容量の実測から本実行の規模を決められる | 段階2、段階3 |
 | M8 | `GeminiBrain` での比較、GitHub Pages公開、本実行 | 品質比較ができ、URLで共有でき、決めた規模で実行できる | 段階4 |
@@ -2472,6 +2477,8 @@ M4でJudgeと分析までStubで通す点がv1.1と違う。Judgeと分析の不
 M4をa・bに分けたのは、分析の入力である `judge.v1.json` の形を先に見て確かめるためである。Judgeの出力形式を決め切らないまま分析を書くと、`stance_series` の持ち方を変えたときに分析側もまとめて作り直すことになる。M4bで `analyze` が入り、集計CSVのJudge依存2列はJudgeがあるケースだけ埋まる（6.9）。
 
 M6のWeb層をM5より後に置いた理由は、実行の主経路が長時間のコマンド実行になるためである。v1.1では画面が主経路だったが、v2.0では画面は確認用であり、実行の成立を先に確かめる。
+
+M5の PersonaBuilder とプロンプトv2はM1で入っている。M5で足したのは、Ollamaのモデル名の既定値、実行前の接続確認、長時間実行向けの `keep_alive`、所要時間の記録である。実モデルでの1ケース完走は、Ollamaが起動しているマシンで `experiment --cases c00 --brain ollama` を実行して確認する。CIでは実モデルを呼ばない。
 
 ---
 

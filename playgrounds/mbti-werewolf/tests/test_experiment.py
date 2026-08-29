@@ -102,6 +102,26 @@ def test_unknown_config_key_is_rejected():
     assert "未知の設定項目" in str(exc.value)
 
 
+def test_ollama_without_model_uses_the_default():
+    """`--brain ollama` は `--model` なしで通る（設計書8.1）。"""
+
+    config = ec.load_config(
+        overrides={"brain": {"provider": "ollama"}, "machine_name": "test"}
+    )
+
+    assert config.brain.provider == "ollama"
+    assert config.brain.model == ec.DEFAULT_BRAIN_MODELS["ollama"]
+    assert config.judge_brain.provider == "stub"
+
+
+def test_gemini_without_model_uses_the_default():
+    config = ec.load_config(
+        overrides={"brain": {"provider": "gemini"}, "machine_name": "test"}
+    )
+
+    assert config.brain.model == ec.DEFAULT_BRAIN_MODELS["gemini"]
+
+
 @pytest.mark.parametrize(
     "overrides,expected",
     [
@@ -111,7 +131,6 @@ def test_unknown_config_key_is_rejected():
         ({"discussion": {"max_rounds": 0}}, "discussion.max_rounds"),
         ({"discussion": {"max_consecutive_speeches": 0}}, "max_consecutive_speeches"),
         ({"brain": {"provider": "openai"}}, "未知の値"),
-        ({"brain": {"provider": "ollama"}}, "model は provider"),
         ({"brain": {"temperature": 3.0}}, "temperature"),
     ],
 )

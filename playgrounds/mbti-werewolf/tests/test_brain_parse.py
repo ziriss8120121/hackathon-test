@@ -247,6 +247,8 @@ def test_judge_brain_is_built_from_the_judge_settings(v2_config):
     assert agent_brain.model == "qwen2.5:3b"
     assert judge_brain.model == "qwen2.5:7b"
     assert judge_brain.brain_config.temperature == 0.2
+    assert agent_brain.brain_config.max_output_chars == 400
+    assert judge_brain.brain_config.max_output_chars == 800
 
 
 def test_case_stub_answers_every_phase(v2_config, build_trial):

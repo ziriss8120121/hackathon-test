@@ -57,6 +57,9 @@ def test_single_case_run_writes_every_output_file(tmp_path, capsys):
     for name in ("config.json", "status.json", "transcript.md", "summary.md", "result.html"):
         assert (case_dir / name).is_file(), name
     assert (tmp_path / "latest.html").is_file()
+    timing = (_experiment_dir(tmp_path) / "timing.md").read_text(encoding="utf-8")
+    assert "実行時間の実測" in timing
+    assert "推論呼び出し" in timing
 
 
 def test_trial_range_and_seed_are_accepted(tmp_path, capsys):
@@ -210,6 +213,18 @@ def test_analyze_missing_experiment_exits_2(tmp_path, capsys):
 
     assert code == 2
     assert "分析エラー" in captured.err
+
+
+def test_ollama_without_model_uses_the_default(tmp_path, capsys):
+    """設計書8.1の `experiment --cases c00 --brain ollama` がモデル省略で通る。"""
+
+    code = main(
+        ["experiment", "--dry-run", "--brain", "ollama", "--runs-dir", str(tmp_path)]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 0
+    assert "脳=ollama（gemma3:4b）" in captured.out
 
 
 def test_no_subcommand_prints_help(capsys):

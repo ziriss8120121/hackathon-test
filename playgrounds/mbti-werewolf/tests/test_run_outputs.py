@@ -65,6 +65,9 @@ def test_case_files_are_not_empty(runner_for, tmp_path):
     case_dir = _exp(tmp_path) / "t001" / "c00-mixed"
     for name in CASE_FILES:
         assert (case_dir / name).stat().st_size > 0
+    timing = (_exp(tmp_path) / "timing.md").read_text(encoding="utf-8")
+    assert "実行時間の実測" in timing
+    assert "stub" in timing
 
 
 def test_skipped_cases_have_no_output_directory(runner_for, tmp_path):

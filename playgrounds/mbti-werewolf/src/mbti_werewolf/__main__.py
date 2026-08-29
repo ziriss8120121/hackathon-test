@@ -161,9 +161,15 @@ def _print_experiment_result(summary: Dict[str, Any], runs_dir: Path) -> int:
             " / ".join(parts), summary["inference_calls"], summary["elapsed_seconds"]
         )
     )
+    per_call = summary.get("seconds_per_call")
+    if per_call is not None:
+        print(
+            "1呼び出しあたり: {}秒（設計書1.3の試算は約10.6秒）".format(per_call)
+        )
     directory = Path(summary["directory"])
     print("保存先: {}".format(directory))
     print("集計:   {}".format(directory / "experiment_metrics.csv"))
+    print("実測:   {}".format(directory / "timing.md"))
     print("-" * 60)
     print("最新結果へのリンク: {}".format(runs_dir / "latest.html"))
     print("公開URL（最新）: https://ziriss8120121.github.io/hackathon-test/runs/latest.html")
@@ -214,6 +220,7 @@ def command_experiment(args: argparse.Namespace) -> int:
         return 2
 
     if args.resume:
+        _print_brain_probe(config)
         return _run_resume(runner, args.resume)
 
     trial_indices = config.trial_indices()
@@ -262,6 +269,8 @@ def command_experiment(args: argparse.Namespace) -> int:
         print("-" * 60)
         print("ケースは実行していない（--dry-run）。")
         return 0
+
+    _print_brain_probe(config)
 
     try:
         summary = runner.run()
@@ -316,6 +325,7 @@ def command_judge(args: argparse.Namespace) -> int:
         )
     )
     print("-" * 60)
+    _print_brain_probe(config, judge=True)
 
     try:
         summary = judge.run(args.experiment, force=args.force)
@@ -332,6 +342,14 @@ def command_judge(args: argparse.Namespace) -> int:
             " / ".join(parts), summary["inference_calls"], summary["elapsed_seconds"]
         )
     )
+    calls = summary.get("inference_calls") or 0
+    elapsed = summary.get("elapsed_seconds") or 0.0
+    if calls:
+        print(
+            "1呼び出しあたり: {:.3f}秒（設計書1.3の試算は約10.6秒）".format(
+                float(elapsed) / calls
+            )
+        )
     print("保存先: {}".format(Path(summary["directory"])))
     for failure in summary["failures"]:
         print("  失敗 {}: {}".format(failure["case"], failure["message"]), file=sys.stderr)
@@ -436,6 +454,29 @@ def _experiment_overrides(args: argparse.Namespace) -> Dict[str, Any]:
         if not args.trials:
             overrides["trial_count"] = end
     return {key: value for key, value in overrides.items() if value is not None}
+
+
+def _print_brain_probe(config, judge: bool = False) -> None:
+    """実Brainの接続を実行前に確認する。失敗しても止めない（設計書3.5）。"""
+
+    from .brains.factory import probe_brain
+
+    provider = config.judge_brain.provider if judge else config.brain.provider
+    if provider == "stub":
+        return
+    try:
+        result = probe_brain(config, seed=config.base_seed, judge=judge)
+    except Exception as exc:  # noqa: BLE001 - 確認の失敗で実験を止めない
+        print("接続確認: 失敗（{}）".format(exc), file=sys.stderr)
+        return
+    if not result:
+        return
+    line = "接続確認: {}".format(result.get("message") or "")
+    if result.get("ok"):
+        print(line)
+    else:
+        print(line, file=sys.stderr)
+        print("このまま実行します。ケースは失敗として記録されます。", file=sys.stderr)
 
 
 if __name__ == "__main__":
