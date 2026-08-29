@@ -20,6 +20,7 @@ mbti_werewolf = [
     "agents/prompts/*/*.json",
     "judge/criteria/*/*.md",
     "judge/criteria/*/*.json",
+    "web/static/*",
 ]
 
 [tool.pytest.ini_options]

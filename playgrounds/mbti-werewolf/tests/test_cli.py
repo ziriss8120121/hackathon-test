@@ -235,3 +235,4 @@ def test_no_subcommand_prints_help(capsys):
     assert "experiment" in captured.out
     assert "judge" in captured.out
     assert "analyze" in captured.out
+    assert "ui" in captured.out

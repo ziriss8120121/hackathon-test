@@ -57,6 +57,7 @@ python -m mbti_werewolf experiment --trial-range 3-7                 # 分割実
 python -m mbti_werewolf experiment --resume e-20260901-210000        # 止まった実験を続ける
 python -m mbti_werewolf judge --experiment e-20260901-210000         # 発言の事後評価
 python -m mbti_werewolf analyze --experiment e-20260901-210000       # 分析出力（推論なし）
+python -m mbti_werewolf ui                                           # 操作画面
 ```
 
 夜間の長時間実行はこの経路を使う。画面を開いたままにする必要がなく、`nohup` などで
@@ -69,7 +70,8 @@ python -m mbti_werewolf analyze --experiment e-20260901-210000       # 分析出
 `--max-rounds` `--brain` `--model` `--machine` `--config` `--data-dir` `--runs-dir`。
 一覧は `python -m mbti_werewolf experiment --help` で確認できる。
 
-操作画面（`ui` サブコマンド）は、v1の4人版と一緒にM3で削除した。M6でv2.0向けに作り直す。
+操作画面は `python -m mbti_werewolf ui` で開く。条件を選んで実行し、実験 → Trial →
+ケースの順に確認できる。長い実行はこれまでどおりコマンド経路を使う。
 
 ---
 
@@ -243,6 +245,7 @@ python -m pytest
 | `test_analysis.py` | 不完全Trialの除外、Judge列の充填、RQ1/RQ2の注記 |
 | `test_cli.py` | コマンド起動と各サブコマンド |
 | `test_ollama.py` | Ollamaの失敗分類。実モデルは呼ばない |
+| `test_web_api.py` | 操作画面のAPI。実行中の再要求が409 |
 
 ---
 
@@ -253,7 +256,7 @@ python -m pytest
 
 ```text
 src/mbti_werewolf/
-  __main__.py     experiment / judge / analyze / masterdata / pages のサブコマンド
+  __main__.py     experiment / judge / analyze / masterdata / pages / ui のサブコマンド
   config.py       実験条件の読み込みと検証
   experiment.py   人物選定、役職割当、Trialと17ケースの生成、条件固定の検査
   runner.py       実行管理、逐次保存、再開
@@ -264,4 +267,5 @@ src/mbti_werewolf/
   record/         出力の生成（case_log / transcript / summary / case_metrics / metrics_csv / result_view / pages / timing）
   judge/          発言の事後評価（judge / stance / criteria）
   analysis/       指標・検定・レポート（indicators / stats / analyzer）
+  web/            操作画面（app / jobs / static）
 ```

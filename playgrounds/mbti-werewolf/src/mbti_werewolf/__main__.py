@@ -7,12 +7,12 @@
     python -m mbti_werewolf analyze --experiment e-20260901-210000    分析出力だけを作る
     python -m mbti_werewolf masterdata              人物プールとパターンを生成する
     python -m mbti_werewolf pages                   GitHub Pages用の静的サイトを生成する
+    python -m mbti_werewolf ui                      操作画面を開く
 
 長時間・多試合の実行は画面を経由しないこの経路で行う。ブラウザやスリープの影響を
 受けず、nohup などでシェルから切り離せるためである（要件IF-07、F-23）。
 
-v1の4人版の `run` と操作画面の `ui` はM3で削除した。`ui` はM6でv2.0向けに作り直す
-（設計書0.4、11章）。
+v1の4人版の `run` はM3で削除した。`ui` はM6でv2.0向けに作り直した（設計書0.4、11章）。
 """
 
 from __future__ import annotations
@@ -118,6 +118,17 @@ def build_parser() -> argparse.ArgumentParser:
     pages.add_argument("--runs-dir", type=Path, help="読み取る runs/（既定はリポジトリの runs/）")
     pages.add_argument("--out", type=Path, help="書き出し先（既定はリポジトリの site/）")
 
+    ui_cmd = sub.add_parser("ui", help="操作画面を起動する")
+    ui_cmd.add_argument("--host", default="127.0.0.1", help="待ち受けアドレス")
+    ui_cmd.add_argument("--port", type=int, default=8000, help="待ち受けポート")
+    ui_cmd.add_argument("--data-dir", type=Path, help="マスタデータの場所")
+    ui_cmd.add_argument("--runs-dir", type=Path, help="出力先（既定はリポジトリの runs/）")
+    ui_cmd.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="ブラウザを自動で開かない",
+    )
+
     return parser
 
 
@@ -135,6 +146,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return command_masterdata(args)
     if args.command == "pages":
         return command_pages(args)
+    if args.command == "ui":
+        return command_ui(args)
 
     parser.print_help()
     return 1
@@ -424,6 +437,37 @@ def command_pages(args: argparse.Namespace) -> int:
     dest = build_pages(runs_dir=args.runs_dir, output_dir=args.out)
     print("GitHub Pages用サイト: {}".format(dest))
     print("一覧: {}".format(dest / "index.html"))
+    return 0
+
+
+def command_ui(args: argparse.Namespace) -> int:
+    """操作画面を起動する（設計書8.1、F-77）。"""
+
+    try:
+        import uvicorn
+        from .web.app import create_app
+    except ImportError:
+        print(
+            "fastapi または uvicorn が入っていません。pip install fastapi uvicorn を実行してください。",
+            file=sys.stderr,
+        )
+        return 2
+    except RuntimeError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    app = create_app(data_dir=args.data_dir, runs_dir=args.runs_dir)
+    host = args.host
+    port = args.port
+    url = "http://{}:{}".format(host, port)
+    print("操作画面: {}".format(url))
+    print("止めるときは Ctrl+C。")
+    if not args.no_browser:
+        import threading
+        import webbrowser
+
+        threading.Timer(0.6, lambda: webbrowser.open(url)).start()
+    uvicorn.run(app, host=host, port=port, log_level="info")
     return 0
 
 

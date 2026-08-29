@@ -6,13 +6,15 @@
 # 経路ごとに必要なものが違う。
 #   CLI + StubBrain          : 追加インストール不要（標準ライブラリのみ）
 #   CLI + Ollama / Gemini    : httpx
+#   操作画面（ui）            : fastapi + uvicorn
 #   テスト                   : pytest
 #
-# 操作画面はv2.0への移行で削除した。M6でv2.0向けに作り直す際、fastapi と uvicorn を
-# ここへ戻す（設計書0.4、11章）。
-
 # HTTP通信。OllamaBrain / GeminiBrain のときだけ読み込む。
 httpx==0.28.1             # BSD-3-Clause License
+
+# 操作画面。`python -m mbti_werewolf ui` のときだけ必要。
+fastapi==0.128.8          # MIT License
+uvicorn==0.39.0           # BSD-3-Clause License
 
 # テスト。
 pytest==8.4.2             # MIT License
