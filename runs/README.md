@@ -7,44 +7,58 @@
 
 ## 構成
 
-1試合だけの実行も1試合のseriesとして扱います。多試合実行と構造を分けないため、
-集計と画面の一覧処理が1本で済みます。
+実験 → Trial → ケースの3階層です。1ケースが8人ワンナイト人狼の1試合、
+1 Trialが17ケース（混合構成1件と、16タイプそれぞれの同質構成16件）です。
 
 ```text
 runs/
-  s-20260815-190959/         series（1回の実行）
-    series.json              実行全体の状態と試合ごとの結果
-    series_summary.md        試合数、勝率、心理機能別の集計
-    r001/                    1試合
-      config.json            この試合の確定した実験条件
-      status.json            進捗。操作画面が1秒ごとに読む
-      run_log.json           出力の正本。他のファイルはここから導出する
-      summary.md             結果カード
-      timeline.md            会話タイムライン
-      metrics.csv            1行 = 1プレイヤーの集計
-      result.html            自己完結の結果ビュー
-  latest.html                 最新の result.html への案内（v1改善で追加）
+  e-20260901-210000/           実験（1回の実行）
+    experiment.json            実験全体の条件と、Trialごとの結果
+    status.json                実験の進捗
+    experiment_metrics.csv     1行 = 1ケース
+    t001/                      Trial
+      trial.json               このTrialの固定条件。再開時に読む
+      status.json              Trialの進捗
+      trial_metrics.csv        1行 = 1ケース1プレイヤー
+      c00-mixed/               ケース（混合構成）
+        config.json            このケースの確定した実験条件
+        status.json            進捗
+        case_log.json          出力の正本。他のファイルはここから導出する
+        transcript.md          会話全文とprivate memo
+        summary.md             結果の要約（会話は載せない）
+        result.html            自己完結の結果ビュー
+      c01-ISTJ/ ... c16-ENTJ/  ケース（同質構成16件）
+  latest.html                  直近に完了したケースの result.html への案内
 ```
 
-`latest.html` は実行のたびに更新され、直近の試合の `result.html` へ自動で
-切り替わる（ダメな場合は手動リンクも出す）。ブックマークしておけば毎回
-`series_id`/`run_id` を探さずに最新結果を開ける。ただし相対リンクなので、
-スマホやLINEから直接URLで開けるようにするには別途GitHub Pagesなどでの公開が
-必要（設計書のM6、未着手）。ローカルにcloneした状態、または操作画面
-（`python -m mbti_werewolf ui`）経由なら今すぐ使える。
+`latest.html` はケースが1件終わるごとに更新され、直近の `result.html` へ自動で
+切り替わります（切り替わらない環境用に手動リンクも出します）。ブックマークして
+おけば、実験IDやケースIDを探さずに最新結果を開けます。
 
-- `series_id` は `s-YYYYMMDD-HHMMSS`、`run_id` は `{series_id}-r001` の形です。
-- `run_id` が `series_id` を含むため、保存先は `run_id` だけで特定できます。
+相対リンクなので、スマホやLINEから直接URLで開くには公開が必要です。
+`runs/` をcommitして `main` へpushすると、GitHub Pagesの
+https://ziriss8120121.github.io/hackathon-test/runs/latest.html
+から同じファイルが開けます。
+
+- 実験IDは `e-YYYYMMDD-HHMMSS`、Trialは `t001` から、ケースは `c00`〜`c16` です。
+- ケースのディレクトリ名には構成種別が入ります（`c00-mixed`、`c01-ISTJ`）。
 
 ## 結果を見る
 
-`result.html` をブラウザで開いてください。結果データを埋め込んだ1ファイルで、
-外部と通信しません。Pythonを動かせなくても、ファイルを開くだけで読めます。
+`result.html` をブラウザで開いてください。1ファイルで完結していて外部と通信せず、
+スマホの画面幅でも表が折り返して読めます。Pythonを動かせなくても開けます。
 
-複数試合の傾向は `series_summary.md`、機能別の数値を自分で集計したい場合は
-`metrics.csv` を表計算ソフトで開いてください。複数試合分を縦に連結できます。
+会話の全文は `transcript.md`、結果の要約は `summary.md` です。数値を自分で集計
+したい場合は `trial_metrics.csv` と `experiment_metrics.csv` を表計算ソフトで
+開いてください。複数の実験分を縦に連結できます。
+
+集計CSVには空欄の列があります。`final_entropy` と `convergence_round` はJudge評価
+（設計書のM4、未着手）が入るまで空欄です。割合の列は、分母が0のときに0と区別する
+ために空欄にしています。
 
 ## 注意
 
 MBTIおよび心理機能は、実在人物の診断や評価ではありません。AIエージェントの
 振る舞いを分けるためのフィクション設定として扱っています。
+
+指標と勝敗の分析は暫定です。版によって変わります。

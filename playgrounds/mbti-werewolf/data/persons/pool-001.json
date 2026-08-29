@@ -1,0 +1,659 @@
+{
+  "pool_id": "pool-001",
+  "count": 100,
+  "generated_at": "2026-08-29T18:00:00+09:00",
+  "composition": {
+    "mbti": {
+      "ISTJ": 8,
+      "ISFJ": 8,
+      "INFJ": 2,
+      "INTJ": 2,
+      "ISTP": 4,
+      "ISFP": 5,
+      "INFP": 5,
+      "INTP": 4,
+      "ESTP": 6,
+      "ESFP": 7,
+      "ENFP": 10,
+      "ENTP": 8,
+      "ESTJ": 12,
+      "ESFJ": 12,
+      "ENFJ": 4,
+      "ENTJ": 3
+    },
+    "age_gender": {
+      "15-19": {
+        "male": 4,
+        "female": 4
+      },
+      "20-29": {
+        "male": 8,
+        "female": 8
+      },
+      "30-39": {
+        "male": 9,
+        "female": 9
+      },
+      "40-49": {
+        "male": 11,
+        "female": 11
+      },
+      "50-59": {
+        "male": 13,
+        "female": 13
+      },
+      "60-64": {
+        "male": 5,
+        "female": 5
+      }
+    }
+  },
+  "composition_source": {
+    "mbti": "日本版MBTIマニュアルの標準サンプル比率",
+    "age_gender": "総務省統計局の日本人人口（15〜64歳）"
+  },
+  "assignment_mode": "seeded_random_independent",
+  "seed": 1001,
+  "persons": [
+    {
+      "person_id": "pe001",
+      "mbti": "INFP",
+      "age": 54,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe002",
+      "mbti": "ESFJ",
+      "age": 19,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe003",
+      "mbti": "ENFP",
+      "age": 54,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe004",
+      "mbti": "ISTJ",
+      "age": 35,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe005",
+      "mbti": "ESFP",
+      "age": 51,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe006",
+      "mbti": "ESTP",
+      "age": 48,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe007",
+      "mbti": "ISFP",
+      "age": 40,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe008",
+      "mbti": "ISFJ",
+      "age": 34,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe009",
+      "mbti": "ESTP",
+      "age": 48,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe010",
+      "mbti": "ENTP",
+      "age": 47,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe011",
+      "mbti": "INFJ",
+      "age": 52,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe012",
+      "mbti": "ESTP",
+      "age": 36,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe013",
+      "mbti": "ESFJ",
+      "age": 24,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe014",
+      "mbti": "INFP",
+      "age": 49,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe015",
+      "mbti": "ISFJ",
+      "age": 52,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe016",
+      "mbti": "ESFJ",
+      "age": 23,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe017",
+      "mbti": "ESTJ",
+      "age": 20,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe018",
+      "mbti": "ENTP",
+      "age": 58,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe019",
+      "mbti": "ISTJ",
+      "age": 62,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe020",
+      "mbti": "ESFJ",
+      "age": 18,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe021",
+      "mbti": "ESFP",
+      "age": 45,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe022",
+      "mbti": "ESTJ",
+      "age": 63,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe023",
+      "mbti": "ENFP",
+      "age": 60,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe024",
+      "mbti": "ISTJ",
+      "age": 39,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe025",
+      "mbti": "ENFJ",
+      "age": 30,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe026",
+      "mbti": "INTJ",
+      "age": 19,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe027",
+      "mbti": "ISFJ",
+      "age": 18,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe028",
+      "mbti": "ISFP",
+      "age": 53,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe029",
+      "mbti": "ESFJ",
+      "age": 56,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe030",
+      "mbti": "ESTP",
+      "age": 23,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe031",
+      "mbti": "ENTJ",
+      "age": 35,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe032",
+      "mbti": "ESFP",
+      "age": 27,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe033",
+      "mbti": "ENTJ",
+      "age": 51,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe034",
+      "mbti": "ENFP",
+      "age": 59,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe035",
+      "mbti": "ESFP",
+      "age": 33,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe036",
+      "mbti": "ESTJ",
+      "age": 36,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe037",
+      "mbti": "ESFJ",
+      "age": 48,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe038",
+      "mbti": "ENTP",
+      "age": 29,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe039",
+      "mbti": "ISTP",
+      "age": 27,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe040",
+      "mbti": "INFP",
+      "age": 41,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe041",
+      "mbti": "ESTJ",
+      "age": 40,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe042",
+      "mbti": "ENTP",
+      "age": 57,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe043",
+      "mbti": "ISFJ",
+      "age": 51,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe044",
+      "mbti": "ESTP",
+      "age": 57,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe045",
+      "mbti": "ESFJ",
+      "age": 41,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe046",
+      "mbti": "ESTP",
+      "age": 64,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe047",
+      "mbti": "ESFJ",
+      "age": 32,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe048",
+      "mbti": "ESFJ",
+      "age": 40,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe049",
+      "mbti": "ENFP",
+      "age": 41,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe050",
+      "mbti": "ISFP",
+      "age": 55,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe051",
+      "mbti": "ISTJ",
+      "age": 50,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe052",
+      "mbti": "ISFJ",
+      "age": 38,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe053",
+      "mbti": "ESTJ",
+      "age": 42,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe054",
+      "mbti": "ESFP",
+      "age": 17,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe055",
+      "mbti": "ESFJ",
+      "age": 53,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe056",
+      "mbti": "ENFJ",
+      "age": 49,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe057",
+      "mbti": "ENFP",
+      "age": 51,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe058",
+      "mbti": "ESFP",
+      "age": 19,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe059",
+      "mbti": "ISTJ",
+      "age": 54,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe060",
+      "mbti": "INTJ",
+      "age": 39,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe061",
+      "mbti": "INFP",
+      "age": 60,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe062",
+      "mbti": "ISFJ",
+      "age": 20,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe063",
+      "mbti": "ISFP",
+      "age": 42,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe064",
+      "mbti": "ENTP",
+      "age": 32,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe065",
+      "mbti": "ESTJ",
+      "age": 15,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe066",
+      "mbti": "ESFP",
+      "age": 47,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe067",
+      "mbti": "ISTJ",
+      "age": 25,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe068",
+      "mbti": "ESTJ",
+      "age": 42,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe069",
+      "mbti": "ENFP",
+      "age": 62,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe070",
+      "mbti": "ESTJ",
+      "age": 54,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe071",
+      "mbti": "ESFJ",
+      "age": 39,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe072",
+      "mbti": "INTP",
+      "age": 51,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe073",
+      "mbti": "ENTJ",
+      "age": 37,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe074",
+      "mbti": "ISTJ",
+      "age": 28,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe075",
+      "mbti": "ENFP",
+      "age": 54,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe076",
+      "mbti": "ISTJ",
+      "age": 59,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe077",
+      "mbti": "ENFJ",
+      "age": 26,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe078",
+      "mbti": "ENTP",
+      "age": 26,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe079",
+      "mbti": "INFP",
+      "age": 62,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe080",
+      "mbti": "ENTP",
+      "age": 53,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe081",
+      "mbti": "ISFJ",
+      "age": 60,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe082",
+      "mbti": "INFJ",
+      "age": 52,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe083",
+      "mbti": "ENFJ",
+      "age": 27,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe084",
+      "mbti": "ENFP",
+      "age": 22,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe085",
+      "mbti": "ISFJ",
+      "age": 64,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe086",
+      "mbti": "ISTP",
+      "age": 21,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe087",
+      "mbti": "INTP",
+      "age": 31,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe088",
+      "mbti": "ESTJ",
+      "age": 25,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe089",
+      "mbti": "ISFP",
+      "age": 38,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe090",
+      "mbti": "INTP",
+      "age": 64,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe091",
+      "mbti": "ESTJ",
+      "age": 57,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe092",
+      "mbti": "ESTJ",
+      "age": 58,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe093",
+      "mbti": "ENTP",
+      "age": 30,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe094",
+      "mbti": "ESTJ",
+      "age": 43,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe095",
+      "mbti": "INTP",
+      "age": 41,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe096",
+      "mbti": "ENFP",
+      "age": 48,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe097",
+      "mbti": "ESFJ",
+      "age": 31,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe098",
+      "mbti": "ISTP",
+      "age": 45,
+      "gender": "male"
+    },
+    {
+      "person_id": "pe099",
+      "mbti": "ISTP",
+      "age": 15,
+      "gender": "female"
+    },
+    {
+      "person_id": "pe100",
+      "mbti": "ENFP",
+      "age": 43,
+      "gender": "male"
+    }
+  ]
+}

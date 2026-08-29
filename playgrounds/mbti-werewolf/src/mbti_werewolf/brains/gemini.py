@@ -1,8 +1,8 @@
 """無料枠APIの脳（設計書5.5、5.6）。
 
-ローカルの小型モデルで議論が成立しない場合の品質比較用である。1試合あたりの
-推論呼び出しは 発言12回 + 投票4回 = 16回 なので、無料枠の1日あたり上限に
-すぐ届く。多試合実行はローカル経路で行う（設計書1.2）。
+ローカルの小型モデルで議論が成立しない場合の品質比較用である。1ケースあたりの
+推論呼び出しは約81回なので、無料枠の1日あたり上限にすぐ届く。多試合実行は
+ローカル経路で行う（設計書1.2）。
 
 課金は有効化しない。有効化すると無料枠を外れるため、有効化しないこと自体を
 運用ルールとする（設計書1.3）。APIキーは環境変数から読み、出力物には残さない
@@ -35,6 +35,21 @@ class GeminiBrain(BaseBrain):
         self.name = "gemini:{}".format(self.model)
         self._api_key = os.environ.get(API_KEY_ENV, "").strip()
         self._last_call_at = 0.0
+
+    def probe(self) -> Dict[str, Any]:
+        """実行前の確認。無料枠を消費しないよう、キーの有無だけを見る。"""
+
+        if not self._api_key:
+            return {
+                "ok": False,
+                "kind": "unreachable",
+                "message": "環境変数 {} が設定されていません。".format(API_KEY_ENV),
+            }
+        return {
+            "ok": True,
+            "kind": None,
+            "message": "Gemini の APIキーは設定されています。接続確認は初回呼び出しで行います。",
+        }
 
     def _complete(self, system: str, user: str, temperature: float) -> str:
         if not self._api_key:

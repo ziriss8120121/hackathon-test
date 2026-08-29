@@ -1,128 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MBTI人狼シミュレーター</title>
-<link rel="stylesheet" href="/static/style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBTI人狼</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<header>
-  <h1>MBTI人狼シミュレーター</h1>
-  <p class="sub">条件を設定して対戦を開始し、完了後に同じ画面で会話と結果を確認する。会話は逐次表示しない。</p>
-</header>
-
-<main>
-  <section class="panel" id="setup-panel">
-    <h2>1. 実験条件</h2>
-    <form id="config-form">
-      <div class="grid">
-        <label>参加人数
-          <input type="number" name="player_count" min="3" max="16" required>
-        </label>
-        <label>議論ターン数
-          <input type="number" name="turn_count" min="1" max="10" required>
-        </label>
-        <label>試合回数
-          <input type="number" name="game_count" min="1" max="500" required>
-        </label>
-        <label>seed
-          <input type="number" name="seed" required>
-        </label>
-        <label>役職割当方法
-          <select name="role_assignment_mode">
-            <option value="seeded_random">seeded_random（seed付きランダム）</option>
-          </select>
-        </label>
-        <label>history_mode
-          <select name="history_mode">
-            <option value="none">none（過去ログを渡さない）</option>
-          </select>
-        </label>
-        <label>人狼の人数
-          <input type="number" name="werewolf_count" min="1" max="8" required>
-        </label>
-        <label>脳（provider）
-          <select name="provider">
-            <option value="stub">stub（LLMを呼ばない・即時）</option>
-            <option value="ollama">ollama（ローカル実行）</option>
-            <option value="gemini">gemini（無料枠API）</option>
-          </select>
-        </label>
-        <label>モデル名
-          <input type="text" name="model" placeholder="例: gemma3:4b">
-        </label>
-        <label>発言の文字数上限
-          <input type="number" name="max_output_chars" min="20" max="2000">
-        </label>
-      </div>
-
-      <label class="inline">心理機能（上級者向け・主機能を直接指定）
-        <input type="text" name="functions" placeholder="Ne, Si, Fi, Te">
-      </label>
-      <p class="hint">
-        既定はMBTIタイプそのもので定義した4人ロースター（討論者ENTP・擁護者ISFJ・仲介者INFP・幹部ESTJ）です。
-        上の欄は、その4人の主機能がそのまま入っています。ここを書き換えると参加人数以上の主機能を上から順に割り当てる旧来の指定方法になり、
-        MBTIタイプの表示は書き換えた分だけ外れます（候補2タイプ表示に戻ります）。
-      </p>
-
-      <h2>2. 実行</h2>
-      <div class="actions">
-        <button type="submit" id="start-button">対戦開始</button>
-        <button type="button" id="reset-button" class="ghost">条件を編集し直す</button>
-      </div>
-      <p class="hint" id="form-hint"></p>
-    </form>
-  </section>
-
-  <section class="panel" id="status-panel">
-    <h2>3. 状態</h2>
-    <div class="status-line">
-      <span class="dot" id="status-dot"></span>
-      <strong id="status-text">未実行</strong>
-      <span id="status-detail" class="muted"></span>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand">MBTI人狼 <span class="brand-accent">操作画面</span></div>
+      <nav>
+        <a href="#/run">実行</a>
+        <a href="#/experiments">実験一覧</a>
+      </nav>
     </div>
-    <div class="progress"><div class="bar" id="progress-bar"></div></div>
-    <p class="error" id="error-box" hidden></p>
-  </section>
-
-  <section class="panel" id="result-panel" hidden>
-    <h2>4. 結果</h2>
-    <div class="cards" id="result-cards"></div>
-
-    <h3>参加者</h3>
-    <div id="roster"></div>
-
-    <h3>会話タイムライン</h3>
-    <div id="timeline"></div>
-
-    <h3>投票</h3>
-    <div id="votes"></div>
-
-    <h3>メトリクス</h3>
-    <div id="metrics"></div>
-
-    <h3>実行条件</h3>
-    <div id="conditions"></div>
-
-    <p class="hint" id="artifact-links"></p>
-  </section>
-
-  <section class="panel">
-    <h2>5. 過去の実行</h2>
-    <div class="actions">
-      <button type="button" id="reload-runs" class="ghost">一覧を更新</button>
-      <span class="muted" id="runs-hint"></span>
-    </div>
-    <div id="runs-list"></div>
-  </section>
-</main>
-
-<footer>
-  MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。
-  MBTIタイプが確定しているプレイヤー（既定の4人MVPロースター）はそのタイプ名で表示し、確定していない場合は主機能からの候補2タイプ（要求定義書6.5）を表示する。
-</footer>
-
-<script src="/static/app.js"></script>
+  </header>
+  <main id="app">読み込み中…</main>
+  <script src="/static/app.js"></script>
 </body>
 </html>
