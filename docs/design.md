@@ -6,7 +6,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 
 | 項目 | 内容 |
 | --- | --- |
-| バージョン | 2.12 |
+| バージョン | 2.14 |
 | 最終更新 | 2026-08-29 |
 | 作成者 | ゆうじろう（Engineer） |
 | 上位文書 | [要件定義書](./system-requirements.md) v2.1 / [要求定義書](./requirements.md) v2.2-draft |
@@ -27,6 +27,8 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 | 2.10の変更点 | M4b（Analyzerと分析出力）を実装した。実装で決めた4点を反映した。(1) 分析HTMLは集計JSONを埋め込みつつ、同じ内容をPython側で表としても書き出す。7.5の「JSONを埋め込む」を守りつつ、JavaScriptが動かない環境でも読めるようにするためである。(2) Wilcoxon符号付順位検定は組数が20以下なら符号の全列挙、それを超えたら正規近似にする。SciPyを足さない（1.1、9.4）。(3) Judge評価がないTrialはRQ1・RQ2から除外する。17ケースが揃っていても、疑念分布が無い状態で収束の指標を比較すると空欄と値が混ざるためである。(4) `analyze` の後で `latest.html` を実験の `experiment.html` へ向け直す。実行中は直近ケースの `result.html` を指したままにする（7.6）。テスト関数は341本が緑である。 |
 | 2.11の変更点 | M5（Ollamaでの実行と1ケース実測）を実装した。PersonaBuilderとプロンプトv2はM1で入っていた。実装で決めた4点を反映した。(1) `--brain ollama` で `--model` を省略すると `gemma3:4b` を使う。設計書8.1の1ケース実測コマンドが、モデル名なしでも実行前に止まらないようにするためである（1.2、6.4、8.1）。Geminiも同様に `gemini-3.1-flash-lite` を埋める。(2) 実行前に `/api/tags` で接続とモデルの有無を確認する。失敗しても実験は止めず、警告を出してケースを `unreachable` などで記録する（3.5、5.6）。(3) 呼び出しに `keep_alive: 30m` を付ける。1ケースは十数分かかるため、Ollama既定の5分だと途中でモデルがアンロードされる。(4) 実験ディレクトリに `timing.md` を書き、1呼び出しあたりの待機秒を設計書1.3の試算（約10.6秒）と並べる。`experiment_summary.json` に `ai_wait_seconds` と `seconds_per_call` を足した。CIのテストはStubとHTTPの差し替えだけを使い、実モデルは呼ばない（10章）。 |
 | 2.12の変更点 | M6（操作画面と4ビュー）を実装した。実装で決めた3点を反映した。(1) `GET /api/config/default` は削除した `config/default.json` ではなく `config.py` の既定値を返す（8.2）。(2) 実行ビューがパターンセットを選ぶため、表になかった `GET /api/data/patterns` を足した（7.3、7.4）。(3) 分析APIは `analyze` が書いたHTMLの埋め込みJSONを読むだけにする。未生成のときは 404 にせず `{status: "missing"}` を返す（7.1）。`fastapi` と `uvicorn` を `requirements.txt` へ戻し、`ui` サブコマンドを復活した。テスト関数は363本が緑である。 |
+| 2.13の変更点 | M7（規模の実測記録）を実装した。1 Trial・5 Trialの実モデル実行そのものは夜間に回す。実装で決めた4点を反映した。(1) `timing.md` に出力容量、議論の終わり方（`all_pass` / `max_rounds`）、1ケースから1 Trial・5 Trial・100 Trialへの見込みを足した（1.3、4.5、NF-12）。(2) `experiment_summary.json` に `output_bytes`・`case_output_bytes`・`bytes_per_done_case`・`seconds_per_done_case`・`discussion_stop_reasons` を足した。(3) `max_rounds` などの既定値は、実モデルの1 Trialが揃うまで変えない（14章）。(4) 既定の出力先をリポジトリ直下の `runs/` に直した。`runner.py` からの段数が1段足りず、`playgrounds/runs/` へ書いていた。 |
+| 2.14の変更点 | M8（Geminiの比較経路とGitHub Pages）を実装した。本実行（段階4）は夜間の実測後に人が回す。実装で決めた3点を反映した。(1) `GeminiBrain` の 429 / キーなし / 認証失敗を HTTP 差し替えで検査する `test_gemini` を足した。probe はキーの有無だけを見、無料枠を消費しない（5.6、5.7）。(2) `pages` は `experiment.html`・`rq1.html`・`rq2.html`・`trial.html` も複写し、一覧の入口を実験単位にした（7.6）。(3) `gh-pages` への掲載は人間が行う。AIは push しない。 |
 
 ### 0.1 本書の位置づけ
 
@@ -290,6 +292,8 @@ v1.1の実測（4人3ターン、呼び出し16回で約170秒）から、1呼�
 | 段階4 | 本実行 | 段階3の実測から、Trial数、`max_rounds`、Judge粒度、分散台数を決めて実行 | 実測後に決定 |
 
 段階2を終えた時点で、`max_rounds` と `judge_batch_size` の既定値を実測に合わせて見直す。段階3を終えた時点で、100 Trialを実行するかTrial数を減らすかを上位文書へ反映する。
+
+各実験の `timing.md` は、今回完了したケースの経過時間と容量から 1 Trial / 5 Trial / 100 Trial を機械的に掛けた見込みを、上表の試算と並べて残す。本書1.3の表は試算のままにし、段階2の実測が揃ってから更新する。
 
 **所要時間を縮める手段**
 
@@ -1398,6 +1402,9 @@ playgrounds/mbti-werewolf/
     test_cli.py
     test_ollama.py                # HTTPを差し替えて失敗分類を確かめる。実モデルは呼ばない
     test_web_api.py
+    test_timing.py
+    test_gemini.py                # HTTPを差し替えて失敗分類を確かめる。実APIは呼ばない
+    test_pages.py
 
 runs/
   latest.html                     # 最新結果への転送（7.6）
@@ -1405,7 +1412,7 @@ runs/
     experiment.json
     persons.json                  # 使用したプールのスナップショット
     experiment_metrics.csv         # 1行 = 1ケース
-    timing.md                     # 1ケース実測。1呼び出しあたりの秒数と1.3の試算
+    timing.md                     # 所要時間・容量・規模の見込み。1.3の試算と並べる
     speech_labels.csv              # 1行 = 1発言
     experiment_report.md
     experiment.html
@@ -1884,6 +1891,17 @@ Trialの固定条件の正本。再開時はこのファイルから条件を復
 
 `ai_wait_seconds` は各推論呼び出しの待機時間の合計、`elapsed_seconds` は実行全体の所要時間とする。`inference_calls` を加えたのは、1.3の試算を実測で更新するために回数が必要になるためである（NF-07）。
 
+実験ディレクトリの `experiment_summary.json` は、ケース一覧に加えて次を持つ。出力形式の追加である。
+
+| 項目 | 意味 |
+| --- | --- |
+| `seconds_per_call` | `ai_wait_seconds / inference_calls`。呼び出し0なら `null` |
+| `seconds_per_done_case` | `elapsed_seconds / done_count`。完了0なら `null` |
+| `output_bytes` | `timing.md` と `experiment_summary.json` を書いたあとの実験ディレクトリ全体 |
+| `case_output_bytes` | ケースディレクトリだけの合計。規模の換算に使う |
+| `bytes_per_done_case` | `case_output_bytes / done_count`。完了0なら `null` |
+| `discussion_stop_reasons` | 完了ケースの `discussion.stop_reason` の件数。`max_rounds` 見直しの材料（4.5） |
+
 ### 6.8 Judge評価（judge.v1.json）
 
 ```json
@@ -2166,8 +2184,9 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 | 最新の実験 | `runs/latest.html`（最新の実験の全体分析へ転送する。M3の時点では直近に完了したケースの `result.html` へ転送する） |
 | 中身 | 実験の全体分析、RQ1・RQ2、Trial比較、ケース詳細、それらを選ぶ一覧 |
 | 生成 | `python -m mbti_werewolf pages` |
-| 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート |
-| 生成物 | `site/`（gitignore。リポジトリの `main` には置かない） |
+| 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート。push は人間が行う |
+| 生成物 | `site/`（gitignore。リポジトリの `main` には置かない）。`experiment.html`・RQ・Trial・ケースの HTML を相対パスのまま複写する |
+| 一覧 | 入口は実験単位。`analyze` 前の実験は表に出し、ケースの `result.html` から辿る |
 | スマートフォン | 全体分析、RQ1・RQ2、Trial比較の3種は、幅の狭い画面で表が縦に折り返る形にする |
 
 スマートフォン対応を分析HTMLに限る理由は、要求定義書の「最新結果のHTMLリンクを電話から開ける」という要求が、結果の確認を対象にしているためである。操作画面はローカル起動が前提なのでスマートフォンから使えず、対応する意味がない。ただしケースの `result.html` は例外として対応する（7.5）。private memoの列を足したことで横に長い表になったためである。
@@ -2191,6 +2210,9 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 | 1 Trialを実行する | `python -m mbti_werewolf experiment --trials 1 --seed 42` |
 | Trial範囲を指定して実行する | `python -m mbti_werewolf experiment --trials 100 --trial-range 26-50 --seed 42` |
 | 1ケースだけ実測する | `python -m mbti_werewolf experiment --cases c00 --brain ollama` |
+| 1ケースをGeminiで比較する | `python -m mbti_werewolf experiment --cases c00 --brain gemini` |
+| 段階2（1 Trial、夜間） | `python -m mbti_werewolf experiment --trials 1 --brain ollama` |
+| 段階3（5 Trial、夜間） | `python -m mbti_werewolf experiment --trials 5 --brain ollama` |
 | 中断した実験を再開する | `python -m mbti_werewolf experiment --resume e-20260901-210000` |
 | 脳を切り替える | `python -m mbti_werewolf experiment --brain ollama --model gemma3:4b` |
 | Judge評価だけを実行する | `python -m mbti_werewolf judge --experiment e-20260901-210000` |
@@ -2249,6 +2271,14 @@ Trialの固定条件は生成時に1度だけ確定し、以後は設定の優�
 | メモリに余裕がない実機で回す | `gemma3:4b`。他アプリを閉じる |
 
 夜間実行を画面から行わない理由は、ブラウザやスリープの影響を受けるためである。数日規模の実行では、macOSのスリープ設定を無効にし、`caffeinate` などでスリープを抑止する。Judgeと分析は実行の後で別コマンドとして回せるため、夜間はゲーム実行だけに絞る。これにより、夜間実行が途中で止まっても、取れたケースの分だけを翌日に評価・分析できる。
+
+段階2・段階3の例。別ターミナルで `ollama serve` を動かしてから実行する。
+
+```bash
+caffeinate -dims nohup python -m mbti_werewolf experiment --trials 1 --brain ollama --seed 42 > /tmp/mbti-stage2.log 2>&1 &
+```
+
+終わったら `timing.md` の規模の見込みと、議論の終わり方を見て、`max_rounds` を触るか決める。5 Trialは `--trials 5` に替える。途中で止まったら同じ `experiment_id` で `--resume` する。
 
 ---
 
@@ -2418,9 +2448,9 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 
 ## 10. テスト設計
 
-`CaseStubBrain` があるため、推論なしで受入基準の大半を検証できる。下表は21ファイルである。M6までにすべて揃った。
+`CaseStubBrain` があるため、推論なしで受入基準の大半を検証できる。下表は24ファイルである。M8までに Gemini の検査と Pages の実験単位一覧まで揃った。
 
-下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。M6の時点で、テスト関数は363本が緑である。実Ollamaへの接続確認1本は、サーバーが無い環境では skip する。
+下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。M8の時点で、テスト関数は376本が緑である。実Ollamaへの接続確認1本は、サーバーが無い環境では skip する。
 
 | v2.0のファイル名 | 事情 |
 | --- | --- |
@@ -2450,6 +2480,9 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 | `test_cli` | 各サブコマンドの起動。`--dry-run` が推論を呼ばず条件固定の検査まで通り、出力を作らない。`--cases` で1ケースだけ実測できる。`--trial-range` による分割実行。不正な範囲指定で終了コード2になる。`--brain ollama` でモデル省略時に `gemma3:4b` が入る | F-55、IF-09、AC-16、AC-20 |
 | `test_ollama` | OllamaのHTTPを差し替え、`unreachable` / `timeout` / `rate_limited` / モデルなしを分類する。`format: json` と `keep_alive` を付ける。APIキーなしで応答を受け取れる。実行前の `/api/tags` 確認。実サーバーがあるときだけ probe が成功することを見る（無いときは skip） | 5.6、1.4、NF-01、AC-07 |
 | `test_web_api` | `/health` と設定・マスタの一覧。画面からの起動が `202` を返し、`runs/` の一覧に出る。実行中の再要求が `409`。分析未生成が `{status: "missing"}`。未知の実験は404 | F-70〜F-77、7.4、8.3、AC-19、AC-20 |
+| `test_timing` | 出力容量の集計、議論終了理由の件数、`timing.md` が1ケースから100 Trialへの見込みを出す | 1.3、NF-07、NF-12 |
+| `test_gemini` | GeminiのHTTPを差し替え、キーなし / 429 / 認証失敗を分類する。probe はAPIを呼ばない。実APIは呼ばない | 5.6、5.7、NF-10 |
+| `test_pages` | `analyze` 後の `pages` が `experiment.html` と Trial HTML を複写し、一覧が実験単位になる。push しない旨を表示する | 7.6、IF-04 |
 
 `test_condition_fixation` と `test_resume` がv2.0で最も重要なテストである。前者が壊れると研究結果が無効になり、後者が壊れると数日かけた実行データを失う。どちらもStubで完全に検証できるため、実モデルでの実行前に必ず通す。
 
@@ -2473,8 +2506,8 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M4b | `Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列、`latest.html` の向け直し | Stubで分析まで通り、10章のテスト19ファイルが揃って緑になる | 段階0 |
 | M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる。`--brain ollama` がモデル省略で通り、接続確認と `timing.md` が残る | 段階1 |
 | M6 | Web層と4ビュー、`test_web_api` | 画面から1 Trialを実行し、3階層をたどれる。`python -m mbti_werewolf ui` で起動する | — |
-| M7 | 1 Trialと5 Trialの実測、既定値の見直し | 所要時間と出力容量の実測から本実行の規模を決められる | 段階2、段階3 |
-| M8 | `GeminiBrain` での比較、GitHub Pages公開、本実行 | 品質比較ができ、URLで共有でき、決めた規模で実行できる | 段階4 |
+| M7 | 規模の実測記録、1 Trial / 5 Trial の夜間手順 | `timing.md` から本実行の時間と容量を見込める。既定値は実測後に見直す | 段階2、段階3 |
+| M8 | `GeminiBrain` の検査、Pagesの実験単位一覧 | 1ケースを `--brain gemini` で比較できる。`pages` で実験HTMLを公開用に出せる。掲載は人間が `gh-pages` へ載せる | 段階4 |
 
 M0からM4までを推論なしで作る理由は、条件固定と再開という「壊れると取り返しがつかない」部分を、LLMの品質や待機時間と切り離して先に固めるためである。ここが固まっていれば、M5でモデルの品質が期待に届かなかった場合も、実行管理と分析を作り直さずにモデルとプロンプトだけを差し替えて再実行できる。
 
@@ -2487,6 +2520,10 @@ M6のWeb層をM5より後に置いた理由は、実行の主経路が長時間�
 M5の PersonaBuilder とプロンプトv2はM1で入っている。M5で足したのは、Ollamaのモデル名の既定値、実行前の接続確認、長時間実行向けの `keep_alive`、所要時間の記録である。実モデルでの1ケース完走は、Ollamaが起動しているマシンで `experiment --cases c00 --brain ollama` を実行して確認する。CIでは実モデルを呼ばない。
 
 M6の操作画面は FastAPI + 素の HTML/JS である。実行の正本はこれまでどおり `runs/` で、画面は読み取りと起動ボタンだけを持つ。分析値は画面では計算しない。
+
+M7で足したのは、実測を残す項目と夜間実行の手順である。1 Trial（約4時間）と5 Trial（約20時間）は `ollama serve` があるマシンで `caffeinate` 付きのコマンド経路を使う。`max_rounds` の既定値は、実モデルの1 Trialが揃うまで変えない。
+
+M8で足したのは、Geminiの失敗分類テストと、Pagesが実験の分析HTMLまで複写することである。無料枠での1ケース比較は `experiment --cases c00 --brain gemini` で行う。本実行は段階3の実測後に人が回す。`gh-pages` への push は人間が行う。
 
 ---
 

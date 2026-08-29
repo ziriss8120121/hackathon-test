@@ -4,6 +4,9 @@
     python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
     python -m mbti_werewolf experiment --resume e-20260901-210000    止まった実験を続ける
     python -m mbti_werewolf experiment --cases c00 --brain ollama    1ケースだけ実測する
+    python -m mbti_werewolf experiment --cases c00 --brain gemini    1ケースをGeminiで比較する
+    python -m mbti_werewolf experiment --trials 1 --brain ollama     段階2（約4時間）
+    python -m mbti_werewolf experiment --trials 5 --brain ollama     段階3（約20時間）
     python -m mbti_werewolf analyze --experiment e-20260901-210000    分析出力だけを作る
     python -m mbti_werewolf masterdata              人物プールとパターンを生成する
     python -m mbti_werewolf pages                   GitHub Pages用の静的サイトを生成する
@@ -179,6 +182,21 @@ def _print_experiment_result(summary: Dict[str, Any], runs_dir: Path) -> int:
         print(
             "1呼び出しあたり: {}秒（設計書1.3の試算は約10.6秒）".format(per_call)
         )
+    from .record.timing import format_bytes, format_duration, format_stop_reasons
+
+    per_case = summary.get("seconds_per_done_case")
+    if per_case is not None:
+        print("1完了ケースあたり: {}".format(format_duration(per_case)))
+    output_bytes = summary.get("output_bytes")
+    per_case_bytes = summary.get("bytes_per_done_case")
+    if output_bytes is not None:
+        extra = ""
+        if per_case_bytes is not None:
+            extra = "（1完了ケースあたり {}）".format(format_bytes(per_case_bytes))
+        print("出力容量: {}{}".format(format_bytes(output_bytes), extra))
+    reasons = summary.get("discussion_stop_reasons")
+    if reasons:
+        print("議論の終わり方: {}".format(format_stop_reasons(reasons)))
     directory = Path(summary["directory"])
     print("保存先: {}".format(directory))
     print("集計:   {}".format(directory / "experiment_metrics.csv"))
@@ -437,6 +455,7 @@ def command_pages(args: argparse.Namespace) -> int:
     dest = build_pages(runs_dir=args.runs_dir, output_dir=args.out)
     print("GitHub Pages用サイト: {}".format(dest))
     print("一覧: {}".format(dest / "index.html"))
+    print("公開するときは、生成物を gh-pages ブランチへ載せる。push は人間が行う。")
     return 0
 
 

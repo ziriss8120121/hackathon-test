@@ -131,14 +131,20 @@ JudgeがまだないTrialはRQ1・RQ2から除外し、除外理由をレポー�
 1ケースが完走するため、出力形式の確認に使える。
 
 Ollamaを使う場合の準備。`--model` を省略すると `gemma3:4b` になる。実行前に接続と
-モデルの有無を確認し、無ければ警告を出す（実験は止めない）。1ケースが終わると
-`timing.md` に所要時間が残る。
+モデルの有無を確認し、無ければ警告を出す（実験は止めない）。実行が終わると
+`timing.md` に所要時間、出力容量、1 Trial / 5 Trial / 100 Trial の見込みが残る。
 
 ```bash
 brew install ollama
 ollama serve          # 別のターミナルで動かしておく
 ollama pull gemma3:4b
 python -m mbti_werewolf experiment --cases c00 --brain ollama
+```
+
+1 Trial（段階2、約4時間）と5 Trial（段階3、約20時間）は画面を使わず、スリープを止めて回す。
+
+```bash
+caffeinate -dims nohup python -m mbti_werewolf experiment --trials 1 --brain ollama --seed 42 > /tmp/mbti-stage2.log 2>&1 &
 ```
 
 Geminiの無料枠は分間・1日の上限がある。上限に達した場合は自動で切り替えず、
@@ -206,7 +212,16 @@ https://ziriss8120121.github.io/hackathon-test/ から同じファイルを開�
 python -m mbti_werewolf pages --out site
 ```
 
-生成物は `gh-pages` ブランチへ載せて公開する。
+生成物は `site/`（gitignore）に出る。GitHub Pages へ載せるときは、人間が `gh-pages`
+ブランチへコピーして push する。AIは push しない。
+
+品質比較用に Gemini を使う場合。キーは環境変数 `GEMINI_API_KEY` だけから読む。
+1ケースで約81回呼ぶため、無料枠の確認用に留める。429 のときは自動で Ollama へ
+切り替えず、失敗として記録する。
+
+```bash
+python -m mbti_werewolf experiment --cases c00 --brain gemini
+```
 
 集計CSVの `final_entropy` と `convergence_round` は、`analyze` を回すまで空欄になる。
 Judgeがない状態で分析すると、そのTrialはRQから除外される。分母が0になる割合も
@@ -246,6 +261,9 @@ python -m pytest
 | `test_cli.py` | コマンド起動と各サブコマンド |
 | `test_ollama.py` | Ollamaの失敗分類。実モデルは呼ばない |
 | `test_web_api.py` | 操作画面のAPI。実行中の再要求が409 |
+| `test_timing.py` | 所要時間と出力容量の実測記録 |
+| `test_gemini.py` | Geminiの失敗分類。実APIは呼ばない |
+| `test_pages.py` | Pagesが実験HTMLを複写し、一覧が実験単位になる |
 
 ---
 

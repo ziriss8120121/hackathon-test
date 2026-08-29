@@ -27,7 +27,14 @@ from .record.result_view import (
 )
 from .record.summary import write_summary
 from .record.metrics_csv import write_experiment_metrics, write_trial_metrics
-from .record.timing import seconds_per_call, write_timing_note
+from .record.timing import (
+    bytes_per_done_case,
+    case_output_bytes,
+    count_stop_reasons,
+    directory_bytes,
+    seconds_per_call,
+    write_timing_note,
+)
 from .record.transcript import write_transcript
 
 STATUS_PENDING = "pending"
@@ -52,7 +59,7 @@ def default_runs_dir() -> Path:
     override = os.environ.get(ENV_RUNS_DIR)
     if override:
         return Path(override)
-    return Path(__file__).resolve().parents[3] / "runs"
+    return Path(__file__).resolve().parents[4] / "runs"
 
 
 def _now() -> str:
@@ -288,14 +295,14 @@ class ExperimentRunner:
         )
         summary = self._build_summary(experiment_id, exp_dir, totals, resumed)
         write_json(exp_dir / "experiment_summary.json", summary)
-        write_timing_note(
-            exp_dir / "timing.md",
-            summary,
-            {
-                "provider": self.config.brain.provider,
-                "model": self.config.brain.model,
-            },
-        )
+        brain = {
+            "provider": self.config.brain.provider,
+            "model": self.config.brain.model,
+        }
+        write_timing_note(exp_dir / "timing.md", summary, brain)
+        summary["output_bytes"] = directory_bytes(exp_dir)
+        write_json(exp_dir / "experiment_summary.json", summary)
+        write_timing_note(exp_dir / "timing.md", summary, brain)
         self._write_experiment_status(
             exp_dir, experiment_id, STATUS_DONE, totals, started_at
         )
@@ -574,13 +581,15 @@ class ExperimentRunner:
         calls = sum(r.inference_calls for r in ran)
         wait = round(sum(r.ai_wait_seconds for r in ran), 3)
         elapsed = round(sum(r.elapsed_seconds for r in ran), 3)
+        done = totals.case_done
+        case_bytes = case_output_bytes(exp_dir)
         return {
             "experiment_id": experiment_id,
             "directory": str(exp_dir),
             "resumed": resumed,
             "case_count": len(ran),
             "skipped_count": totals.case_skipped,
-            "done_count": totals.case_done,
+            "done_count": done,
             "failed_count": totals.case_failed,
             "invalid_count": sum(1 for r in ran if r.status == STATUS_DONE and not r.valid),
             "trial_complete_count": totals.trial_complete,
@@ -588,6 +597,11 @@ class ExperimentRunner:
             "elapsed_seconds": elapsed,
             "ai_wait_seconds": wait,
             "seconds_per_call": seconds_per_call(wait, calls),
+            "seconds_per_done_case": seconds_per_call(elapsed, done),
+            "output_bytes": directory_bytes(exp_dir),
+            "case_output_bytes": case_bytes,
+            "bytes_per_done_case": bytes_per_done_case(case_bytes, done),
+            "discussion_stop_reasons": count_stop_reasons(self._all_case_logs(exp_dir)),
             "cases": [
                 {
                     "case_id": r.case_id,

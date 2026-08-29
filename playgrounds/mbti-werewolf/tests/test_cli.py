@@ -58,8 +58,10 @@ def test_single_case_run_writes_every_output_file(tmp_path, capsys):
         assert (case_dir / name).is_file(), name
     assert (tmp_path / "latest.html").is_file()
     timing = (_experiment_dir(tmp_path) / "timing.md").read_text(encoding="utf-8")
-    assert "実行時間の実測" in timing
+    assert "実行時間と出力容量の実測" in timing
     assert "推論呼び出し" in timing
+    assert "規模の見込み" in timing
+    assert "出力容量" in captured.out
 
 
 def test_trial_range_and_seed_are_accepted(tmp_path, capsys):
@@ -196,8 +198,10 @@ def test_pages_builds_index_from_runs(tmp_path, capsys):
 
     html = (out / "index.html").read_text(encoding="utf-8")
     assert "ケース1件" in html
+    assert "実験1件" in html
     assert "混合構成" in html
     assert "runs/latest.html" in html
+    assert "実験の分析" in html
 
     copied = list(out.glob("runs/*/t001/c00-mixed/result.html"))
     assert copied, "result.html がサイトへコピーされていない"
@@ -236,3 +240,13 @@ def test_no_subcommand_prints_help(capsys):
     assert "judge" in captured.out
     assert "analyze" in captured.out
     assert "ui" in captured.out
+
+
+def test_default_runs_dir_is_the_repository_runs():
+    """`playgrounds/mbti-werewolf` から実行しても、出力はリポジトリの `runs/` へ行く。"""
+
+    from mbti_werewolf.runner import default_runs_dir
+
+    path = default_runs_dir()
+    assert path.name == "runs"
+    assert (path.parent / "playgrounds" / "mbti-werewolf").is_dir()

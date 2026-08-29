@@ -66,8 +66,14 @@ def test_case_files_are_not_empty(runner_for, tmp_path):
     for name in CASE_FILES:
         assert (case_dir / name).stat().st_size > 0
     timing = (_exp(tmp_path) / "timing.md").read_text(encoding="utf-8")
-    assert "実行時間の実測" in timing
+    assert "実行時間と出力容量の実測" in timing
     assert "stub" in timing
+    summary = json.loads((_exp(tmp_path) / "experiment_summary.json").read_text(encoding="utf-8"))
+    assert summary["output_bytes"] > 0
+    assert summary["case_output_bytes"] > 0
+    assert summary["bytes_per_done_case"] is not None
+    assert summary["discussion_stop_reasons"]
+    assert set(summary["discussion_stop_reasons"]).issubset({"all_pass", "max_rounds", "max_speeches", "max_total_chars"})
 
 
 def test_skipped_cases_have_no_output_directory(runner_for, tmp_path):
