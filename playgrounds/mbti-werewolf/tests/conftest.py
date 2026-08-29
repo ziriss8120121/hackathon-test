@@ -113,6 +113,20 @@ def default_responder(
                 if speak
                 else {"speak": False, "memo": "今は待つ。"}
             )
+        elif tag == "judge":
+            payload = {
+                "evaluations": [
+                    {
+                        "speech_id": speech_id,
+                        "labels": ["suspect"],
+                        "mentions": [first],
+                        "stances": [
+                            {"target": first, "direction": "suspect", "strength": 2}
+                        ],
+                    }
+                    for speech_id in request.subjects
+                ]
+            }
         else:
             raise AssertionError("未知のtag: {0}".format(tag))
         return json.dumps(payload, ensure_ascii=False)

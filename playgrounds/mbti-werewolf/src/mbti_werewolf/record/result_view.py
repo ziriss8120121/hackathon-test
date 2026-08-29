@@ -671,7 +671,7 @@ code { font-family: ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
-<p>最新のケース結果（<code>__CASE_ID__</code>）へ移動します。
+<p>最新の結果（<code>__CASE_ID__</code>）へ移動します。
 自動で切り替わらない場合は<a href="./__TARGET__">こちらをタップ</a>してください。</p>
 </body>
 </html>
@@ -684,8 +684,7 @@ def render_latest_redirect(case_id: str, target: str) -> str:
     メタリフレッシュに対応しないブラウザ（アプリ内ブラウザなど）でも辿れるよう、
     手動リンクを必ず添える。v1の `latest.html` と同じ考え方である。
 
-    M3では最新ケースの `result.html` を指す。M4で実験全体の分析HTMLが出るように
-    なったら、そちらへ向け直す（7.6）。
+    M3では最新ケースの `result.html` を指す。`analyze` の後は実験の `experiment.html` へ向け直す（7.6）。
     """
 
     return _LATEST_TEMPLATE.replace("__TARGET__", target).replace("__CASE_ID__", case_id)

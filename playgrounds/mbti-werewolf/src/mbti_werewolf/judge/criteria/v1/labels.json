@@ -1,0 +1,27 @@
+{
+  "criteria_version": "v1",
+  "note": "発言ラベルと公開スタンスの定義（設計書5.5）。プロンプトの生成と応答の検証の両方がこのファイルだけを見る。定義を変えるときは v2 のディレクトリを作り、v1 は残す。",
+  "labels": [
+    { "name": "suspect", "definition": "特定の相手を疑う、または人狼だと主張する" },
+    { "name": "defend", "definition": "特定の相手をかばう、または人狼でないと主張する" },
+    { "name": "claim", "definition": "自分の役職や自分が得た情報を主張する" },
+    { "name": "question", "definition": "特定の相手または全体へ問いを投げる" },
+    { "name": "rebut", "definition": "直前までの主張へ反論する" },
+    { "name": "agree", "definition": "他者の主張に同意する" },
+    { "name": "hypothesis", "definition": "複数の可能性や仮定を並べる" },
+    { "name": "intent", "definition": "自分の投票先や方針を表明する" },
+    { "name": "other", "definition": "上記のどれにも当てはまらない" }
+  ],
+  "fallback_label": "other",
+  "stance": {
+    "directions": [
+      { "name": "suspect", "definition": "対象を疑っている" },
+      { "name": "defend", "definition": "対象をかばっている" }
+    ],
+    "strengths": [
+      { "value": 1, "definition": "弱い。可能性の1つとして触れた程度" },
+      { "value": 2, "definition": "中。理由を挙げて立場を示している" },
+      { "value": 3, "definition": "強い。断定に近い言い方をしている" }
+    ]
+  }
+}

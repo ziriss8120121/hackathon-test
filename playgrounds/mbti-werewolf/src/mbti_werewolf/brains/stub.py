@@ -38,12 +38,26 @@ _PASS_MEMOS = [
 
 _ROLE_AWARENESS = "自分に通知された情報だけを持っている。"
 
+#: Judgeの応答で順に返すラベルの組み合わせ。9種のうち複数付く例と単独の例を混ぜて
+#: おき、分析側が複数ラベルを扱えることをStubだけで確認できるようにする。
+_JUDGE_LABEL_SETS = (
+    ("question",),
+    ("suspect", "hypothesis"),
+    ("claim",),
+    ("agree",),
+    ("defend",),
+    ("intent",),
+    ("rebut", "suspect"),
+    ("other",),
+)
+
 
 class CaseStubBrain:
     """v2.0の応答形式を返す脳。LLMを呼ばない。
 
-    夜の役職行動、議論前後の個別判断、発言か見送りの選択、投票の5種類を、
-    設計書5.4の期待形どおりに返す。
+    夜の役職行動、議論前後の個別判断、発言か見送りの選択、投票、Judgeの評価を、
+    設計書5.4の期待形どおりに返す。Judgeも同じ脳を通るため、推論なしで実行から
+    分析までを一度通せる（設計書11章のM4）。
     """
 
     provider = "stub"
@@ -58,6 +72,7 @@ class CaseStubBrain:
         #: 見送りを何回に1回返すか。沈黙が起きる経路をStubでも通すために入れている。
         self.pass_every = 4
         self._speak_calls = 0
+        self._judge_index = 0
 
     def describe(self) -> Dict[str, str]:
         return {
@@ -77,6 +92,7 @@ class CaseStubBrain:
             "speak": self._speak,
             "pre_vote": self._pre_vote,
             "vote": self._vote,
+            "judge": self._judge,
         }.get(tag)
         if handler is None:
             raise BrainError("invalid_response", "未知のtag: {0}".format(request.tag))
@@ -137,3 +153,45 @@ class CaseStubBrain:
             "target": self._choice(request),
             "memo": _MEMOS[self._rng.randrange(len(_MEMOS))],
         }
+
+    def _judge(self, request: Request) -> Dict[str, object]:
+        """発言バッチの評価（設計書5.5）。
+
+        `subjects` に渡された `speech_id` へ1件ずつ返す。対象は `choices` の
+        参加者から選ぶ。Judge側は発言者自身へ向いたスタンスを落とすので、
+        評価できない発言が混ざる経路もStubのまま通る。
+        """
+
+        candidates = list(request.choices) or ["P1"]
+        evaluations = []
+
+        for speech_id in request.subjects:
+            labels = list(_JUDGE_LABEL_SETS[self._judge_index % len(_JUDGE_LABEL_SETS)])
+            self._judge_index += 1
+            target = candidates[self._rng.randrange(len(candidates))]
+
+            stances = []
+            mentions = []
+            direction = "suspect" if "suspect" in labels else (
+                "defend" if "defend" in labels else None
+            )
+            if direction is not None:
+                stances.append(
+                    {
+                        "target": target,
+                        "direction": direction,
+                        "strength": 1 + self._rng.randrange(3),
+                    }
+                )
+                mentions.append(target)
+
+            evaluations.append(
+                {
+                    "speech_id": speech_id,
+                    "labels": labels,
+                    "mentions": mentions,
+                    "stances": stances,
+                }
+            )
+
+        return {"evaluations": evaluations}

@@ -93,6 +93,58 @@ def test_invalid_trial_range_returns_error_code(tmp_path, capsys):
     assert "設定エラー" in captured.err
 
 
+def test_judge_evaluates_a_finished_experiment_without_rerunning_the_game(
+    tmp_path, capsys
+):
+    """ゲーム実行とJudgeが別コマンドであることの確認（設計書8.1、IF-09）。"""
+
+    assert main(
+        ["experiment", "--brain", "stub", "--cases", "c00", "--runs-dir", str(tmp_path)]
+    ) == 0
+    capsys.readouterr()
+
+    experiment_id = _experiment_dir(tmp_path).name
+    code = main(["judge", "--experiment", experiment_id, "--runs-dir", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert code == 0
+    assert "評価 1" in captured.out
+
+    case_dir = _experiment_dir(tmp_path) / "t001" / "c00-mixed"
+    payload = json.loads((case_dir / "judge.v1.json").read_text(encoding="utf-8"))
+    assert payload["judge_criteria_version"] == "v1"
+    assert len(payload["speeches"]) == len(payload["stance_series"])
+    # 元の case_log.json は評価で書き換えない。
+    log = json.loads((case_dir / "case_log.json").read_text(encoding="utf-8"))
+    assert "judge" not in log
+
+
+def test_judging_twice_skips_the_cases_that_already_have_this_version(tmp_path, capsys):
+    assert main(
+        ["experiment", "--brain", "stub", "--cases", "c00", "--runs-dir", str(tmp_path)]
+    ) == 0
+    experiment_id = _experiment_dir(tmp_path).name
+    assert main(["judge", "--experiment", experiment_id, "--runs-dir", str(tmp_path)]) == 0
+    capsys.readouterr()
+
+    code = main(["judge", "--experiment", experiment_id, "--runs-dir", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert code == 0
+    assert "評価 0" in captured.out
+    assert "評価済み 1" in captured.out
+
+
+def test_judging_an_unknown_experiment_returns_error_code(tmp_path, capsys):
+    code = main(
+        ["judge", "--experiment", "e-99999999-999999", "--runs-dir", str(tmp_path)]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 2
+    assert "評価エラー" in captured.err
+
+
 def test_masterdata_writes_pool_and_patterns(tmp_path, capsys):
     code = main(
         [
@@ -150,9 +202,21 @@ def test_pages_builds_index_from_runs(tmp_path, capsys):
     assert "GitHub Pages用サイト" in captured.out
 
 
+def test_analyze_missing_experiment_exits_2(tmp_path, capsys):
+    code = main(
+        ["analyze", "--experiment", "e-missing", "--runs-dir", str(tmp_path)]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 2
+    assert "分析エラー" in captured.err
+
+
 def test_no_subcommand_prints_help(capsys):
     code = main([])
     captured = capsys.readouterr()
 
     assert code == 1
     assert "experiment" in captured.out
+    assert "judge" in captured.out
+    assert "analyze" in captured.out

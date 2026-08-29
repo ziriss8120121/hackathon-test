@@ -55,6 +55,8 @@ python -m mbti_werewolf experiment --cases c00 --brain ollama --model gemma3:4b 
 python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
 python -m mbti_werewolf experiment --trial-range 3-7                 # 分割実行
 python -m mbti_werewolf experiment --resume e-20260901-210000        # 止まった実験を続ける
+python -m mbti_werewolf judge --experiment e-20260901-210000         # 発言の事後評価
+python -m mbti_werewolf analyze --experiment e-20260901-210000       # 分析出力（推論なし）
 ```
 
 夜間の長時間実行はこの経路を使う。画面を開いたままにする必要がなく、`nohup` などで
@@ -68,6 +70,48 @@ python -m mbti_werewolf experiment --resume e-20260901-210000        # 止まっ
 一覧は `python -m mbti_werewolf experiment --help` で確認できる。
 
 操作画面（`ui` サブコマンド）は、v1の4人版と一緒にM3で削除した。M6でv2.0向けに作り直す。
+
+---
+
+## 3.1 発言を評価する（judge）
+
+ゲームの実行が終わった後、発言を1件ずつ評価する。実行とは別のコマンドなので、
+評価基準を変えてもゲームを回し直す必要がない。
+
+```bash
+python -m mbti_werewolf judge --experiment e-20260901-210000
+python -m mbti_werewolf judge --experiment e-... --judge-brain ollama --judge-model gemma3:4b
+python -m mbti_werewolf judge --experiment e-... --force      # 評価済みのケースもやり直す
+```
+
+評価は発言ごとに、9種のラベル（疑う・かばう・主張する など）、言及した相手、
+公開スタンス（誰を・疑う/かばう・強さ1〜3）を付ける。結果はケースごとの
+`judge.v1.json` に入る。既定では、まだ評価のないケースだけを見る。
+
+Judgeには役職・MBTI・投票先・勝敗・非公開メモを渡さない。正解を知った評価に
+すると「人狼の発言だから怪しい」という後付けになり、公開された会話から読み取れる
+内容の評価にならないためである。
+
+評価基準の文面は `src/mbti_werewolf/judge/criteria/v1/` にある。基準を変えるときは
+`v2/` を作る。ファイル名に版が入るので、古い評価は消えない。
+
+---
+
+## 3.2 分析する（analyze）
+
+`case_log.json` と `judge.v1.json` を読んで、人が読むレポートと集計CSVを作る。
+推論は呼ばない。指標の定義を変えたら、このコマンドだけを回し直す。
+
+```bash
+python -m mbti_werewolf analyze --experiment e-20260901-210000
+```
+
+出力は実験ディレクトリに `experiment_report.md` / `experiment.html`、`rq1.md`、
+`rq2.md`、`manipulation_check.md`、`speech_labels.csv` として残る。Trialごとには
+`trial_report.md` がある。`latest.html` は実験の `experiment.html` へ向く。
+
+JudgeがまだないTrialはRQ1・RQ2から除外し、除外理由をレポートに書く。
+`final_entropy` と `convergence_round` は、Judgeがあるケースだけ埋まる。
 
 ---
 
@@ -126,9 +170,17 @@ runs/e-20260901-210000/
   experiment.json          実験全体の条件と進捗
   status.json              実験の進捗
   experiment_metrics.csv   1行 = 1ケース
+  speech_labels.csv        1行 = 1発言（analyze 後）
+  experiment_report.md
+  experiment.html
+  rq1.md / rq1.html
+  rq2.md / rq2.html
+  manipulation_check.md
   t001/
     trial.json             このTrialの固定条件（再開時に読む）
     status.json            Trialの進捗
+    trial_report.md        17ケースを並べた補助分析
+    trial.html
     trial_metrics.csv      1行 = 1ケース1プレイヤー
     c00-mixed/
       config.json          このケースの確定した実験条件
@@ -137,8 +189,9 @@ runs/e-20260901-210000/
       transcript.md        会話全文とprivate memo（先行実験のWORLD A / B形式）
       summary.md           結果の要約（会話は載せない）
       result.html          自己完結の結果ビュー
+      judge.v1.json        発言の評価（judge コマンドを実行すると増える）
     c01-ISTJ/ ... c16-ENTJ/
-runs/latest.html           直近に完了したケースの result.html への転送
+runs/latest.html           分析後は実験の experiment.html へ転送（実行中は直近ケース）
 ```
 
 `result.html` は外部と通信しない1ファイルで、スマホのブラウザでもそのまま読める。
@@ -151,8 +204,9 @@ python -m mbti_werewolf pages --out site
 
 生成物は `gh-pages` ブランチへ載せて公開する。
 
-集計CSVは、Judgeの出力に依存する2列（`final_entropy` と `convergence_round`）が
-M4まで空欄になる。分母が0になる割合も空欄にする。0と区別するためである。
+集計CSVの `final_entropy` と `convergence_round` は、`analyze` を回すまで空欄になる。
+Judgeがない状態で分析すると、そのTrialはRQから除外される。分母が0になる割合も
+空欄にする。0と区別するためである。
 
 ---
 
@@ -182,6 +236,9 @@ python -m pytest
 | `test_case_metrics.py` | 指標の算出と、算出できない場合の扱い |
 | `test_case_outputs.py` | `summary.md`・`result.html`・集計CSVの形 |
 | `test_run_outputs.py` | 実行を通して出力ファイルが揃う |
+| `test_judge.py` | 発言と評価が1対1に対応し、Judgeへ正解が渡らない |
+| `test_stance.py` | 疑念分布が発言量に引きずられない |
+| `test_analysis.py` | 不完全Trialの除外、Judge列の充填、RQ1/RQ2の注記 |
 | `test_cli.py` | コマンド起動と各サブコマンド |
 
 ---
@@ -193,7 +250,7 @@ python -m pytest
 
 ```text
 src/mbti_werewolf/
-  __main__.py     experiment / masterdata / pages のサブコマンド
+  __main__.py     experiment / judge / analyze / masterdata / pages のサブコマンド
   config.py       実験条件の読み込みと検証
   experiment.py   人物選定、役職割当、Trialと17ケースの生成、条件固定の検査
   runner.py       実行管理、逐次保存、再開
@@ -202,6 +259,8 @@ src/mbti_werewolf/
   agents/         プロンプト組み立てと応答の解釈（agent / persona / mbti_types / functions）
   brains/         推論手段（base / stub / ollama / gemini / factory）
   record/         出力の生成（case_log / transcript / summary / case_metrics / metrics_csv / result_view / pages）
+  judge/          発言の事後評価（judge / stance / criteria）
+  analysis/       指標・検定・レポート（indicators / stats / analyzer）
 ```
 
-M4以降で `judge/` と `analysis/` を追加する。
+`analysis/` は次に追加する。指標の集計、RQ分析、Trialと実験のレポートがここに入る。

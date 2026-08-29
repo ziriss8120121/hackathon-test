@@ -111,6 +111,27 @@ EXPERIMENT_COLUMNS: Sequence[str] = (
     "decided_from_unknown_count",
 )
 
+#: `speech_labels.csv`（1行 = 1発言）。Judgeの出力と `case_log.json` を結合する（6.9）。
+SPEECH_COLUMNS: Sequence[str] = (
+    "experiment_id",
+    "trial_id",
+    "case_id",
+    "speech_id",
+    "order",
+    "round",
+    "player_id",
+    "mbti",
+    "initial_role",
+    "final_role",
+    "chars",
+    "labels",
+    "mentions",
+    "stance_target",
+    "stance_direction",
+    "stance_strength",
+    "judge_criteria_version",
+)
+
 
 def _cell(value: Any) -> str:
     if value is None:
@@ -143,6 +164,8 @@ def experiment_rows(case_logs: Iterable[Dict[str, Any]]) -> List[Dict[str, str]]
     rows: List[Dict[str, str]] = []
     for case_log in case_logs:
         metrics = case_metrics(case_log)
+        overlay = case_log.get("_metrics_overlay") or {}
+        metrics.update(overlay)
         rows.append({key: _cell(metrics.get(key)) for key in EXPERIMENT_COLUMNS})
     return rows
 
@@ -165,3 +188,11 @@ def write_trial_metrics(path: Path, case_logs: Iterable[Dict[str, Any]]) -> None
 
 def write_experiment_metrics(path: Path, case_logs: Iterable[Dict[str, Any]]) -> None:
     write_csv(path, EXPERIMENT_COLUMNS, experiment_rows(case_logs))
+
+
+def write_speech_labels(path: Path, rows: Iterable[Dict[str, Any]]) -> None:
+    write_csv(
+        path,
+        SPEECH_COLUMNS,
+        [{key: _cell(row.get(key)) for key in SPEECH_COLUMNS} for row in rows],
+    )

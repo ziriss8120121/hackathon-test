@@ -15,7 +15,12 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-mbti_werewolf = ["agents/prompts/*/*.md", "agents/prompts/*/*.json"]
+mbti_werewolf = [
+    "agents/prompts/*/*.md",
+    "agents/prompts/*/*.json",
+    "judge/criteria/*/*.md",
+    "judge/criteria/*/*.json",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

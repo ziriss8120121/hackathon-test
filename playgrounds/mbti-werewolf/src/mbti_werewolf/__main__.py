@@ -4,6 +4,7 @@
     python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
     python -m mbti_werewolf experiment --resume e-20260901-210000    止まった実験を続ける
     python -m mbti_werewolf experiment --cases c00 --brain ollama    1ケースだけ実測する
+    python -m mbti_werewolf analyze --experiment e-20260901-210000    分析出力だけを作る
     python -m mbti_werewolf masterdata              人物プールとパターンを生成する
     python -m mbti_werewolf pages                   GitHub Pages用の静的サイトを生成する
 
@@ -42,6 +43,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--brain", choices=("stub", "ollama", "gemini"), help="推論手段を選ぶ"
     )
     experiment.add_argument("--model", help="モデル名（例: gemma3:4b）")
+    experiment.add_argument(
+        "--judge-brain",
+        choices=("stub", "ollama", "gemini"),
+        help="Judgeの推論手段（既定は --brain と同じ）",
+    )
+    experiment.add_argument("--judge-model", help="Judgeのモデル名（既定は --model と同じ）")
     experiment.add_argument("--max-rounds", type=int, help="議論のラウンド上限")
     experiment.add_argument("--machine", help="実行環境の識別名")
     experiment.add_argument("--data-dir", type=Path, help="マスタデータの場所（既定は data/）")
@@ -64,6 +71,37 @@ def build_parser() -> argparse.ArgumentParser:
         "--dry-run",
         action="store_true",
         help="ケースを実行せず、Trialと17ケースの生成と条件固定の検査だけを行う",
+    )
+
+    judge_cmd = sub.add_parser(
+        "judge", help="実行済みの実験の発言を事後評価する（ゲームは再実行しない）"
+    )
+    judge_cmd.add_argument(
+        "--experiment", required=True, metavar="EXPERIMENT_ID", help="評価する実験"
+    )
+    judge_cmd.add_argument("--config", type=Path, help="設定ファイル（既定値を上書きする）")
+    judge_cmd.add_argument(
+        "--judge-brain", choices=("stub", "ollama", "gemini"), help="Judgeの推論手段"
+    )
+    judge_cmd.add_argument("--judge-model", help="Judgeのモデル名（例: gemma3:4b）")
+    judge_cmd.add_argument("--criteria", help="評価基準の版（既定はv1）")
+    judge_cmd.add_argument("--batch-size", type=int, help="1回に評価する発言数（既定8）")
+    judge_cmd.add_argument("--runs-dir", type=Path, help="読み取る runs/（既定はリポジトリの runs/）")
+    judge_cmd.add_argument(
+        "--force",
+        action="store_true",
+        help="同じ版の評価があるケースも評価し直す（既定は評価のないケースだけ）",
+    )
+
+    analyze_cmd = sub.add_parser(
+        "analyze", help="実行済みの実験から分析出力を作る（推論は呼ばない）"
+    )
+    analyze_cmd.add_argument(
+        "--experiment", required=True, metavar="EXPERIMENT_ID", help="分析する実験"
+    )
+    analyze_cmd.add_argument("--runs-dir", type=Path, help="読み取る runs/（既定はリポジトリの runs/）")
+    analyze_cmd.add_argument(
+        "--criteria", help="読み取るJudge評価の版（既定はv1）"
     )
 
     masterdata_cmd = sub.add_parser(
@@ -89,6 +127,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.command == "experiment":
         return command_experiment(args)
+    if args.command == "judge":
+        return command_judge(args)
+    if args.command == "analyze":
+        return command_analyze(args)
     if args.command == "masterdata":
         return command_masterdata(args)
     if args.command == "pages":
@@ -233,6 +275,100 @@ def command_experiment(args: argparse.Namespace) -> int:
     return _print_experiment_result(summary, runner.runs_dir)
 
 
+def command_judge(args: argparse.Namespace) -> int:
+    from .brains.factory import create_case_brain
+    from .config import ConfigError, load_config
+    from .judge.judge import Criteria, ExperimentJudge, JudgeError
+    from .runner import default_runs_dir
+
+    overrides: Dict[str, Any] = {
+        "judge_brain": {"provider": args.judge_brain, "model": args.judge_model},
+        "judge_criteria_version": args.criteria,
+        "judge_batch_size": args.batch_size,
+    }
+    try:
+        config = load_config(path=args.config, overrides=overrides)
+        criteria = Criteria(config.judge_criteria_version)
+    except (ConfigError, JudgeError, ValueError, OSError, KeyError) as exc:
+        print("設定エラー: {}".format(exc), file=sys.stderr)
+        return 2
+
+    runs_dir = args.runs_dir or default_runs_dir()
+    judge = ExperimentJudge(
+        runs_dir=runs_dir,
+        # ケースごとに脳を作り直す。Stubは呼び出し順で出力が決まるため、ケース間で
+        # 状態を共有すると評価がケースの実行順に依存する。
+        brain_factory=lambda: create_case_brain(
+            config, seed=config.base_seed, judge=True
+        ),
+        criteria=criteria,
+        batch_size=config.judge_batch_size,
+        on_progress=print,
+    )
+
+    print(
+        "評価: {} / 基準 {} / 脳={}{} / バッチ{}件".format(
+            args.experiment,
+            criteria.version,
+            config.judge_brain.provider,
+            "（{}）".format(config.judge_brain.model) if config.judge_brain.model else "",
+            config.judge_batch_size,
+        )
+    )
+    print("-" * 60)
+
+    try:
+        summary = judge.run(args.experiment, force=args.force)
+    except JudgeError as exc:
+        print("評価エラー: {}".format(exc), file=sys.stderr)
+        return 2
+
+    print("-" * 60)
+    parts = ["評価 {}".format(summary["done_count"]), "失敗 {}".format(summary["failed_count"])]
+    if summary["skipped_count"]:
+        parts.append("評価済み {}".format(summary["skipped_count"]))
+    print(
+        "結果: {}（呼び出し{}回、合計{}秒）".format(
+            " / ".join(parts), summary["inference_calls"], summary["elapsed_seconds"]
+        )
+    )
+    print("保存先: {}".format(Path(summary["directory"])))
+    for failure in summary["failures"]:
+        print("  失敗 {}: {}".format(failure["case"], failure["message"]), file=sys.stderr)
+    return 0 if summary["failed_count"] == 0 else 1
+
+
+def command_analyze(args: argparse.Namespace) -> int:
+    from .analysis.analyzer import AnalyzeError, Analyzer
+    from .runner import default_runs_dir
+
+    runs_dir = args.runs_dir or default_runs_dir()
+    analyzer = Analyzer(
+        runs_dir=runs_dir,
+        criteria_version=args.criteria or "v1",
+        on_progress=print,
+    )
+    print("分析: {}".format(args.experiment))
+    print("-" * 60)
+    try:
+        summary = analyzer.run(args.experiment)
+    except AnalyzeError as exc:
+        print("分析エラー: {}".format(exc), file=sys.stderr)
+        return 2
+
+    print("-" * 60)
+    print(
+        "結果: 有効Trial {0} / 除外 {1} / 発言ラベル {2}行".format(
+            summary["eligible_count"],
+            summary["excluded_count"],
+            summary["speech_label_rows"],
+        )
+    )
+    print("保存先: {}".format(summary["directory"]))
+    print("最新結果へのリンク: {}".format(runs_dir / "latest.html"))
+    return 0
+
+
 def command_masterdata(args: argparse.Namespace) -> int:
     from . import experiment as experiment_module
     from . import masterdata
@@ -279,7 +415,12 @@ def _experiment_overrides(args: argparse.Namespace) -> Dict[str, Any]:
         "base_seed": args.seed,
         "machine_name": args.machine,
         "brain": {"provider": args.brain, "model": args.model},
-        "judge_brain": {"provider": args.brain, "model": args.model},
+        # Judgeを別指定しなければエージェントと同じ経路にする。実測は両方を同じ
+        # モデルで回すことが多く、毎回2つ指定させる形にすると取り違えが起きる。
+        "judge_brain": {
+            "provider": args.judge_brain or args.brain,
+            "model": args.judge_model or args.model,
+        },
     }
     if args.max_rounds:
         overrides["discussion"] = {"max_rounds": args.max_rounds}

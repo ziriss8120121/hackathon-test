@@ -45,9 +45,10 @@ class BrainError(Exception):
 class Request:
     """1回の推論要求。
 
-    choices と tag は形式に関する補助情報であり、ゲームのルールではない。
-      choices : expect_keys のうち選択肢が限られる項目の候補（投票先など）
-      tag     : 呼び出しの識別ラベル。StubBrainの出力切り替えと調査に使う
+    choices、subjects、tag は形式に関する補助情報であり、ゲームのルールではない。
+      choices  : expect_keys のうち選択肢が限られる項目の候補（投票先など）
+      subjects : 1回の応答で1件ずつ答える対象の識別子。Judgeの発言バッチで使う
+      tag      : 呼び出しの識別ラベル。StubBrainの出力切り替えと調査に使う
     """
 
     system: str
@@ -55,6 +56,7 @@ class Request:
     expect_keys: Tuple[str, ...] = ()
     choices: Tuple[str, ...] = ()
     tag: str = ""
+    subjects: Tuple[str, ...] = ()
 
 
 @dataclass
@@ -207,6 +209,12 @@ class BaseBrain:
         if request.choices:
             lines.append(
                 "選べる値は {} のいずれかです。".format("、".join(request.choices))
+            )
+        if request.subjects:
+            lines.append(
+                "{} の{}件すべてについて答えてください。".format(
+                    "、".join(request.subjects), len(request.subjects)
+                )
             )
         return "\n".join(lines)
 
