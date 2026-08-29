@@ -100,9 +100,24 @@ def read_json(path) -> Optional[Dict[str, Any]]:
         return json.load(fp)
 
 
+# v2.0のfixtureは v2_support.py が持つ。pytestが自動で読むのは conftest.py だけなので、
+# ここへ取り込んでテストから使えるようにする（設計書0.4の移行期間の措置）。
+from v2_support import (  # noqa: E402,F401
+    ScriptedBrain,
+    build_trial,
+    case_log,
+    default_responder,
+    run_case,
+    v2_config,
+    v2_data_dir,
+    v2_inputs,
+)
+
 __all__ = [
     "BrainError",
     "FakeBrain",
+    "ScriptedBrain",
+    "default_responder",
     "is_vote_prompt",
     "read_json",
     "speech",
