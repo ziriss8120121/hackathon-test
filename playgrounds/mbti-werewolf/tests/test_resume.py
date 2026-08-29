@@ -13,7 +13,7 @@ import re
 import pytest
 
 from mbti_werewolf import experiment as experiment_module
-from mbti_werewolf.experiment_runner import (
+from mbti_werewolf.runner import (
     STATUS_SKIPPED,
     ExperimentRunner,
     ResumeError,

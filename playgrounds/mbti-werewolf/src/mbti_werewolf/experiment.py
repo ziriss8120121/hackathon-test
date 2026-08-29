@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from .agents.mbti_types import TYPE_STACKS
 from .engine import roles as roles_module
 from .engine.rules import RuleSet
-from .experiment_config import ExperimentConfig
+from .config import ExperimentConfig
 from .masterdata import PatternSet, PersonPool
 
 SCHEMA_VERSION = "2"

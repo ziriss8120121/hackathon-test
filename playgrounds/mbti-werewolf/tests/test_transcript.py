@@ -21,7 +21,7 @@ from mbti_werewolf.record.transcript import (
     write_transcript,
 )
 
-from v2_support import default_responder
+from conftest import default_responder
 
 REFERENCE = (
     Path(__file__).resolve().parents[3]

@@ -1,9 +1,10 @@
 # mbti-werewolf
 
-心理機能（MBTI風の行動ルール）を持つAIエージェント同士に人狼をさせ、行動ルールの差が
-ログに現れるかを観察するためのシミュレーター。
+MBTI16タイプの行動傾向を持つAIエージェント8体に「ワンナイト人狼」をさせ、性格傾向の差が
+推理と議論に現れるかを観察するためのシミュレーター。
 
 - 上位文書: [要求定義書](../../docs/requirements.md) / [要件定義書](../../docs/system-requirements.md) / [設計書](../../docs/design.md)
+- ルールの正本: [`01_werewolf-rules_v0.7.md`](../../docs/m-plus-experiment/01_werewolf-rules_v0.7.md)
 - プレイヤーは全員AI。人間は実行と観察だけを行う。
 - 会話は実行完了後にまとめて表示する。1発言ずつ流すライブ表示は行わない。
 
@@ -32,47 +33,56 @@ pip install -e .
 
 ---
 
-## 2. 実行する
+## 2. 実験の単位
 
-### 操作画面から
+| 単位 | 中身 |
+| --- | --- |
+| ケース | 8人ワンナイト1試合。 |
+| Trial | 17ケース。混合構成1ケースと、同質構成16ケース（16タイプそれぞれ全員同じ）。 |
+| 実験 | 複数Trial。既定は1 Trial。 |
 
-```bash
-python -m mbti_werewolf ui
-```
-
-`http://127.0.0.1:8765/` が開く。条件を設定して「対戦開始」を押すと実行が始まり、
-完了後に同じ画面で会話タイムラインと結果が表示される。停止は Ctrl+C。
-
-### コマンドから
-
-```bash
-python -m mbti_werewolf run                        # 1試合
-python -m mbti_werewolf run --games 100 --seed 42  # 100試合
-python -m mbti_werewolf run --brain ollama --model gemma3:4b
-python -m mbti_werewolf run --players 8 --werewolves 2 --functions Ne,Ti,Fe,Si,Ni,Se,Te,Fi
-```
-
-夜間の長時間実行はこちらを使う。画面を開いたままにする必要がなく、`nohup` などで
-シェルから切り離せる。
-
-主なオプションは `--games` `--seed` `--players` `--turns` `--werewolves` `--functions`
-`--brain` `--model` `--max-output-chars` `--config` `--runs-dir`。
-一覧は `python -m mbti_werewolf run --help` で確認できる。
+Trial内の17ケースは、人物・年齢・性別・役職・seedをすべて一致させ、MBTIだけを変える。
+これが条件固定であり、比較の前提になる。
 
 ---
 
-## 3. エージェントの脳を切り替える
+## 3. 実行する
+
+```bash
+python -m mbti_werewolf experiment                                   # 1 Trial（17ケース）
+python -m mbti_werewolf experiment --dry-run                         # 生成と条件固定の検査だけ
+python -m mbti_werewolf experiment --cases c00 --brain ollama --model gemma3:4b   # 1ケースの実測
+python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
+python -m mbti_werewolf experiment --trial-range 3-7                 # 分割実行
+python -m mbti_werewolf experiment --resume e-20260901-210000        # 止まった実験を続ける
+```
+
+夜間の長時間実行はこの経路を使う。画面を開いたままにする必要がなく、`nohup` などで
+シェルから切り離せる。
+
+ケースを1件終えるごとにファイルへ書き出すため、途中で止めてもそこまでの結果は残る。
+`--resume` は完了済みのケースを実行せず、条件を `trial.json` から復元してから続ける。
+
+主なオプションは `--trials` `--trial-range` `--seed` `--cases` `--case-attempts`
+`--max-rounds` `--brain` `--model` `--machine` `--config` `--data-dir` `--runs-dir`。
+一覧は `python -m mbti_werewolf experiment --help` で確認できる。
+
+操作画面（`ui` サブコマンド）は、v1の4人版と一緒にM3で削除した。M6でv2.0向けに作り直す。
+
+---
+
+## 4. エージェントの脳を切り替える
 
 `--brain` または設定の `brain.provider` で切り替える。ゲーム進行側のコードは変わらない。
 
 | provider | 通信先 | 用途 | 準備 |
 | --- | --- | --- | --- |
-| `stub` | なし | 進行・出力・画面の確認、テスト。既定値。 | 不要 |
+| `stub` | なし | 進行・出力の確認、テスト。既定値。 | 不要 |
 | `ollama` | `http://localhost:11434` | 本命。実際の議論を観察する。 | 下記 |
 | `gemini` | Gemini API 無料枠 | 品質比較用。 | 環境変数 `GEMINI_API_KEY` |
 
-`stub` はLLMを呼ばず、心理機能ごとの固定文を返す。議論としては無意味だが、
-待機時間ゼロで1試合が完走するため、出力形式と画面の確認に使える。
+`stub` はLLMを呼ばず、決まった形の応答を返す。議論としては無意味だが、待機時間ゼロで
+1ケースが完走するため、出力形式の確認に使える。
 
 Ollamaを使う場合の準備。
 
@@ -80,49 +90,73 @@ Ollamaを使う場合の準備。
 brew install ollama
 ollama serve          # 別のターミナルで動かしておく
 ollama pull gemma3:4b
-python -m mbti_werewolf run --brain ollama --model gemma3:4b
+python -m mbti_werewolf experiment --cases c00 --brain ollama --model gemma3:4b
 ```
 
-1試合あたりの推論回数は 発言12回 + 投票4回 = 16回。Geminiの既定モデルは
-`gemini-3.1-flash-lite`。無料枠は分間・1日の上限があるため、100試合以上はOllamaで行う。
-上限に達した場合は自動で切り替えず、`rate_limited` として失敗を記録する。
+Geminiの無料枠は分間・1日の上限がある。上限に達した場合は自動で切り替えず、
+`rate_limited` として失敗を記録する。長い実行はOllamaで行う。
 
 ---
 
-## 4. 出力
+## 5. マスタデータ
 
-出力先はリポジトリの `runs/` 。`--runs-dir` または環境変数 `MBTI_WEREWOLF_RUNS_DIR`
-で変更できる。1試合だけの実行も1試合のseriesとして扱う。
+人物プールとMBTIパターンは `data/` に置く。生成し直すと過去の実験と条件が変わるため、
+通常は生成済みのファイルをそのまま使う。
 
 ```text
-runs/s-20260815-190959/
-  series.json          実行全体の状態と試合ごとの結果
-  series_summary.md    試合数、勝率、心理機能別の集計
-  r001/
-    config.json        この試合の確定した実験条件
-    status.json        進捗（画面が1秒ごとに読む）
-    run_log.json       出力の正本。他のファイルはここから導出する
-    summary.md         結果カード
-    timeline.md        会話タイムライン
-    metrics.csv        1行 = 1プレイヤーの集計
-    result.html        自己完結の結果ビュー
+data/
+  rules/onenight-8p-v0.7.json      ルール文書v0.7の機械可読な写し
+  persons/pool-001.json            人物プール（年齢・性別・MBTI）
+  patterns/pattern-set-001.json    Trialごとに使う8人の組み合わせ
 ```
 
-`result.html` は結果データを埋め込んだ1ファイルで、外部と通信しない。
-Pythonを動かせないメンバーはこれをブラウザで開ける。GitHub Pages の一覧は
+```bash
+python -m mbti_werewolf masterdata --patterns 100
+```
+
+---
+
+## 6. 出力
+
+出力先はリポジトリの `runs/` 。`--runs-dir` または環境変数 `MBTI_WEREWOLF_RUNS_DIR`
+で変更できる。
+
+```text
+runs/e-20260901-210000/
+  experiment.json          実験全体の条件と進捗
+  status.json              実験の進捗
+  experiment_metrics.csv   1行 = 1ケース
+  t001/
+    trial.json             このTrialの固定条件（再開時に読む）
+    status.json            Trialの進捗
+    trial_metrics.csv      1行 = 1ケース1プレイヤー
+    c00-mixed/
+      config.json          このケースの確定した実験条件
+      status.json          進捗
+      case_log.json        出力の正本。他のファイルはここから導出する
+      transcript.md        会話全文とprivate memo（先行実験のWORLD A / B形式）
+      summary.md           結果の要約（会話は載せない）
+      result.html          自己完結の結果ビュー
+    c01-ISTJ/ ... c16-ENTJ/
+runs/latest.html           直近に完了したケースの result.html への転送
+```
+
+`result.html` は外部と通信しない1ファイルで、スマホのブラウザでもそのまま読める。
+Pythonを動かせないメンバーはこれを開く。GitHub Pages の一覧は
 https://ziriss8120121.github.io/hackathon-test/ から同じファイルを開く。
 
 ```bash
 python -m mbti_werewolf pages --out site
 ```
 
-生成物は `gh-pages` ブランチへ載せて公開する。操作画面の見た目は公開するが、そこから対戦は開始できない。
+生成物は `gh-pages` ブランチへ載せて公開する。
 
-`metrics.csv` は複数試合分を縦に連結すれば、そのまま表計算ソフトで機能別に集計できる。
+集計CSVは、Judgeの出力に依存する2列（`final_entropy` と `convergence_round`）が
+M4まで空欄になる。分母が0になる割合も空欄にする。0と区別するためである。
 
 ---
 
-## 5. テスト
+## 7. テスト
 
 ```bash
 python -m pytest
@@ -133,33 +167,41 @@ python -m pytest
 
 | ファイル | 確認していること |
 | --- | --- |
-| `test_engine.py` | 1試合の完走と出力ファイルの生成 |
-| `test_reproducibility.py` | 同じseedで割当と進行順序が再現される |
-| `test_role_isolation.py` | 村人視点のプロンプトに他者の役職が出ない |
-| `test_brain_parse.py` | 形式が崩れた応答でも試合が完走し、事象が残る |
-| `test_tiebreak.py` | 同数得票でも試合が終了し、決着方法が残る |
-| `test_failure_record.py` | 失敗時に原因の種別と部分結果が残る |
-| `test_web_api.py` | 画面から実行するAPIの契約 |
-| `test_cli.py` | コマンド起動と、設定だけでの条件変更 |
+| `test_rules.py` | ルールJSONの読み込みと検証 |
+| `test_experiment.py` | 人物選定、役職割当、Trialと17ケースの生成 |
+| `test_condition_fixation.py` | 17ケースでMBTI以外の条件が一致する |
+| `test_night.py` | 開始時の役職処理と最終役職 |
+| `test_discussion.py` | 自由議論のラウンド制御と終了条件 |
+| `test_private_answers.py` | 2時点の個別判断とprivate memo |
+| `test_vote.py` | 投票の収集と同数得票の扱い |
+| `test_execution.py` | 追放と勝敗判定 |
+| `test_isolation.py` | 他者の役職、MBTI、他者の個別判断が渡らない |
+| `test_brain_parse.py` | 形式が崩れた応答の再送と3回失敗の扱い |
+| `test_resume.py` | 中断と再開、失敗ケースの再実行 |
+| `test_transcript.py` | `transcript.md` が先行実験の形式に沿う |
+| `test_case_metrics.py` | 指標の算出と、算出できない場合の扱い |
+| `test_case_outputs.py` | `summary.md`・`result.html`・集計CSVの形 |
+| `test_run_outputs.py` | 実行を通して出力ファイルが揃う |
+| `test_cli.py` | コマンド起動と各サブコマンド |
 
 ---
 
-## 6. コードの構成
+## 8. コードの構成
 
 依存は外から内へ一方向。`engine` と `agents` は脳の具体実装をimportしない。
 推論手段を追加するときに触るのは `brains/` と設定の選択肢だけである。
 
 ```text
 src/mbti_werewolf/
-  __main__.py     ui / run のサブコマンド
-  config.py       設定の読み込みと検証
-  runner.py       実行管理、進捗と出力の書き込み
-  engine/         ゲーム進行（game / roles / view / tiebreak）
-  agents/         プロンプト組み立てと応答の解釈、心理機能の行動ルール
+  __main__.py     experiment / masterdata / pages のサブコマンド
+  config.py       実験条件の読み込みと検証
+  experiment.py   人物選定、役職割当、Trialと17ケースの生成、条件固定の検査
+  runner.py       実行管理、逐次保存、再開
+  masterdata.py   人物プールとパターンセットの生成
+  engine/         ゲーム進行（rules / case / roles / night / discussion / vote / view）
+  agents/         プロンプト組み立てと応答の解釈（agent / persona / mbti_types / functions）
   brains/         推論手段（base / stub / ollama / gemini / factory）
-  record/         出力の生成（run_log / metrics / summary / timeline / series / result_view）
-  web/            FastAPIと操作画面の静的ファイル
+  record/         出力の生成（case_log / transcript / summary / case_metrics / metrics_csv / result_view / pages）
 ```
 
-画面の見た目を変えるときに触るのは `web/static/` の3ファイルだけで、実行側には
-手を入れない。ビルド工程は持たない。
+M4以降で `judge/` と `analysis/` を追加する。

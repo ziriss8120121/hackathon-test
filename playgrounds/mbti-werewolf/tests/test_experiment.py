@@ -7,7 +7,7 @@ import json
 import pytest
 
 from mbti_werewolf import experiment as experiment_module
-from mbti_werewolf import experiment_config as ec
+from mbti_werewolf import config as ec
 
 
 # --- ID -------------------------------------------------------------------

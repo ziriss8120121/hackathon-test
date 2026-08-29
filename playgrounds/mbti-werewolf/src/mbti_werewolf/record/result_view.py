@@ -1,26 +1,65 @@
-"""result.html の生成（設計書3.6、7.5、要件F-34、F-41、NF-15）。
+"""ケースの `result.html`（設計書6.10、7.5）。
 
-実行結果のJSONをファイル内に埋め込んだ自己完結HTMLとして生成する。外部から
-データを取得しないため、file:// で直接開いてもGitHub Pages経由でも同じように
-表示される。操作画面と違ってPythonの起動を必要としないので、実行環境を持たない
-メンバーがブラウザだけで結果を読める。
+外部からデータを取得しない自己完結HTMLにする。`file://` で直接開いてもGitHub Pages
+経由でも同じように表示されるため、実行環境を持たないメンバーがブラウザだけで結果を
+読める（NF-15）。
 
-データを埋め込むのは、file:// から fetch で別ファイルを読むとブラウザに
-拒否されるためである。
+中身はv1から流用せず新規に作る。v1は4人・心理機能1つ・ターン固定を前提に表示して
+おり、v2は8人・自由議論・private memo・両時点の個別判断を出すため、表示する項目が
+ほぼ入れ替わる。CSSと最新結果リンクの仕組みだけv1と同じ考え方を使う（設計書0.4）。
 """
 
 from __future__ import annotations
 
-import json
-from typing import Any, Dict
+import html
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-_TEMPLATE = """<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MBTI人狼 結果 __RUN_ID__</title>
-<style>
+from ..engine.roles import TEAM_WEREWOLF, role_label, team_of
+from .case_metrics import SUSPECT_UNKNOWN, case_metrics, player_metrics
+from .transcript import night_steps
+
+_GENDER_LABELS = {"male": "男性", "female": "女性"}
+
+PASS_TEXT = "（見送り）"
+SKIP_TEXT = "（応答が得られず記録なし）"
+MISSING_TEXT = "—"
+
+_STOP_REASONS = {
+    "all_pass": "そのラウンドの対象者全員が見送った",
+    "max_rounds": "ラウンド数が上限に達した",
+    "max_speeches": "発言数が上限に達した",
+    "max_total_chars": "発言量が上限に達した",
+}
+
+
+def _esc(value: Any) -> str:
+    if value is None:
+        return ""
+    return html.escape(str(value), quote=True)
+
+
+def _upper(player_id: Optional[str]) -> str:
+    return player_id.upper() if player_id else ""
+
+
+def _suspect_text(suspect: Optional[str]) -> str:
+    if suspect is None:
+        return MISSING_TEXT
+    if suspect == SUSPECT_UNKNOWN:
+        return "判断不能"
+    return _upper(suspect)
+
+
+def _num(value: Any, suffix: str = "") -> str:
+    if value is None:
+        return MISSING_TEXT
+    return "{0}{1}".format(value, suffix)
+
+
+# 表示だけを担うため、HTMLは素の文字列で組む。テンプレートエンジンを入れると
+# 依存が増え、`file://` で開く自己完結HTMLという性質と釣り合わない。
+_STYLE = """
 :root {
   --bg: #f5f6f8;
   --panel: #ffffff;
@@ -32,7 +71,6 @@ _TEMPLATE = """<!DOCTYPE html>
   --werewolf: #d1373f;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
 body {
   margin: 0;
   padding: 0 0 64px;
@@ -41,373 +79,620 @@ body {
   font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
   line-height: 1.7;
 }
-main { max-width: 960px; margin: 0 auto; padding: 24px 16px 0; }
-.site-header { position: sticky; top: 0; z-index: 20; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
-.site-header-inner { max-width: 960px; margin: 0 auto; padding: 14px 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.brand { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+main { max-width: 960px; margin: 0 auto; padding: 20px 16px 0; }
+.site-header { background: #fff; border-bottom: 1px solid var(--line); }
+.site-header-inner { max-width: 960px; margin: 0 auto; padding: 14px 16px; display: flex;
+  align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-size: 17px; font-weight: 700; }
 .brand-accent { color: var(--accent); font-weight: 500; }
-.status-chip { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; white-space: nowrap; }
-.status-chip.done { border-color: var(--village); color: var(--village); }
-.status-chip.failed { border-color: var(--werewolf); color: var(--werewolf); }
-.site-nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto; padding: 10px 16px; }
-.site-nav a { flex-shrink: 0; font-size: 12px; color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
-.site-nav a:hover { color: var(--text); border-color: var(--line); background: #eef1f5; }
-h1 { font-size: 20px; margin: 0 0 4px; }
-h2 { font-size: 16px; margin: 40px 0 12px; padding: 2px 0 6px 12px; border-bottom: 1px solid var(--line); position: relative; scroll-margin-top: 96px; }
-h2::before { content: ""; position: absolute; left: 0; top: 1px; bottom: 8px; width: 3px; border-radius: 2px; background: var(--accent); }
-.sub { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px -12px rgba(15, 23, 42, 0.2); }
+.chip { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line);
+  color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+.chip.village { border-color: var(--village); color: var(--village); }
+.chip.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.site-nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto;
+  padding: 0 16px 10px; }
+.site-nav a { flex-shrink: 0; font-size: 12px; color: var(--muted); text-decoration: none;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
+.site-nav a:hover { color: var(--text); border-color: var(--line); }
+h1 { font-size: 19px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 36px 0 12px; padding-left: 10px; border-left: 3px solid var(--accent); }
+h3 { font-size: 13px; color: var(--muted); margin: 20px 0 8px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
 .card .label { color: var(--muted); font-size: 12px; }
-.card .value { font-size: 17px; margin-top: 4px; word-break: break-all; }
+.card .value { font-size: 17px; margin-top: 4px; word-break: break-word; }
 .village { color: var(--village); }
 .werewolf { color: var(--werewolf); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
-th { color: var(--muted); font-weight: 600; }
-td.wrap, th.wrap { white-space: normal; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
 tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.025); }
-tbody tr:hover { background: rgba(59, 102, 214, 0.08); }
-.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
-.scroll table { border: none; }
-.scroll th, .scroll td { border-bottom: 1px solid var(--line); }
-.scroll tr:last-child td { border-bottom: none; }
-.discussion-note { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
-.chat-log { background: #ffffff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.chat-row { display: flex; align-items: flex-start; gap: 8px; }
-.chat-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; }
-.chat-avatar-muted { background: #9aa1b1; }
-.chat-bubble-wrap { max-width: 78%; display: flex; flex-direction: column; }
-.chat-meta { font-size: 11px; color: #6b7280; margin: 0 4px 4px; }
-.chat-bubble { padding: 10px 14px; border-radius: 18px; border-bottom-left-radius: 4px; font-size: 14px; line-height: 1.6; color: #24292f; word-break: break-word; white-space: pre-wrap; }
-.chat-row.role-village .chat-bubble { background: #eaf7ee; border: 1px solid #bfe6cf; }
-.chat-row.role-werewolf .chat-bubble { background: #ffeef0; border: 1px solid #f3c2c8; }
-.chat-flag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 999px; background: #eef0f3; color: #6b7280; margin-left: 6px; }
-.badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); margin-left: 6px; }
-.alert { background: #fdecee; border: 1px solid #f3b4bb; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
-.note { color: var(--muted); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
-dl.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: 0; font-size: 13px; }
-dl.kv dt { color: var(--muted); }
-dl.kv dd { margin: 0; word-break: break-all; }
-.card .sub { color: var(--muted); font-size: 12px; margin-top: 6px; line-height: 1.5; }
-.roster-card { display: flex; flex-direction: column; gap: 10px; }
-.roster-card-top { display: flex; align-items: center; gap: 12px; }
-.mbti-icon { width: 56px; height: 56px; border-radius: 12px; background: #1f2328; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-.mbti-icon-fallback { font-size: 13px; font-weight: 700; color: #e6e8ee; letter-spacing: 0.02em; }
-.roster-card-title { min-width: 0; }
-.roster-card-title .value { font-size: 15px; word-break: break-word; }
-.roster-card-title .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.roster-badges, .roster-stats { display: flex; gap: 6px; flex-wrap: wrap; }
-.badge.role-badge.village { border-color: var(--village); color: var(--village); }
-.badge.role-badge.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
-.badge.result-badge.win { border-color: var(--village); color: var(--village); }
-.badge.result-badge.lose { border-color: var(--werewolf); color: var(--werewolf); }
-.stat-pill { font-size: 11px; color: var(--muted); background: rgba(15, 23, 42, 0.03); border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; }
+td.memo { color: var(--muted); font-size: 12px; }
+/* 項目名と値の2列だけの表。項目名を折り返させず、値側を伸ばす。 */
+table.kv th[scope="row"] { width: 1%; }
+table.kv td { overflow-wrap: anywhere; }
+td.quiet { color: var(--muted); }
+td.id { font-family: ui-monospace, Menlo, monospace; white-space: nowrap; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted); }
+.badge.village { border-color: var(--village); color: var(--village); }
+.badge.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.alert { background: #fdecee; border: 1px solid #f3b4bb; border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 20px; }
+.note { color: var(--muted); font-size: 12px; margin-top: 36px; border-top: 1px solid var(--line);
+  padding-top: 16px; }
+.links { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; margin: 0 0 8px; }
+
+/* 狭い画面では表を1行1ブロックへ折り返す。要求定義書がスマートフォンから結果を
+   開くことを重視項目に挙げており、横スクロールのままだとprivate memoの列が画面外
+   に出て読めない。各セルの見出しは data-label から出す。
+
+   table と tbody も display: block にする。display: table のままだと表のレイアウト
+   計算が働き、width: 100% より内容の最小幅が優先されて画面からはみ出す。 */
+@media (max-width: 640px) {
+  table.stack, table.stack tbody { display: block; width: 100%; }
+  table.stack thead { display: none; }
+  table.stack tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  table.stack tr:last-child { border-bottom: none; }
+  table.stack td { display: flex; gap: 10px; padding: 2px 0; border: none; white-space: normal; }
+  table.stack td::before {
+    content: attr(data-label);
+    flex: 0 0 6.5em;
+    color: var(--muted);
+    font-size: 11px;
+    padding-top: 2px;
+  }
+  table.stack td > span.grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  /* 中身が空のセルは行から消す。横並びの表では列を揃えるために必要だが、
+     縦に積むと項目名だけの行になって読みにくい。 */
+  table.stack td.blank { display: none; }
+  th, td { padding: 7px 8px; font-size: 12px; overflow-wrap: anywhere; }
+}
+"""
+
+_NAV = (
+    ("sec-result", "結果"),
+    ("sec-roster", "参加者"),
+    ("sec-night", "夜処理"),
+    ("sec-discussion", "公開議論"),
+    ("sec-votes", "投票"),
+    ("sec-answers", "個別判断"),
+    ("sec-metrics", "指標"),
+    ("sec-conditions", "実行条件"),
+)
+
+
+def render_result_html(case_log: Dict[str, Any]) -> str:
+    metrics = case_metrics(case_log)
+    rows = player_metrics(case_log)
+    result = case_log["result"]
+
+    nav = "".join(
+        '<a href="#{0}">{1}</a>'.format(anchor, label) for anchor, label in _NAV
+    )
+
+    parts = [
+        "<!DOCTYPE html>",
+        '<html lang="ja">',
+        "<head>",
+        '<meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width, initial-scale=1">',
+        "<title>ケース {0}</title>".format(_esc(case_log["case_id"])),
+        "<style>{0}</style>".format(_STYLE),
+        "</head>",
+        "<body>",
+        '<header class="site-header">',
+        '  <div class="site-header-inner">',
+        '    <div class="brand">MBTI人狼 <span class="brand-accent">ケース結果</span></div>',
+        "    {0}".format(_status_chip(case_log)),
+        "  </div>",
+        '  <nav class="site-nav">{0}</nav>'.format(nav),
+        "</header>",
+        "<main>",
+        "<h1>{0}</h1>".format(_esc(case_log["case_id"])),
+        '<p class="sub">{0}</p>'.format(_esc(_headline(case_log))),
+        _links(),
+    ]
+
+    if case_log.get("failure"):
+        parts.append(_failure(case_log))
+
+    parts.append(_result_section(case_log, metrics, result))
+    parts.append(_roster_section(case_log, rows))
+    parts.append(_night_section(case_log))
+    parts.append(_discussion_section(case_log))
+    parts.append(_votes_section(case_log))
+    parts.append(_answers_section(rows))
+    parts.append(_metrics_section(metrics))
+    parts.append(_conditions_section(case_log))
+    parts.append(
+        '<p class="note">この画面は実行時に生成された自己完結HTMLである。'
+        "会話全文は <code>transcript.md</code>、生データは <code>case_log.json</code> にある。"
+        "MBTIタイプは参加者本人へは一切渡していない。</p>"
+    )
+    parts.extend(["</main>", "</body>", "</html>", ""])
+    return "\n".join(parts)
+
+
+def _status_chip(case_log: Dict[str, Any]) -> str:
+    result = case_log["result"]
+    if case_log["status"] != "done":
+        return '<div class="chip werewolf">{0}</div>'.format(_esc(case_log["status"]))
+    if not result["valid"]:
+        return '<div class="chip">無効試合</div>'
+    winner = result["winner"]
+    label = "村人陣営の勝利" if winner == "village" else "人狼陣営の勝利"
+    css = "village" if winner == "village" else "werewolf"
+    return '<div class="chip {0}">{1}</div>'.format(css, label)
+
+
+def _headline(case_log: Dict[str, Any]) -> str:
+    if case_log["composition"] == "mixed":
+        composition = "混合構成（人物プールのMBTIをそのまま使用）"
+    else:
+        composition = "同質構成（8人全員が {0}）".format(case_log["homogeneous_type"])
+    return "{0} / Trial {1} / ルール {2}".format(
+        composition,
+        case_log["config"]["trial_index"],
+        case_log["versions"]["rule_set_id"],
+    )
+
+
+def _links() -> str:
+    return (
+        '<p class="links">'
+        '<a href="./transcript.md">会話全文（transcript.md）</a>'
+        '<a href="./summary.md">要約（summary.md）</a>'
+        '<a href="./case_log.json">生データ（case_log.json）</a>'
+        "</p>"
+    )
+
+
+def _failure(case_log: Dict[str, Any]) -> str:
+    failure = case_log["failure"] or {}
+    return (
+        '<div class="alert"><strong>このケースは失敗して終わった。</strong><br>'
+        "種別: {0}<br>内容: {1}<br>試行回数: {2}</div>".format(
+            _esc(failure.get("kind")),
+            _esc(failure.get("message")),
+            _esc(case_log.get("attempt")),
+        )
+    )
+
+
+def _card(label: str, value: str, css: str = "") -> str:
+    return '<div class="card"><div class="label">{0}</div><div class="value {2}">{1}</div></div>'.format(
+        _esc(label), value, css
+    )
+
+
+def _result_section(
+    case_log: Dict[str, Any], metrics: Dict[str, Any], result: Dict[str, Any]
+) -> str:
+    if not result["valid"]:
+        return (
+            '<h2 id="sec-result">結果</h2>'
+            '<div class="cards">{0}{1}</div>'.format(
+                _card("結果", "無効試合"),
+                _card("理由", _esc("有効投票なし")),
+            )
+        )
+
+    winner = result["winner"]
+    winner_label = "村人陣営" if winner == "village" else "人狼陣営"
+    executed = (
+        "、".join(_upper(pid) for pid in result["executed"])
+        if result["executed"]
+        else "なし（最多得票が1票）"
+    )
+    tally = "、".join(
+        "{0} {1}票".format(_upper(pid), count)
+        for pid, count in sorted(
+            result["vote_tally"].items(), key=lambda kv: (-kv[1], kv[0])
+        )
+    )
+
+    cards = [
+        _card("勝敗", _esc(winner_label), "village" if winner == "village" else "werewolf"),
+        _card("追放者", _esc(executed)),
+        _card("得票", _esc(tally or "なし")),
+        _card(
+            "有効票 / 棄権",
+            _esc("{0}票 / {1}件".format(result["valid_vote_count"], result["abstain_count"])),
+        ),
+        _card("議論ラウンド", _esc("{0}（{1}）".format(
+            case_log["discussion"]["rounds"],
+            _STOP_REASONS.get(case_log["discussion"]["stop_reason"] or "", "不明"),
+        ))),
+        _card("推論呼び出し", _esc("{0}回".format(case_log["timing"]["inference_calls"]))),
+    ]
+    return '<h2 id="sec-result">結果</h2><div class="cards">{0}</div>'.format("".join(cards))
+
+
+def _cells(*pairs: Any) -> str:
+    """`(見出し, 中身, css)` の並びを `<td>` へ変える。
+
+    見出しを `data-label` へ入れる。狭い画面で表を1行1ブロックへ折り返すとき、
+    CSSがこの属性から項目名を出す（`table.stack`）。
+    """
+
+    parts = []
+    for pair in pairs:
+        label, value = pair[0], pair[1]
+        classes = [pair[2]] if len(pair) > 2 and pair[2] else []
+        if not value:
+            classes.append("blank")
+        attr = ' class="{0}"'.format(" ".join(classes)) if classes else ""
+        parts.append(
+            '<td data-label="{0}"{1}><span class="grow">{2}</span></td>'.format(
+                _esc(label), attr, value
+            )
+        )
+    return "".join(parts)
+
+
+def _roster_section(case_log: Dict[str, Any], rows: List[Dict[str, Any]]) -> str:
+    by_id = {row["player_id"]: row for row in rows}
+    executed = set(case_log["result"]["executed"])
+
+    body = []
+    for player in case_log["players"]:
+        row = by_id[player["player_id"]]
+        team = team_of(player["final_role"])
+        badge = '<span class="badge {0}">{1}</span>'.format(
+            "werewolf" if team == TEAM_WEREWOLF else "village",
+            "人狼陣営" if team == TEAM_WEREWOLF else "村人陣営",
+        )
+        body.append(
+            "<tr>{0}</tr>".format(
+                _cells(
+                    ("ID", _esc(_upper(player["player_id"])), "id"),
+                    ("MBTI", _esc(player["mbti"])),
+                    ("人物", _esc(player["person_id"]), "id"),
+                    (
+                        "属性",
+                        _esc(
+                            "{0}歳・{1}".format(
+                                player["age"],
+                                _GENDER_LABELS.get(player["gender"], player["gender"]),
+                            )
+                        ),
+                    ),
+                    ("開始時役職", _esc(role_label(player["initial_role"]))),
+                    (
+                        "最終役職",
+                        "{0} {1}".format(_esc(role_label(player["final_role"])), badge),
+                    ),
+                    ("発言", _esc("{0}回".format(row["speech_count"]))),
+                    ("見送り", _esc("{0}回".format(row["pass_count"]))),
+                    ("投票結果", "追放" if player["player_id"] in executed else ""),
+                )
+            )
+        )
+
+    return (
+        '<h2 id="sec-roster">参加者</h2>'
+        '<div class="scroll"><table class="stack"><thead><tr>'
+        "<th>ID</th><th>MBTI</th><th>人物</th><th>属性</th>"
+        "<th>開始時役職</th><th>最終役職</th><th>発言</th><th>見送り</th><th></th>"
+        "</tr></thead><tbody>{0}</tbody></table></div>"
+        '<p class="sub">MBTIはこの画面と <code>summary.md</code> だけに出る。'
+        "参加者本人へは渡していない。</p>".format("".join(body))
+    )
+
+
+def _night_section(case_log: Dict[str, Any]) -> str:
+    """夜処理は表ではなく文章にする。`transcript.md` と同じ文言を使う。"""
+
+    steps = night_steps(case_log)
+    if not steps:
+        return '<h2 id="sec-night">夜処理</h2><p class="sub">夜処理はなかった。</p>'
+    body = "".join("<li>{0}</li>".format(_esc(step)) for step in steps)
+    return '<h2 id="sec-night">夜処理</h2><ol>{0}</ol>'.format(body)
+
+
+def _discussion_section(case_log: Dict[str, Any]) -> str:
+    discussion = case_log["discussion"]
+    events = discussion["events"]
+    if not events:
+        return '<h2 id="sec-discussion">公開議論</h2><p class="sub">発言はなかった。</p>'
+
+    rounds: Dict[int, List[Dict[str, Any]]] = {}
+    for event in events:
+        rounds.setdefault(event["round"], []).append(event)
+
+    parts = ['<h2 id="sec-discussion">公開議論</h2>']
+    parts.append(
+        '<p class="sub">private memo は本人だけが持つ非公開の一言である。'
+        "他の参加者へは渡していない。</p>"
+    )
+    for round_no in sorted(rounds):
+        body = []
+        for event in rounds[round_no]:
+            if event["spoke"]:
+                speech = _esc(event.get("speech_text", ""))
+                css = ""
+            else:
+                speech = _esc(SKIP_TEXT if event["skipped"] else PASS_TEXT)
+                css = "quiet"
+            memo = _esc(event.get("memo") or "") or MISSING_TEXT
+            body.append(
+                "<tr>{0}</tr>".format(
+                    _cells(
+                        ("ID", _esc(_upper(event["player_id"])), "id"),
+                        ("公開発言", speech, css),
+                        ("memo", memo, "memo"),
+                    )
+                )
+            )
+        parts.append("<h3>第{0}ラウンド</h3>".format(round_no))
+        parts.append(
+            '<div class="scroll"><table class="stack"><thead><tr><th>ID</th>'
+            "<th>公開発言</th><th>private memo</th></tr></thead>"
+            "<tbody>{0}</tbody></table></div>".format("".join(body))
+        )
+
+    parts.append(
+        '<p class="sub">終了理由: {0}（{1}ラウンド、発言{2}件、見送り{3}件、スキップ{4}件）</p>'.format(
+            _esc(_STOP_REASONS.get(discussion["stop_reason"] or "", "不明")),
+            discussion["rounds"],
+            sum(1 for e in events if e["spoke"]),
+            sum(1 for e in events if not e["spoke"] and not e["skipped"]),
+            sum(1 for e in events if e["skipped"]),
+        )
+    )
+    return "".join(parts)
+
+
+def _votes_section(case_log: Dict[str, Any]) -> str:
+    body = []
+    for vote in case_log["votes"]:
+        target = "（棄権）" if vote["abstained"] else _upper(vote["target"])
+        memo = _esc(vote.get("memo") or "") or MISSING_TEXT
+        body.append(
+            "<tr>{0}</tr>".format(
+                _cells(
+                    ("ID", _esc(_upper(vote["voter"])), "id"),
+                    ("投票先", _esc(target), "id"),
+                    ("memo", memo, "memo"),
+                )
+            )
+        )
+    return (
+        '<h2 id="sec-votes">投票</h2>'
+        '<div class="scroll"><table class="stack"><thead><tr><th>ID</th>'
+        "<th>投票先</th><th>private memo</th></tr></thead>"
+        "<tbody>{0}</tbody></table></div>".format("".join(body))
+    )
+
+
+def _answers_section(rows: List[Dict[str, Any]]) -> str:
+    body = []
+    for row in rows:
+        correct = row["vote_correct"]
+        body.append(
+            "<tr>{0}</tr>".format(
+                _cells(
+                    ("ID", _esc(_upper(row["player_id"])), "id"),
+                    ("議論前の疑い", _esc(_suspect_text(row["pre_suspect"]))),
+                    ("議論前の自信", _esc(_num(row["pre_confidence"]))),
+                    ("投票前の疑い", _esc(_suspect_text(row["final_suspect"]))),
+                    ("投票前の自信", _esc(_num(row["final_confidence"]))),
+                    ("投票予定", _esc(_suspect_text(row["planned_vote"]))),
+                    (
+                        "実際の投票",
+                        _esc("（棄権）" if row["abstained"] else _upper(row["actual_vote"])),
+                    ),
+                    (
+                        "正答",
+                        "○" if correct == 1 else ("×" if correct == 0 else MISSING_TEXT),
+                    ),
+                )
+            )
+        )
+    return (
+        '<h2 id="sec-answers">個別判断（議論前 → 投票前）</h2>'
+        '<div class="scroll"><table class="stack"><thead><tr><th>ID</th>'
+        "<th>議論前の疑い</th><th>自信</th>"
+        "<th>投票前の疑い</th><th>自信</th><th>投票予定</th><th>実際の投票</th><th>正答</th>"
+        "</tr></thead><tbody>{0}</tbody></table></div>"
+        '<p class="sub">「正答」は投票先の最終役職が人狼だったかを示す。'
+        "棄権と応答なしは {1} にする。</p>".format("".join(body), MISSING_TEXT)
+    )
+
+
+def _metrics_section(metrics: Dict[str, Any]) -> str:
+    shown = (
+        ("village_correct", "追放者に人狼が含まれたか"),
+        ("village_vote_accuracy", "人狼以外6人の投票が人狼へ向いた割合"),
+        ("vote_concentration", "最多得票数 ÷ 有効票数"),
+        ("final_entropy", "最終発言時点の疑念の散らばり"),
+        ("convergence_round", "疑いが固定した最初のラウンド"),
+        ("correction_rate", "誤った判断を投票前に正した割合"),
+        ("deterioration_rate", "正しい判断を投票前に誤った割合"),
+        ("mean_confidence_delta", "自信度の平均変化"),
+        ("plan_vote_mismatch_rate", "投票予定と実際の投票のずれ"),
+        ("pass_rate", "見送り ÷ 問い合わせ"),
+        ("speech_count_gini", "発言回数の偏り（0が均等）"),
+    )
+    body = "".join(
+        "<tr>{0}</tr>".format(
+            _cells(
+                ("指標", "<code>{0}</code>".format(_esc(key))),
+                ("値", _esc(_num(metrics[key]))),
+                ("意味", _esc(label)),
+            )
+        )
+        for key, label in shown
+    )
+    return (
+        '<h2 id="sec-metrics">指標</h2>'
+        '<div class="scroll"><table class="stack"><thead><tr><th>指標</th><th>値</th>'
+        "<th>意味</th>"
+        "</tr></thead><tbody>{0}</tbody></table></div>"
+        '<p class="sub"><code>final_entropy</code> と <code>convergence_round</code> は'
+        "公開スタンス系列が必要なため、Judgeを実行するまで {1} のままである。</p>".format(
+            body, MISSING_TEXT
+        )
+    )
+
+
+def _conditions_section(case_log: Dict[str, Any]) -> str:
+    versions = case_log["versions"]
+    config = case_log["config"]
+    brain = case_log["brain"]
+    timing = case_log["timing"]
+    limits = case_log["discussion"]["limits"]
+
+    items = [
+        ("ルールセット", "{0} v{1}".format(versions["rule_set_id"], versions["rule_set_version"])),
+        ("人格プロンプト版", versions["persona_prompt_version"]),
+        ("Judge評価基準版", versions["judge_criteria_version"]),
+        (
+            "指標版",
+            "{0}（確定日 {1}）".format(
+                config["indicator_version"], config["indicator_frozen_at"] or "未確定"
+            ),
+        ),
+        ("人物プール / パターン", "{0} / {1}".format(versions["pool_id"], versions["pattern_id"])),
+        ("Trial / seed", "{0} / {1}".format(config["trial_index"], config["trial_seed"])),
+        ("使用モデル", "{0}（{1}）".format(brain.get("model") or MISSING_TEXT, brain.get("provider"))),
+        (
+            "議論の上限",
+            "max_rounds={0}、max_speeches={1}、max_total_chars={2}、"
+            "max_speech_chars={3}、max_consecutive_speeches={4}".format(
+                limits["max_rounds"],
+                limits["max_speeches"],
+                limits["max_total_chars"],
+                limits["max_speech_chars"],
+                limits["max_consecutive_speeches"],
+            ),
+        ),
+        (
+            "実行時間",
+            "{0}秒（うちAI待機 {1}秒、呼び出し{2}回）".format(
+                timing["elapsed_seconds"], timing["ai_wait_seconds"], timing["inference_calls"]
+            ),
+        ),
+        ("実行機", timing["machine_name"]),
+    ]
+    body = "".join(
+        '<tr><th scope="row">{0}</th><td>{1}</td></tr>'.format(_esc(label), _esc(value))
+        for label, value in items
+    )
+    return (
+        '<h2 id="sec-conditions">実行条件</h2>'
+        '<div class="scroll"><table class="kv"><tbody>{0}</tbody></table></div>'.format(body)
+    )
+
+
+def write_result_html(path: Path, case_log: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_result_html(case_log), encoding="utf-8")
+
+
+def render_failure_html(
+    case_id: str,
+    composition: str,
+    homogeneous_type: Optional[str],
+    error: Dict[str, str],
+    attempt: int,
+) -> str:
+    """ケースが失敗して `case_log.json` が無いときの `result.html`（設計書7.5）。
+
+    通常の結果ページと同じ場所に同じ名前で置く。失敗したケースだけHTMLが無い形に
+    すると、一覧から開いたときに404になり、失敗したのか未実行なのかが分からない。
+    """
+
+    if composition == "mixed":
+        composition_text = "混合構成"
+    else:
+        composition_text = "同質構成（{0}）".format(homogeneous_type)
+
+    return "\n".join(
+        [
+            "<!DOCTYPE html>",
+            '<html lang="ja">',
+            "<head>",
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            "<title>ケース {0}（失敗）</title>".format(_esc(case_id)),
+            "<style>{0}</style>".format(_STYLE),
+            "</head>",
+            "<body>",
+            '<header class="site-header"><div class="site-header-inner">',
+            '<div class="brand">MBTI人狼 <span class="brand-accent">ケース結果</span></div>',
+            '<div class="chip werewolf">失敗</div>',
+            "</div></header>",
+            "<main>",
+            "<h1>{0}</h1>".format(_esc(case_id)),
+            '<p class="sub">{0}</p>'.format(_esc(composition_text)),
+            '<div class="alert"><strong>このケースは完走しなかった。</strong><br>'
+            "種別: {0}<br>内容: {1}<br>試行回数: {2}</div>".format(
+                _esc(error.get("kind")), _esc(error.get("message")), _esc(attempt)
+            ),
+            '<p class="note">再実行するには <code>--resume</code> を付けて同じ実験IDを'
+            "指定する。完了済みのケースは実行されない。</p>",
+            "</main>",
+            "</body>",
+            "</html>",
+            "",
+        ]
+    )
+
+
+def write_failure_html(
+    path: Path, case, error: Dict[str, str], attempt: int
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        render_failure_html(
+            case.case_id, case.composition, case.homogeneous_type, error, attempt
+        ),
+        encoding="utf-8",
+    )
+
+
+_LATEST_TEMPLATE = """<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0; url=./__TARGET__">
+<title>最新のケース結果へ移動</title>
+<style>
+body { font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; margin: 0;
+  padding: 48px 20px; line-height: 1.8; color: #1f2328; }
+a { color: #3b66d6; }
+code { font-family: ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
-<header class="site-header">
-  <div class="site-header-inner">
-    <div class="brand">MBTI人狼 <span class="brand-accent">結果ビュー</span></div>
-    <div class="status-chip" id="status-chip"></div>
-  </div>
-  <nav class="site-nav">
-    <a href="#sec-roster">参加者</a>
-    <a href="#sec-discussion">議論ログ</a>
-    <a href="#sec-votes">投票</a>
-    <a href="#sec-cards">結果</a>
-    <a href="#sec-metrics">メトリクス</a>
-    <a href="#sec-conditions">実行条件</a>
-  </nav>
-</header>
-<main>
-  <p class="sub" id="head-sub"></p>
-  <div id="app"></div>
-  <p class="note" id="foot-note"></p>
-</main>
-
-<script type="application/json" id="run-data">__RUN_DATA__</script>
-<script>
-const ROLE_LABELS = { werewolf: "人狼", villager: "村人" };
-const WINNER_LABELS = { village: "村人陣営の勝ち", werewolf: "人狼陣営の勝ち" };
-const FUNCTION_LABELS = __FUNCTION_LABELS__;
-const DOMINANT_TO_MBTI = __DOMINANT_TO_MBTI__;
-
-const log = JSON.parse(document.getElementById("run-data").textContent);
-const players = {};
-(log.players || []).forEach((p) => { players[p.player_id] = p; });
-const metricsByPlayer = {};
-((log.metrics && log.metrics.per_player) || []).forEach((r) => { metricsByPlayer[r.player_id] = r; });
-
-function esc(value) {
-  return String(value === undefined || value === null ? "" : value)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function mbtiOf(fn) {
-  const types = DOMINANT_TO_MBTI[fn] || [];
-  return types.length ? types.join(" / ") : "—";
-}
-
-// MBTIタイプが確定しているプレイヤー（v1改善のMVPロースター）はタイプ名を、
-// 確定していない（旧ログ、functions直接指定など）場合は候補2タイプを表示する。
-function identityOf(entry) {
-  if (!entry) return "—";
-  if (entry.mbti_type) {
-    return entry.display_name ? entry.display_name + "（" + entry.mbti_type + "）" : entry.mbti_type;
-  }
-  return mbtiOf(entry.function);
-}
-
-function playerLabel(id) {
-  const p = players[id];
-  if (!p) return id || "—";
-  return identityOf(p) + " / " + p.player_id + " / " + (ROLE_LABELS[p.role] || p.role) + " / " + p.function;
-}
-
-function hasConfirmedMbti() {
-  return (log.players || []).some((p) => p.mbti_type);
-}
-
-function winningMbti() {
-  const winner = (log.result || {}).winner;
-  const wanted = winner === "werewolf" ? "werewolf" : (winner === "village" ? "villager" : "");
-  if (!wanted) return "決着なし";
-  const parts = (log.players || []).filter((p) => p.role === wanted)
-    .map((p) => identityOf(p) + " / " + p.player_id + " / " + p.function);
-  return parts.join("、") || "—";
-}
-
-function who(id) {
-  return esc(playerLabel(id));
-}
-
-function topOf(key) {
-  const rows = (log.metrics && log.metrics.per_player) || [];
-  if (!rows.length) return "—";
-  const top = Math.max.apply(null, rows.map((r) => r[key] || 0));
-  if (!top) return "該当なし";
-  return rows.filter((r) => (r[key] || 0) === top)
-    .map((r) => identityOf(r) + " / " + r.player_id + " / " + r.function).join("、") + " — " + top;
-}
-
-// このファイルは自己完結HTML（外部通信なし、F-41/NF-15）が前提のため、
-// アイコンは画像ではなく文字タイル（MBTIタイプ、無ければ主機能コード）にする。
-// 画像化したくなったら、このHTMLへ data URI として埋め込む形にすること。
-// 外部ファイルを指すimgタグは絶対に入れない。
-function mbtiIconHtml(p) {
-  const text = p.mbti_type ? p.mbti_type : p.function;
-  return '<div class="mbti-icon"><div class="mbti-icon-fallback">' + esc(text) + '</div></div>';
-}
-
-// MBTIの気質グループ（NT/NF/SJ/SP）を4文字のタイプ名から算出する。1タイプ1色ではなく
-// グループ単位で色分けするため、色の定義を増やさなくても16タイプへそのまま拡張できる。
-const TEMPERAMENT_COLORS = { NT: "#7c5cff", NF: "#22a06b", SJ: "#3b82f6", SP: "#f59e0b" };
-
-function temperamentOf(mbtiType) {
-  if (!mbtiType || mbtiType.length < 4) return "";
-  if (mbtiType[1] === "N") return mbtiType[2] === "T" ? "NT" : "NF";
-  return mbtiType[3] === "J" ? "SJ" : "SP";
-}
-
-function chatAvatarHtml(p) {
-  if (p.mbti_type) {
-    const color = TEMPERAMENT_COLORS[temperamentOf(p.mbti_type)] || "#6b7280";
-    return '<div class="chat-avatar" style="background:' + color + ';">' + esc(p.mbti_type) + '</div>';
-  }
-  return '<div class="chat-avatar chat-avatar-muted">' + esc(p.function) + '</div>';
-}
-
-function renderRoster() {
-  const list = log.players || [];
-  if (!list.length) return "";
-  const cards = list.map((p) => {
-    const stack = (p.function_stack && p.function_stack.length ? p.function_stack : [p.function]).join(" / ");
-    const roleKey = p.role === "werewolf" ? "werewolf" : "village";
-    const m = metricsByPlayer[p.player_id] || {};
-    const winLabel = m.win === true ? "勝ち" : (m.win === false ? "負け" : "—");
-    const winKey = m.win === true ? "win" : (m.win === false ? "lose" : "");
-    const speechCount = m.speech_count === undefined || m.speech_count === null ? "—" : m.speech_count;
-    const suspectedCount = m.suspected_by_count === undefined || m.suspected_by_count === null ? "—" : m.suspected_by_count;
-    return '<div class="card roster-card">'
-      + '<div class="roster-card-top">'
-      + mbtiIconHtml(p)
-      + '<div class="roster-card-title">'
-      + '<div class="value">' + esc(identityOf(p)) + '</div>'
-      + '<div class="label">' + esc(p.player_id) + ' / ' + esc(ROLE_LABELS[p.role] || p.role) + ' / 主機能 ' + esc(p.function) + '</div>'
-      + '</div></div>'
-      + '<div class="roster-badges">'
-      + '<span class="badge role-badge ' + roleKey + '">' + esc(ROLE_LABELS[p.role] || p.role) + '</span>'
-      + '<span class="badge result-badge ' + winKey + '">' + esc(winLabel) + '</span>'
-      + '</div>'
-      + '<div class="sub">4心理機能 ' + esc(stack) + '</div>'
-      + '<div class="roster-stats">'
-      + '<span class="stat-pill">発言 ' + esc(speechCount) + '</span>'
-      + '<span class="stat-pill">疑われ ' + esc(suspectedCount) + '</span>'
-      + '</div>'
-      + '</div>';
-  }).join("");
-  return '<div class="cards">' + cards + '</div>';
-}
-
-function renderFailure() {
-  if (log.status === "done") return "";
-  const f = log.failure || {};
-  return '<div class="alert"><strong>この実行は完走していません（' + esc(log.status) + "）</strong><br>"
-    + "種別: <code>" + esc(f.kind || "不明") + "</code><br>" + esc(f.message || "") + "<br>"
-    + "到達フェーズ: " + esc(log.phase || "") + "。ここまでの発言と投票は下に表示している。</div>";
-}
-
-function renderCards() {
-  const r = log.result || {};
-  const winnerClass = r.winner === "village" ? "village" : (r.winner === "werewolf" ? "werewolf" : "");
-  const wolves = (log.players || []).filter((p) => p.role === "werewolf")
-    .map((p) => identityOf(p) + " / " + p.player_id + " / " + p.function).join("、") || "—";
-  const cards = [
-    ["勝敗", '<span class="' + winnerClass + '">' + esc(WINNER_LABELS[r.winner] || "決着なし") + "</span>"],
-    ["勝ったMBTI", esc(winningMbti())],
-    ["人狼だったMBTI", esc(wolves)],
-    ["処刑された人", r.executed ? who(r.executed) : "—"],
-    ["最も疑われた人", esc(topOf("suspected_by_count"))],
-    ["最も発言した人", esc(topOf("speech_count"))],
-    ["決着方法", r.tie_break ? esc("同数得票のため " + r.tie_break.method) : "最多得票が1人"],
-  ];
-  return '<div class="cards">' + cards.map((c) =>
-    '<div class="card"><div class="label">' + esc(c[0]) + '</div><div class="value">' + c[1] + "</div></div>"
-  ).join("") + "</div>";
-}
-
-function renderMetrics() {
-  const rows = (log.metrics && log.metrics.per_player) || [];
-  if (!rows.length) return "<p>集計はありません。</p>";
-  const head = ["ID", "心理機能", "MBTI", "役職", "発言数", "平均文字数", "投票先", "勝敗", "疑い", "疑われ", "質問", "反論", "同調", "仮説"];
-  const body = rows.map((r) => "<tr>" + [
-    r.player_id,
-    r.function + (FUNCTION_LABELS[r.function] ? "（" + FUNCTION_LABELS[r.function] + "）" : ""),
-    identityOf(r),
-    ROLE_LABELS[r.role] || r.role,
-    r.speech_count, r.avg_chars, r.final_vote || "—",
-    r.win === null || r.win === undefined ? "—" : (r.win ? "勝ち" : "負け"),
-    r.suspicion_count, r.suspected_by_count, r.question_count,
-    r.rebuttal_count, r.agreement_count, r.hypothesis_count,
-  ].map((v) => "<td>" + esc(v) + "</td>").join("") + "</tr>").join("");
-  return '<div class="scroll"><table><thead><tr>' + head.map((h) => "<th>" + esc(h) + "</th>").join("")
-    + "</tr></thead><tbody>" + body + "</tbody></table></div>";
-}
-
-function renderTimeline() {
-  const turns = log.turns || [];
-  if (!turns.length) return "<p>発言はまだ記録されていません。</p>";
-  let html = '<p class="discussion-note">このゲームはワンナイト人狼形式です。途中結果はなく、議論ログのあとに1回だけ投票と結果があります。'
-    + '発言する順番はあらかじめ決められたターン割り当てに従っており、参加者が自分の判断で発言タイミングを選んでいるわけではありません。</p>';
-  html += '<div class="chat-log">';
-  turns.forEach((t, index) => {
-    const p = players[t.player_id];
-    const roleKey = p && p.role === "werewolf" ? "werewolf" : "village";
-    const flags = [];
-    if (t.parse_failed) flags.push("形式が崩れた応答");
-    if (t.wait_seconds) flags.push(t.wait_seconds + "秒");
-    html += '<div class="chat-row role-' + roleKey + '">'
-      + (p ? chatAvatarHtml(p) : '<div class="chat-avatar chat-avatar-muted">?</div>')
-      + '<div class="chat-bubble-wrap">'
-      + '<div class="chat-meta">発言' + esc(String(index + 1).padStart(2, "0")) + ' ' + who(t.player_id)
-      + flags.map((f) => '<span class="chat-flag">' + esc(f) + "</span>").join("")
-      + '</div>'
-      + '<div class="chat-bubble">' + esc(t.speech_text) + '</div>'
-      + '</div></div>';
-  });
-  html += '</div>';
-  return html;
-}
-
-function renderVotes() {
-  const votes = log.votes || [];
-  if (!votes.length) return "<p>投票はまだ記録されていません。</p>";
-  const counts = (log.result || {}).vote_counts || {};
-  const tally = Object.keys(counts).map((k) => k + " " + counts[k] + "票").join("、");
-  const body = votes.map((v) => "<tr><td>" + who(v.voter) + "</td><td>" + who(v.target) + "</td>"
-    + '<td class="wrap">' + esc(v.reason) + "</td><td>"
-    + (v.fallback ? "乱数で決定" : (v.invalid_retry_count ? "再要求" + v.invalid_retry_count + "回" : "—"))
-    + "</td></tr>").join("");
-  return (tally ? "<p>得票: " + esc(tally) + "</p>" : "")
-    + '<div class="scroll"><table><thead><tr><th>投票者</th><th>投票先</th><th class="wrap">理由</th><th>備考</th></tr></thead><tbody>'
-    + body + "</tbody></table></div>";
-}
-
-function renderConditions() {
-  const c = log.config || {};
-  const t = log.timing || {};
-  const b = log.brain || {};
-  const items = [
-    ["run_id", log.run_id], ["series_id", log.series_id],
-    ["参加人数", (c.player_count || "") + "人"], ["内部発言セット数", c.turn_count],
-    ["seed", c.seed], ["base_seed", c.base_seed],
-    ["役職割当方式", c.role_assignment_mode], ["心理機能", (c.functions || []).join("、")],
-    ["history_mode", c.history_mode],
-    ["使用した脳", [b.provider, b.model, b.endpoint_kind].filter(Boolean).join(" / ")],
-    ["実行環境", t.machine_name], ["開始", t.started_at], ["終了", t.ended_at],
-    ["所要時間", (t.elapsed_seconds || 0) + "秒"], ["AI待機時間", (t.ai_wait_seconds || 0) + "秒"],
-    ["プロンプト版", ((log.players || [])[0] || {}).agent_prompt_version],
-    ["schema_version", log.schema_version],
-  ];
-  return '<div class="panel"><dl class="kv">' + items.map((i) =>
-    "<dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1] === undefined || i[1] === null || i[1] === "" ? "—" : i[1]) + "</dd>"
-  ).join("") + "</dl></div>";
-}
-
-document.getElementById("head-sub").textContent =
-  log.run_id + "  /  " + (log.timing || {}).started_at + "  /  状態: " + log.status;
-
-const statusChip = document.getElementById("status-chip");
-statusChip.textContent = log.run_id;
-statusChip.className = "status-chip" + (log.status === "done" ? " done" : (log.status === "failed" ? " failed" : ""));
-
-document.getElementById("app").innerHTML = [
-  renderFailure(),
-  '<h2 id="sec-roster">参加者</h2>', renderRoster(),
-  '<h2 id="sec-discussion">議論ログ</h2>', renderTimeline(),
-  '<h2 id="sec-votes">投票</h2>', renderVotes(),
-  '<h2 id="sec-cards">結果</h2>', renderCards(),
-  '<h2 id="sec-metrics">メトリクス</h2>', renderMetrics(),
-  '<h2 id="sec-conditions">実行条件</h2>', renderConditions(),
-].join("");
-
-document.getElementById("foot-note").innerHTML = [
-  "MBTIおよび心理機能は、実在人物の診断や評価ではない。AIエージェントの振る舞いを分けるためのフィクション設定として扱っている。",
-  hasConfirmedMbti()
-    ? "MBTIタイプが確定しているプレイヤーはそのタイプ名で表示している。確定していないプレイヤーは主機能からの候補2タイプ（要求定義書6.5）を表示している。"
-    : "MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。",
-  "このファイルは実行結果を埋め込んだ自己完結HTMLで、外部との通信を行わない。",
-].map(esc).join("<br>");
-</script>
+<p>最新のケース結果（<code>__CASE_ID__</code>）へ移動します。
+自動で切り替わらない場合は<a href="./__TARGET__">こちらをタップ</a>してください。</p>
 </body>
 </html>
 """
 
 
-def render_result_html(run_log: Dict[str, Any]) -> str:
-    from ..agents.functions import FUNCTION_RULES
-    from ..agents.mbti_types import DOMINANT_TO_TYPES
+def render_latest_redirect(case_id: str, target: str) -> str:
+    """最新のケース結果への転送ページ（設計書7.6）。
 
-    labels = {code: rule["label"] for code, rule in FUNCTION_RULES.items()}
-    return (
-        _TEMPLATE.replace("__RUN_ID__", str(run_log.get("run_id", "")))
-        .replace("__FUNCTION_LABELS__", _embed(labels))
-        .replace("__DOMINANT_TO_MBTI__", _embed(DOMINANT_TO_TYPES))
-        .replace("__RUN_DATA__", _embed(run_log))
-    )
+    メタリフレッシュに対応しないブラウザ（アプリ内ブラウザなど）でも辿れるよう、
+    手動リンクを必ず添える。v1の `latest.html` と同じ考え方である。
 
-
-def _embed(value: Any) -> str:
-    """HTMLへ埋め込める形にJSONを直列化する。
-
-    </script> でHTMLが途切れないように < と > をエスケープする。
+    M3では最新ケースの `result.html` を指す。M4で実験全体の分析HTMLが出るように
+    なったら、そちらへ向け直す（7.6）。
     """
-    return (
-        json.dumps(value, ensure_ascii=False)
-        .replace("<", "\\u003c")
-        .replace(">", "\\u003e")
-        .replace("&", "\\u0026")
-    )
+
+    return _LATEST_TEMPLATE.replace("__TARGET__", target).replace("__CASE_ID__", case_id)
+
+
+def write_latest_redirect(runs_dir: Path, case_id: str, target: str) -> Path:
+    path = runs_dir / "latest.html"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_latest_redirect(case_id, target), encoding="utf-8")
+    return path

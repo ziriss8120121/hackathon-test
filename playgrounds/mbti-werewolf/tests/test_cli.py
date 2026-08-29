@@ -1,6 +1,8 @@
-"""コマンド起動を確認する。
+"""コマンド起動を確認する（設計書8.1、IF-07、F-23、AC-16）。
 
-対応要件: IF-07、F-23、AC-16、AC-10
+長時間の実行は画面を経由しないこの経路で行うため、サブコマンドが繋がっていること、
+`--dry-run` が推論を呼ばずに条件固定の検査まで通ること、`--cases` で1ケースだけを
+実測できることを確かめる。
 """
 
 from __future__ import annotations
@@ -10,34 +12,33 @@ import json
 from mbti_werewolf.__main__ import main
 
 
-def _series_dir(tmp_path):
-    return next(path for path in tmp_path.iterdir() if path.name.startswith("s-"))
+def _experiment_dir(runs_dir):
+    return next(path for path in runs_dir.iterdir() if path.name.startswith("e-"))
 
 
-def test_run_single_game(tmp_path, capsys):
-    code = main(["run", "--brain", "stub", "--runs-dir", str(tmp_path)])
+def test_dry_run_generates_trials_without_calling_the_brain(tmp_path, capsys):
+    """生成と条件固定の検査だけを行う。出力ディレクトリは作らない。"""
+
+    code = main(["experiment", "--dry-run", "--runs-dir", str(tmp_path)])
     captured = capsys.readouterr()
 
     assert code == 0
-    assert "series_id:" in captured.out
-    assert "成功 1 / 失敗 0" in captured.out
+    assert "ケース数: 17件" in captured.out
+    assert "条件検査=通過" in captured.out
+    assert "ケースは実行していない" in captured.out
+    assert list(tmp_path.iterdir()) == []
 
-    log_path = _series_dir(tmp_path) / "r001" / "run_log.json"
-    assert log_path.is_file()
 
+def test_single_case_run_writes_every_output_file(tmp_path, capsys):
+    """`--cases` で1ケースだけ実測する経路（設計書8.1）。"""
 
-def test_run_multiple_games_with_options(tmp_path, capsys):
     code = main(
         [
-            "run",
+            "experiment",
             "--brain",
             "stub",
-            "--games",
-            "3",
-            "--seed",
-            "7",
-            "--turns",
-            "2",
+            "--cases",
+            "c00",
             "--runs-dir",
             str(tmp_path),
         ]
@@ -45,77 +46,113 @@ def test_run_multiple_games_with_options(tmp_path, capsys):
     captured = capsys.readouterr()
 
     assert code == 0
-    assert "成功 3 / 失敗 0" in captured.out
+    assert "完了 1" in captured.out
+    assert "experiment_metrics.csv" in captured.out
+    assert "latest.html" in captured.out
 
-    series = json.loads((_series_dir(tmp_path) / "series.json").read_text(encoding="utf-8"))
-    assert series["game_count"] == 3
-    assert series["config"]["turn_count"] == 2
-    assert series["config"]["base_seed"] == 7
-    assert (_series_dir(tmp_path) / "series_summary.md").is_file()
-
-
-def test_settings_can_be_changed_without_code_edit(tmp_path):
-    """8人版へ設定だけで広げられること（要件F-08、AC-10）。"""
-    code = main(
-        [
-            "run",
-            "--brain",
-            "stub",
-            "--players",
-            "8",
-            "--werewolves",
-            "2",
-            "--functions",
-            "Ne,Ti,Fe,Si,Ni,Se,Te,Fi",
-            "--turns",
-            "1",
-            "--runs-dir",
-            str(tmp_path),
-        ]
-    )
-
-    assert code == 0
-    log = json.loads(
-        (_series_dir(tmp_path) / "r001" / "run_log.json").read_text(encoding="utf-8")
-    )
+    case_dir = _experiment_dir(tmp_path) / "t001" / "c00-mixed"
+    log = json.loads((case_dir / "case_log.json").read_text(encoding="utf-8"))
+    assert log["composition"] == "mixed"
     assert len(log["players"]) == 8
-    assert sum(1 for player in log["players"] if player["role"] == "werewolf") == 2
-    assert len(log["turns"]) == 8
-    assert len(log["votes"]) == 8
+    for name in ("config.json", "status.json", "transcript.md", "summary.md", "result.html"):
+        assert (case_dir / name).is_file(), name
+    assert (tmp_path / "latest.html").is_file()
+
+
+def test_trial_range_and_seed_are_accepted(tmp_path, capsys):
+    """分割実行の指定。`--trial-range` だけでも `trial_count` を補って通す。"""
+
+    code = main(
+        [
+            "experiment",
+            "--dry-run",
+            "--trial-range",
+            "2-3",
+            "--seed",
+            "77",
+            "--runs-dir",
+            str(tmp_path),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 0
+    assert "Trial 2件（2-3）" in captured.out
+    assert "seed=77" in captured.out
+    assert "t002" in captured.out and "t003" in captured.out
+    assert "t001" not in captured.out
+
+
+def test_invalid_trial_range_returns_error_code(tmp_path, capsys):
+    code = main(
+        ["experiment", "--dry-run", "--trial-range", "3..7", "--runs-dir", str(tmp_path)]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 2
+    assert "設定エラー" in captured.err
+
+
+def test_masterdata_writes_pool_and_patterns(tmp_path, capsys):
+    code = main(
+        [
+            "masterdata",
+            "--data-dir",
+            str(tmp_path),
+            "--patterns",
+            "3",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert code == 0
+    pool = json.loads((tmp_path / "persons" / "pool-001.json").read_text(encoding="utf-8"))
+    patterns = json.loads(
+        (tmp_path / "patterns" / "pattern-set-001.json").read_text(encoding="utf-8")
+    )
+    assert len(pool["persons"]) == pool["count"]
+    assert len(patterns["patterns"]) == 3
+    assert "人物プール" in captured.out
 
 
 def test_pages_builds_index_from_runs(tmp_path, capsys):
-    code = main(["run", "--brain", "stub", "--runs-dir", str(tmp_path / "runs")])
+    runs_dir = tmp_path / "runs"
+    code = main(
+        [
+            "experiment",
+            "--brain",
+            "stub",
+            "--cases",
+            "c00",
+            "--runs-dir",
+            str(runs_dir),
+        ]
+    )
     assert code == 0
 
     out = tmp_path / "site"
-    code = main(
-        ["pages", "--runs-dir", str(tmp_path / "runs"), "--out", str(out)]
-    )
+    code = main(["pages", "--runs-dir", str(runs_dir), "--out", str(out)])
     captured = capsys.readouterr()
 
     assert code == 0
     assert (out / "index.html").is_file()
     assert (out / ".nojekyll").is_file()
-    assert (out / "simulator.html").is_file()
-    assert (out / "style.css").is_file()
+    assert (out / "404.html").is_file()
+
     html = (out / "index.html").read_text(encoding="utf-8")
-    preview = (out / "simulator.html").read_text(encoding="utf-8")
-    assert "勝ったMBTI" in html
-    assert "run_id" in html
-    assert "simulator.html" in html
-    assert "操作画面の見た目" in preview
-    assert "対戦を開始できません" in preview
-    copied = list(out.glob("runs/*/r001/result.html"))
+    assert "ケース1件" in html
+    assert "混合構成" in html
+    assert "runs/latest.html" in html
+
+    copied = list(out.glob("runs/*/t001/c00-mixed/result.html"))
     assert copied, "result.html がサイトへコピーされていない"
     assert (out / "runs" / "latest.html").is_file()
-    assert "最新の試合" in html
     assert "GitHub Pages用サイト" in captured.out
 
 
-def test_invalid_config_returns_error_code(tmp_path, capsys):
-    code = main(["run", "--brain", "stub", "--players", "2", "--runs-dir", str(tmp_path)])
+def test_no_subcommand_prints_help(capsys):
+    code = main([])
     captured = capsys.readouterr()
 
-    assert code == 2
-    assert "設定エラー" in captured.err
+    assert code == 1
+    assert "experiment" in captured.out

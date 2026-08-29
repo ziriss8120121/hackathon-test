@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-from mbti_werewolf.agents.case_agent import MEMO_MAX_CHARS, REASON_MAX_CHARS
+from mbti_werewolf.agents.agent import MEMO_MAX_CHARS, REASON_MAX_CHARS
 from mbti_werewolf.agents.persona import SUSPECT_UNKNOWN
 
-from v2_support import default_responder
+from conftest import default_responder
 
 
 def test_both_time_points_are_collected_for_all_players(run_case):

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from ..agents.case_agent import CaseAgent, clip_reason
+from ..agents.agent import CaseAgent, clip_reason
 from .rules import (
     PHASE_SEER_INSPECTION,
     PHASE_THIEF_INSPECTION,

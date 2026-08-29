@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..agents.case_agent import CaseAgent, clip_memo
+from ..agents.agent import CaseAgent, clip_memo
 from .roles import team_of
 from .view import CaseSpeech, CaseViewBuilder, to_internal_id
 

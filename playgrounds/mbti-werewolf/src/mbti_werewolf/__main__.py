@@ -1,34 +1,25 @@
 """コマンドの入口（設計書8.1）。
 
-    python -m mbti_werewolf ui                      操作画面を開く
-    python -m mbti_werewolf run                     1試合を実行する（v1の4人版）
-    python -m mbti_werewolf run --games 100 --seed 42
-    python -m mbti_werewolf run --brain stub        脳を切り替える
-    python -m mbti_werewolf experiment              1 Trial（17ケース）を実行する（v2.0）
+    python -m mbti_werewolf experiment              1 Trial（17ケース）を実行する
     python -m mbti_werewolf experiment --trials 5 --brain ollama --model gemma3:4b
     python -m mbti_werewolf experiment --resume e-20260901-210000    止まった実験を続ける
     python -m mbti_werewolf experiment --cases c00 --brain ollama    1ケースだけ実測する
-    python -m mbti_werewolf masterdata              人物プールとパターンを生成する（v2.0）
+    python -m mbti_werewolf masterdata              人物プールとパターンを生成する
     python -m mbti_werewolf pages                   GitHub Pages用の静的サイトを生成する
 
 長時間・多試合の実行は画面を経由しないこの経路で行う。ブラウザやスリープの影響を
 受けず、nohup などでシェルから切り離せるためである（要件IF-07、F-23）。
 
-`run` はv1の4人版、`experiment` はv2.0の8人ワンナイトである。M3でv2.0の出力が
-揃った時点で `run` を削除する（設計書0.4）。
+v1の4人版の `run` と操作画面の `ui` はM3で削除した。`ui` はM6でv2.0向けに作り直す
+（設計書0.4、11章）。
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
-import threading
-import webbrowser
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from .config import ConfigError, load_config
-from .runner import Runner
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -37,29 +28,6 @@ def build_parser() -> argparse.ArgumentParser:
         description="MBTI人狼シミュレーター（AI先行テスト用）",
     )
     sub = parser.add_subparsers(dest="command")
-
-    ui = sub.add_parser("ui", help="操作画面を起動する")
-    ui.add_argument("--host", default="127.0.0.1")
-    ui.add_argument("--port", type=int, default=8765)
-    ui.add_argument("--no-browser", action="store_true", help="ブラウザを自動で開かない")
-
-    run = sub.add_parser("run", help="試合を実行する")
-    run.add_argument("--config", type=Path, help="設定ファイル（既定値を上書きする）")
-    run.add_argument("--games", type=int, help="試合回数")
-    run.add_argument("--seed", type=int, help="乱数のseed（base_seed）")
-    run.add_argument("--players", type=int, help="参加人数")
-    run.add_argument("--turns", type=int, help="議論のターン数")
-    run.add_argument("--werewolves", type=int, help="人狼の人数")
-    run.add_argument(
-        "--functions", help="心理機能をカンマ区切りで指定する（例: Ne,Ti,Fe,Si）"
-    )
-    run.add_argument(
-        "--brain", choices=("stub", "ollama", "gemini"), help="推論手段を選ぶ"
-    )
-    run.add_argument("--model", help="モデル名（例: gemma3:4b）")
-    run.add_argument("--max-output-chars", type=int, help="発言の文字数上限")
-    run.add_argument("--machine", help="実行環境の識別名（既定はホスト名）")
-    run.add_argument("--runs-dir", type=Path, help="出力先（既定はリポジトリの runs/）")
 
     experiment = sub.add_parser(
         "experiment", help="8人ワンナイトの実験を実行する（1 Trial = 17ケース）"
@@ -119,10 +87,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    if args.command == "ui":
-        return command_ui(args)
-    if args.command == "run":
-        return command_run(args)
     if args.command == "experiment":
         return command_experiment(args)
     if args.command == "masterdata":
@@ -132,98 +96,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     parser.print_help()
     return 1
-
-
-def command_ui(args: argparse.Namespace) -> int:
-    try:
-        import uvicorn
-    except ImportError:
-        print(
-            "uvicorn が入っていません。次を実行してください。\n"
-            "  pip install -r requirements.txt",
-            file=sys.stderr,
-        )
-        return 1
-
-    from .web.app import create_app
-
-    url = "http://{}:{}/".format(args.host, args.port)
-    print("操作画面: {}".format(url))
-    print("停止する場合は Ctrl+C を押してください。")
-
-    if not args.no_browser:
-        threading.Timer(1.0, lambda: webbrowser.open(url)).start()
-
-    uvicorn.run(create_app(), host=args.host, port=args.port, log_level="warning")
-    return 0
-
-
-def command_run(args: argparse.Namespace) -> int:
-    try:
-        config = load_config(path=args.config, overrides=_overrides(args))
-    except ConfigError as exc:
-        print("設定エラー: {}".format(exc), file=sys.stderr)
-        return 2
-
-    runner = Runner(args.runs_dir)
-    series_id = runner.create_series(config)
-
-    print("series_id: {}".format(series_id))
-    print(
-        "条件: {}人 / {}ターン / {}試合 / seed={} / 脳={}{}".format(
-            config.player_count,
-            config.turn_count,
-            config.game_count,
-            config.seed,
-            config.brain.provider,
-            "（{}）".format(config.brain.model) if config.brain.model else "",
-        )
-    )
-    print("-" * 60)
-
-    def report(entry: Dict[str, Any]) -> None:
-        mark = "ok  " if entry["status"] == "done" else "fail"
-        print(
-            "[{}] {:>4}/{:<4} {} 勝者={} 処刑={} {}秒{}".format(
-                mark,
-                entry["run_index"],
-                config.game_count,
-                entry["run_id"],
-                entry.get("winner") or "—",
-                entry.get("executed") or "—",
-                entry.get("elapsed_seconds"),
-                "  種別={}".format(entry["error_kind"]) if entry.get("error_kind") else "",
-            )
-        )
-
-    series = runner.execute_series(series_id, config, on_run_finished=report)
-
-    series_path = runner.series_dir(series_id)
-    print("-" * 60)
-    print(
-        "結果: 成功 {} / 失敗 {}（状態: {}、合計 {}秒、AI待機 {}秒）".format(
-            series.get("success_count"),
-            series.get("failure_count"),
-            series.get("status"),
-            series.get("elapsed_seconds"),
-            series.get("ai_wait_seconds"),
-        )
-    )
-    print("保存先: {}".format(series_path))
-    print("集計:   {}".format(series_path / "series_summary.md"))
-    if config.game_count == 1:
-        print("結果:   {}".format(series_path / "r001" / "result.html"))
-    print("-" * 60)
-    print("最新結果へのリンク: {}".format(runner.runs_dir / "latest.html"))
-    print(
-        "公開URL（一覧）: https://ziriss8120121.github.io/hackathon-test/"
-    )
-    print(
-        "公開URL（最新）: https://ziriss8120121.github.io/hackathon-test/runs/latest.html"
-    )
-    print("URLへ反映するには、runs/ を commit して main へ push する。")
-
-    return 0 if series.get("status") == "done" else 1
 
 
 def _case_filter(value: Optional[str]) -> Optional[List[str]]:
@@ -258,7 +130,7 @@ def _print_experiment_result(summary: Dict[str, Any], runs_dir: Path) -> int:
 
 
 def _run_resume(runner, experiment_id: str) -> int:
-    from .experiment_runner import ResumeError
+    from .runner import ResumeError
 
     print("再開: {}".format(experiment_id))
     print("-" * 60)
@@ -275,15 +147,12 @@ def _run_resume(runner, experiment_id: str) -> int:
 
 def command_experiment(args: argparse.Namespace) -> int:
     from . import experiment as experiment_module
-    from .experiment_config import ConfigError as ExperimentConfigError
-    from .experiment_config import load_config as load_experiment_config
-    from .experiment_runner import DEFAULT_CASE_ATTEMPTS, ExperimentRunner
+    from .config import ConfigError, load_config
+    from .runner import DEFAULT_CASE_ATTEMPTS, ExperimentRunner
 
     try:
-        config = load_experiment_config(
-            path=args.config, overrides=_experiment_overrides(args)
-        )
-    except (ExperimentConfigError, ValueError) as exc:
+        config = load_config(path=args.config, overrides=_experiment_overrides(args))
+    except (ConfigError, ValueError) as exc:
         print("設定エラー: {}".format(exc), file=sys.stderr)
         return 2
 
@@ -396,46 +265,12 @@ def command_masterdata(args: argparse.Namespace) -> int:
 
 
 def command_pages(args: argparse.Namespace) -> int:
-    from .config import project_root, runs_root
     from .record.pages import build_pages
 
-    dest = build_pages(
-        runs_dir=args.runs_dir or runs_root(),
-        output_dir=args.out or (project_root() / "site"),
-    )
+    dest = build_pages(runs_dir=args.runs_dir, output_dir=args.out)
     print("GitHub Pages用サイト: {}".format(dest))
     print("一覧: {}".format(dest / "index.html"))
     return 0
-
-
-def _overrides(args: argparse.Namespace) -> Dict[str, Any]:
-    overrides: Dict[str, Any] = {
-        "game_count": args.games,
-        "seed": args.seed,
-        "player_count": args.players,
-        "turn_count": args.turns,
-        "machine_name": args.machine,
-        "brain": {
-            "provider": args.brain,
-            "model": args.model,
-            "max_output_chars": args.max_output_chars,
-        },
-    }
-    if args.functions:
-        overrides["functions"] = [
-            part.strip() for part in args.functions.replace("、", ",").split(",") if part.strip()
-        ]
-    if args.players or args.werewolves:
-        # 人数を変えたら村人の数も合わせて作り直す。合計が人数と一致しないと
-        # 設定検証で弾かれるため、片方だけの指定でも整合させる。
-        base = load_config(path=args.config)
-        players = args.players or base.player_count
-        werewolves = args.werewolves or base.role_composition.get("werewolf", 1)
-        overrides["role_composition"] = {
-            "werewolf": werewolves,
-            "villager": players - werewolves,
-        }
-    return {key: value for key, value in overrides.items() if value is not None}
 
 
 def _experiment_overrides(args: argparse.Namespace) -> Dict[str, Any]:

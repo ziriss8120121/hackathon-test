@@ -15,7 +15,7 @@ import random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from ..agents.case_agent import CaseAgent, clip_memo, parse_bool
+from ..agents.agent import CaseAgent, clip_memo, parse_bool
 from .view import CaseSpeech, CaseViewBuilder
 
 STOP_ALL_PASS = "all_pass"

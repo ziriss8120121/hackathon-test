@@ -10,13 +10,13 @@ import csv
 import io
 from html.parser import HTMLParser
 
-from mbti_werewolf.record.case_result_view import (
+from mbti_werewolf.record.result_view import (
     render_failure_html,
     render_latest_redirect,
     render_result_html,
 )
 from mbti_werewolf.record.case_metrics import JUDGE_DEPENDENT
-from mbti_werewolf.record.case_summary import render_summary
+from mbti_werewolf.record.summary import render_summary
 from mbti_werewolf.record.metrics_csv import (
     EXPERIMENT_COLUMNS,
     TRIAL_COLUMNS,

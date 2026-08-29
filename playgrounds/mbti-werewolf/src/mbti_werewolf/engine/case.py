@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from ..agents.case_agent import CaseAgent, clip_reason, parse_confidence
+from ..agents.agent import CaseAgent, clip_reason, parse_confidence
 from ..agents.persona import PersonaBuilder, PromptSet, SUSPECT_UNKNOWN, load_tendencies
 from .discussion import DiscussionRunner, DiscussionResult
 from .night import NightResolver

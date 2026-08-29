@@ -19,7 +19,7 @@ from mbti_werewolf.agents.mbti_types import TYPE_STACKS, display_name_for
 from mbti_werewolf.agents.persona import PersonaBuilder, PromptSet, load_tendencies
 from mbti_werewolf.engine.view import CaseViewBuilder
 
-from v2_support import default_responder
+from conftest import default_responder
 
 
 @pytest.fixture

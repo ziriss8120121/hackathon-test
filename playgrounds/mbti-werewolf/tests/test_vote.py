@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from v2_support import default_responder
+from conftest import default_responder
 
 
 def test_every_player_votes_once(run_case):

@@ -7,7 +7,7 @@ import re
 
 from mbti_werewolf.engine.discussion import poll_order
 
-from v2_support import default_responder
+from conftest import default_responder
 
 
 def _events(outcome):

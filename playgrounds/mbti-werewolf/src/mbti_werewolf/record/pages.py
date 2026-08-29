@@ -1,7 +1,15 @@
 """GitHub Pages用の静的サイト生成（設計書7.6、要件F-42、IF-04）。
 
-公開するのは自己完結の result.html、それを選ぶ一覧、および操作画面の見た目
-（実行なし）である。生成物は出力先に書き、リポジトリの main には置かない。
+公開するのは自己完結の `result.html` と、それを選ぶ一覧である。生成物は出力先に
+書き、リポジトリの `main` には置かない。
+
+一覧はケース単位で作る。`runs/` を走査して `case_log.json` を読み、同じ
+ディレクトリの `result.html` を出力先へ複写する。データベースへの登録処理を
+持たないため、コマンドから実行した結果も画面から実行した結果も同じように現れる
+（7.4）。
+
+M4で `experiment.html` が出たら、一覧の入口を実験単位へ差し替える。M3の時点では
+実験単位の集計HTMLが存在しないため、ケースを直接並べている。
 """
 
 from __future__ import annotations
@@ -12,27 +20,27 @@ from html import escape
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from ..agents.mbti_types import winning_mbti_text
-from ..config import runs_root
-
 WINNER_LABELS = {"village": "村人陣営の勝ち", "werewolf": "人狼陣営の勝ち"}
-STATUS_LABELS = {
-    "done": "完了",
-    "failed": "失敗",
-    "partial": "一部失敗",
-    "running": "実行中",
-}
+STATUS_LABELS = {"done": "完了", "failed": "失敗", "running": "実行中"}
+
+#: 一覧の先頭に出すカードの件数。全1,700ケースをカードにすると選べない。
+FEATURED_LIMIT = 6
 
 
-def build_pages(runs_dir: Optional[Path] = None, output_dir: Optional[Path] = None) -> Path:
-    """runs/ を走査して静的サイトを output_dir に書き出す。"""
-    source = Path(runs_dir) if runs_dir is not None else runs_root()
+def build_pages(
+    runs_dir: Optional[Path] = None, output_dir: Optional[Path] = None
+) -> Path:
+    """`runs/` を走査して静的サイトを `output_dir` に書き出す。"""
+
+    from ..runner import default_runs_dir
+
+    source = Path(runs_dir) if runs_dir is not None else default_runs_dir()
     dest = Path(output_dir) if output_dir is not None else source.parent / "site"
     if dest.exists():
         shutil.rmtree(dest)
     dest.mkdir(parents=True)
 
-    entries = collect_runs(source)
+    entries = collect_cases(source)
     for entry in entries:
         if not entry["source_html"]:
             continue
@@ -40,14 +48,12 @@ def build_pages(runs_dir: Optional[Path] = None, output_dir: Optional[Path] = No
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(entry["source_html"], target)
 
+    # `latest.html` の転送先は runs/ からの相対パスなので、出力先でも runs/ の下に
+    # 置く。置き場所を変えるとリンクが切れる。
     latest = source / "latest.html"
     if latest.is_file():
         (dest / "runs").mkdir(parents=True, exist_ok=True)
         shutil.copy2(latest, dest / "runs" / "latest.html")
-
-    static_dir = Path(__file__).resolve().parents[1] / "web" / "static"
-    shutil.copy2(static_dir / "style.css", dest / "style.css")
-    (dest / "simulator.html").write_text(render_simulator_preview(), encoding="utf-8")
 
     (dest / ".nojekyll").write_text("", encoding="utf-8")
     (dest / "index.html").write_text(render_index(entries), encoding="utf-8")
@@ -55,122 +61,141 @@ def build_pages(runs_dir: Optional[Path] = None, output_dir: Optional[Path] = No
     return dest
 
 
-def collect_runs(runs_dir: Path) -> List[Dict[str, Any]]:
+def collect_cases(runs_dir: Path) -> List[Dict[str, Any]]:
+    """`runs/実験/Trial/ケース/case_log.json` を新しい順に集める。"""
+
     entries: List[Dict[str, Any]] = []
     if not runs_dir.is_dir():
         return entries
-    for series_dir in sorted(runs_dir.iterdir()):
-        if not series_dir.is_dir():
-            continue
-        for run_dir in sorted(series_dir.iterdir()):
-            log_path = run_dir / "run_log.json"
-            if not log_path.is_file():
-                continue
-            log = json.loads(log_path.read_text(encoding="utf-8"))
-            html_path = run_dir / "result.html"
-            result = log.get("result") or {}
-            brain = log.get("brain") or {}
-            config = log.get("config") or {}
-            timing = log.get("timing") or {}
-            href = "runs/{}/r{:03d}/result.html".format(
-                log.get("series_id") or series_dir.name,
-                int(log.get("run_index") or 1),
-            )
-            entries.append(
-                {
-                    "run_id": log.get("run_id", run_dir.name),
-                    "series_id": log.get("series_id", series_dir.name),
-                    "status": log.get("status", ""),
-                    "winner": result.get("winner"),
-                    "executed": result.get("executed"),
-                    "provider": brain.get("provider") or "",
-                    "model": brain.get("model") or "",
-                    "started_at": timing.get("started_at") or "",
-                    "elapsed_seconds": timing.get("elapsed_seconds"),
-                    "player_count": config.get("player_count"),
-                    "winning_mbti": winning_mbti_text(
-                        log.get("players") or [], result.get("winner")
-                    ),
-                    "href": href,
-                    "source_html": str(html_path) if html_path.is_file() else "",
-                    "featured": _is_featured(log),
-                }
-            )
-    entries.sort(key=lambda item: item.get("started_at") or "", reverse=True)
+
+    for exp_dir in sorted(d for d in runs_dir.iterdir() if d.is_dir()):
+        for trial_dir in sorted(d for d in exp_dir.iterdir() if d.is_dir()):
+            for case_dir in sorted(d for d in trial_dir.iterdir() if d.is_dir()):
+                entry = _entry(exp_dir, trial_dir, case_dir)
+                if entry is not None:
+                    entries.append(entry)
+
+    entries.sort(key=lambda item: (item["started_at"], item["case_id"]), reverse=True)
     return entries
 
 
+def _entry(exp_dir: Path, trial_dir: Path, case_dir: Path) -> Optional[Dict[str, Any]]:
+    log_path = case_dir / "case_log.json"
+    if not log_path.is_file():
+        return None
+    try:
+        log = json.loads(log_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, ValueError, OSError):
+        # 書き込み途中で止まったファイルは一覧から外す。1件で生成が止まらないように。
+        return None
+
+    result = log.get("result") or {}
+    brain = log.get("brain") or {}
+    timing = log.get("timing") or {}
+    html_path = case_dir / "result.html"
+
+    return {
+        "case_id": log.get("case_id", case_dir.name),
+        "experiment_id": log.get("experiment_id", exp_dir.name),
+        "composition": _composition_text(log),
+        "status": log.get("status", ""),
+        "winner": result.get("winner"),
+        "valid": result.get("valid", True),
+        "executed": result.get("executed") or [],
+        "provider": brain.get("provider") or "",
+        "model": brain.get("model") or "",
+        "started_at": timing.get("started_at") or "",
+        "elapsed_seconds": timing.get("elapsed_seconds"),
+        "rounds": (log.get("discussion") or {}).get("rounds"),
+        "href": "runs/{0}/{1}/{2}/result.html".format(
+            exp_dir.name, trial_dir.name, case_dir.name
+        ),
+        "source_html": str(html_path) if html_path.is_file() else "",
+        "featured": log.get("status") == "done"
+        and brain.get("provider") in ("ollama", "gemini"),
+    }
+
+
+def _composition_text(log: Dict[str, Any]) -> str:
+    if log.get("composition") == "mixed":
+        return "混合構成"
+    return "同質構成 {0}".format(log.get("homogeneous_type") or "")
+
+
 def render_index(entries: List[Dict[str, Any]]) -> str:
-    featured = [entry for entry in entries if entry.get("featured")]
-    cards = "\n".join(_card(entry) for entry in featured) or "<p class='muted'>まだ公開できる完走結果はない。</p>"
-    rows = "\n".join(_row(entry) for entry in entries) or (
-        "<tr><td colspan='8'>実行結果はまだない。</td></tr>"
+    featured = [e for e in entries if e["featured"]][:FEATURED_LIMIT]
+    cards = "\n".join(_card(e) for e in featured) or (
+        "<p class='muted'>実モデルで完走したケースはまだない。</p>"
     )
-    return _INDEX.format(
-        count=len(entries),
-        cards=cards,
-        rows=rows,
+    rows = "\n".join(_row(e) for e in entries) or (
+        "<tr><td colspan='7'>実行結果はまだない。</td></tr>"
     )
+    return _INDEX.format(count=len(entries), cards=cards, rows=rows)
 
 
-def _is_featured(log: Dict[str, Any]) -> bool:
-    if log.get("status") != "done":
-        return False
-    return (log.get("brain") or {}).get("provider") in ("ollama", "gemini")
+def _winner_class(winner: Optional[str]) -> str:
+    if winner == "village":
+        return "village"
+    if winner == "werewolf":
+        return "werewolf"
+    return ""
+
+
+def _winner_text(entry: Dict[str, Any]) -> str:
+    if not entry["valid"]:
+        return "無効試合"
+    return WINNER_LABELS.get(entry["winner"], "決着なし")
+
+
+def _brain_text(entry: Dict[str, Any]) -> str:
+    parts = [p for p in (entry["provider"], entry["model"]) if p]
+    return " / ".join(parts) or "—"
 
 
 def _card(entry: Dict[str, Any]) -> str:
-    winner = entry.get("winner")
-    winner_class = "village" if winner == "village" else ("werewolf" if winner == "werewolf" else "")
-    brain = " / ".join(part for part in (entry.get("provider"), entry.get("model")) if part)
     return (
         '<a class="card" href="{href}">'
-        '<div class="label">{brain}</div>'
+        '<div class="label">{composition}</div>'
         '<div class="value {winner_class}">{winner}</div>'
-        '<div class="muted">{mbti}</div>'
-        '<div class="muted">{run_id}</div>'
+        '<div class="muted">{brain}</div>'
+        '<div class="muted">{case_id}</div>'
         "</a>"
     ).format(
         href=escape(entry["href"]),
-        brain=escape(brain or "—"),
-        winner_class=winner_class,
-        winner=escape(WINNER_LABELS.get(winner, "決着なし")),
-        mbti=escape(entry.get("winning_mbti") or "—"),
-        run_id=escape(entry.get("run_id") or ""),
+        composition=escape(entry["composition"]),
+        winner_class=_winner_class(entry["winner"]),
+        winner=escape(_winner_text(entry)),
+        brain=escape(_brain_text(entry)),
+        case_id=escape(entry["case_id"]),
     )
 
 
 def _row(entry: Dict[str, Any]) -> str:
-    winner = entry.get("winner")
-    winner_class = "village" if winner == "village" else ("werewolf" if winner == "werewolf" else "")
-    elapsed = entry.get("elapsed_seconds")
-    elapsed_text = "—" if elapsed in (None, "") else "{}秒".format(elapsed)
+    elapsed = entry["elapsed_seconds"]
     link = (
-        '<a href="{href}">{run_id}</a>'.format(
-            href=escape(entry["href"]),
-            run_id=escape(entry.get("run_id") or ""),
+        '<a href="{href}">{case_id}</a>'.format(
+            href=escape(entry["href"]), case_id=escape(entry["case_id"])
         )
-        if entry.get("source_html")
-        else escape(entry.get("run_id") or "")
+        if entry["source_html"]
+        else escape(entry["case_id"])
     )
     return (
-        "<tr><td>{link}</td><td>{status}</td>"
-        '<td class="{winner_class}">{winner}</td>'
-        "<td class='wrap'>{mbti}</td><td>{brain}</td>"
-        "<td>{elapsed}</td><td>{started}</td><td>{players}</td></tr>"
+        '<tr><td data-label="ケース" class="wrap">{link}</td>'
+        '<td data-label="構成">{composition}</td>'
+        '<td data-label="状態">{status}</td>'
+        '<td data-label="勝敗" class="{winner_class}">{winner}</td>'
+        '<td data-label="脳" class="wrap">{brain}</td>'
+        '<td data-label="ラウンド">{rounds}</td>'
+        '<td data-label="開始">{started}</td></tr>'
     ).format(
         link=link,
-        status=escape(STATUS_LABELS.get(entry.get("status"), entry.get("status") or "—")),
-        winner_class=winner_class,
-        winner=escape(WINNER_LABELS.get(winner, "—")),
-        mbti=escape(entry.get("winning_mbti") or "—"),
-        brain=escape(
-            " / ".join(part for part in (entry.get("provider"), entry.get("model")) if part)
-            or "—"
-        ),
-        elapsed=escape(str(elapsed_text)),
-        started=escape(entry.get("started_at") or "—"),
-        players=escape(str(entry.get("player_count") or "—")),
+        composition=escape(entry["composition"]),
+        status=escape(STATUS_LABELS.get(entry["status"], entry["status"] or "—")),
+        winner_class=_winner_class(entry["winner"]),
+        winner=escape(_winner_text(entry)),
+        brain=escape(_brain_text(entry)),
+        rounds=escape("—" if entry["rounds"] is None else str(entry["rounds"])),
+        started=escape(entry["started_at"] or "—"),
     )
 
 
@@ -223,27 +248,36 @@ a.card:hover {{ border-color: var(--accent); }}
 table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
 th, td {{ padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }}
 th {{ color: var(--muted); font-weight: 600; }}
-td.wrap, th.wrap {{ white-space: normal; }}
+td.wrap, th.wrap {{ white-space: normal; overflow-wrap: anywhere; }}
 .scroll {{ overflow-x: auto; }}
 a {{ color: var(--accent); }}
 .note {{ color: var(--muted); font-size: 12px; margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }}
+
+/* 狭い画面では表を1行1ブロックへ折り返す（設計書7.6）。 */
+@media (max-width: 640px) {{
+  table, tbody {{ display: block; width: 100%; }}
+  thead {{ display: none; }}
+  tr {{ display: block; padding: 10px 0; border-bottom: 1px solid var(--line); }}
+  td {{ display: flex; gap: 10px; padding: 2px 0; border: none; white-space: normal; }}
+  td::before {{ content: attr(data-label); flex: 0 0 5.5em; color: var(--muted); font-size: 11px; }}
+}}
 </style>
 </head>
 <body>
 <main>
   <h1>MBTI人狼 実行結果</h1>
-  <p class="sub">開発環境なしで結果を見るための公開ページ。{count}件。対戦の新規実行はできない。<a href="simulator.html">操作画面の見た目</a> / <a href="runs/latest.html">最新の試合</a></p>
-  <h2>観察用の試合</h2>
+  <p class="sub">開発環境なしで結果を見るための公開ページ。ケース{count}件。実行はできない。<a href="runs/latest.html">最新のケース</a></p>
+  <h2>実モデルで完走したケース</h2>
   <div class="cards">
 {cards}
   </div>
-  <h2>すべての実行</h2>
+  <h2>すべてのケース</h2>
   <div class="scroll">
     <table>
       <thead>
         <tr>
-          <th>run_id</th><th>状態</th><th>勝敗</th><th class="wrap">勝ったMBTI</th>
-          <th>脳</th><th>所要</th><th>開始</th><th>人数</th>
+          <th class="wrap">ケース</th><th>構成</th><th>状態</th><th>勝敗</th>
+          <th class="wrap">脳</th><th>ラウンド</th><th>開始</th>
         </tr>
       </thead>
       <tbody>
@@ -252,148 +286,28 @@ a {{ color: var(--accent); }}
     </table>
   </div>
   <p class="note">
-    MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
-    MBTIは主機能からの候補2タイプ（要求定義書6.5）。1人に心理機能を1つだけ持たせているため、タイプは一意に決まらない。
+    MBTIは実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。<br>
+    1 Trialは混合構成1ケースと同質構成16ケースの17ケースで構成される。指標は暫定であり、版によって変わる。
   </p>
 </main>
 </body>
 </html>
 """
-
-
-def render_simulator_preview() -> str:
-    """操作画面と同じ項目を、実行できない見た目として出す。"""
-    return _SIMULATOR
-
-
-_SIMULATOR = """<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MBTI人狼シミュレーター（見た目）</title>
-<link rel="stylesheet" href="style.css">
-<style>
-.preview-banner {
-  background: #332812;
-  border: 1px solid #6c5230;
-  color: #f0d9a8;
-  border-radius: 10px;
-  padding: 12px 14px;
-  margin-bottom: 16px;
-  font-size: 13px;
-}
-fieldset {
-  border: 0;
-  padding: 0;
-  margin: 0;
-  min-inline-size: 0;
-}
-</style>
-</head>
-<body>
-<header>
-  <h1>MBTI人狼シミュレーター</h1>
-  <p class="sub">条件を設定して対戦を開始し、完了後に同じ画面で会話と結果を確認する。会話は逐次表示しない。</p>
-</header>
-<main>
-  <p class="preview-banner">
-    これは操作画面の見た目です。公開ページからは対戦を開始できません。
-    実行するには、リポジトリを clone してローカルで <code>python -m mbti_werewolf ui</code> を起動してください。
-    <a href="./">結果一覧へ戻る</a>
-  </p>
-  <section class="panel" id="setup-panel">
-    <h2>1. 実験条件</h2>
-    <form id="config-form">
-      <fieldset disabled>
-      <div class="grid">
-        <label>参加人数
-          <input type="number" name="player_count" value="4">
-        </label>
-        <label>議論ターン数
-          <input type="number" name="turn_count" value="3">
-        </label>
-        <label>試合回数
-          <input type="number" name="game_count" value="1">
-        </label>
-        <label>seed
-          <input type="number" name="seed" value="42">
-        </label>
-        <label>役職割当方法
-          <select name="role_assignment_mode">
-            <option selected>seeded_random（seed付きランダム）</option>
-          </select>
-        </label>
-        <label>history_mode
-          <select name="history_mode">
-            <option selected>none（過去ログを渡さない）</option>
-          </select>
-        </label>
-        <label>人狼の人数
-          <input type="number" name="werewolf_count" value="1">
-        </label>
-        <label>脳（provider）
-          <select name="provider">
-            <option selected>stub（LLMを呼ばない・即時）</option>
-            <option>ollama（ローカル実行）</option>
-            <option>gemini（無料枠API）</option>
-          </select>
-        </label>
-        <label>モデル名
-          <input type="text" name="model" placeholder="例: gemma3:4b" value="">
-        </label>
-        <label>発言の文字数上限
-          <input type="number" name="max_output_chars" value="200">
-        </label>
-      </div>
-      <label class="inline">心理機能（上級者向け・主機能を直接指定）
-        <input type="text" name="functions" value="Ne, Si, Fi, Te">
-      </label>
-      <p class="hint">
-        既定はMBTIタイプそのもので定義した4人ロースター（討論者ENTP・擁護者ISFJ・仲介者INFP・幹部ESTJ）です。
-        上の欄は、その4人の主機能がそのまま入っています。ここを書き換えると参加人数以上の主機能を上から順に割り当てる旧来の指定方法になり、
-        MBTIタイプの表示は書き換えた分だけ外れます（候補2タイプ表示に戻ります）。
-      </p>
-      <h2>2. 実行</h2>
-      <div class="actions">
-        <button type="button" disabled>対戦開始</button>
-        <button type="button" class="ghost" disabled>条件を編集し直す</button>
-      </div>
-      <p class="hint">公開ページでは実行できません。</p>
-      </fieldset>
-    </form>
-  </section>
-  <section class="panel">
-    <h2>3. 状態</h2>
-    <div class="status-line">
-      <span class="dot"></span>
-      <strong>未実行</strong>
-      <span class="muted">この公開ページでは試合を回せません。</span>
-    </div>
-    <div class="progress"><div class="bar"></div></div>
-  </section>
-  <section class="panel">
-    <h2>5. 過去の実行</h2>
-    <p class="muted">過去の試合は <a href="./">結果一覧</a> から開きます。</p>
-  </section>
-</main>
-<footer>
-  MBTIおよび心理機能は、実在人物の診断や評価ではない。エージェントの振る舞いを分けるためのフィクション設定として扱っている。
-</footer>
-</body>
-</html>
-"""
-
 
 _NOT_FOUND = """<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ページが見つかりません</title>
+<title>ページが見つからない</title>
+<style>
+body { margin: 0; padding: 48px 20px; background: #12141a; color: #e6e8ee;
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif; line-height: 1.8; }
+a { color: #7aa2f7; }
+</style>
 </head>
 <body>
-<p>このURLには結果がありません。<a href="./">一覧へ戻る</a></p>
+<p>ページが見つかりませんでした。<a href="/hackathon-test/">結果一覧へ戻る</a></p>
 </body>
 </html>
 """

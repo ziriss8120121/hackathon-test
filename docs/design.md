@@ -6,7 +6,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 
 | 項目 | 内容 |
 | --- | --- |
-| バージョン | 2.7 |
+| バージョン | 2.8 |
 | 最終更新 | 2026-08-29 |
 | 作成者 | ゆうじろう（Engineer） |
 | 上位文書 | [要件定義書](./system-requirements.md) v2.1 / [要求定義書](./requirements.md) v2.2-draft |
@@ -21,7 +21,8 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 | 2.4の変更点 | `transcript.md` を先行実験の結果文書（WORLD A / B）と同じ構成に変更した。実行条件・開始時役職・夜処理・公開議論・投票・結果を1ファイルに置き、公開議論と投票の表にprivate memoを横並びで載せる。v2.3で「memoを人が読む出力に含めない」としていた記述を撤回した（5.3）。あわせて `summary.md` から会話を外し、v1の4人版をM3まで動く状態で残す移行手順を0.4へ追記した。指標の定義と `case_log.json` の形式は変わっていない。 |
 | 2.5の変更点 | M0・M1とWORLD A / B形式の `transcript.md` を実装した際に決めた2点を反映した。(1) 全員が連続発言の上限に達したラウンドを `max_rounds` に数える（4.5）。数えないと上限を設けたことで議論ラウンド数が静かに減る。(2) `discussion.max_consecutive_speeches` の `null` を設定として通す（6.4）。4.5で無効化した実行を段階2で試すと決めているため。あわせて10章のテスト一覧を実際のファイル構成へ合わせ、`test_transcript` を追加した。出力形式と指標の定義は変わっていない。 |
 | 2.6の変更点 | M2（中断・再開）の実装で決めたことを3.5と6.5へ反映した。再開はケース単位で `done` を飛ばす。出力先は同じ `experiment_id` へ書き足す。条件は `trial.json` が正本で、指定と違えばTrialの記録を採用して違いを表示する。人物プールとパターンセットは読み直さず、ルールセットは版が違えば停止する。復元した座席の役職の枚数をルールセットと照合する。失敗したケースは既定で1回だけ作り直して再実行し、それでも失敗したら次のケースへ進む。Trialの `status.json` と `case_skipped` を追加し、実験の `status.json` は前回までの完了分を含めて数えることにした。`--cases` で実行対象を絞れるようにした（M5前の実測用）。あわせてM3の分担を確定した。`trial_metrics.csv` と `experiment_metrics.csv` はM3で出し、Judge依存の2列（`final_entropy`・`convergence_round`）は空欄にしてM4で埋める。`speech_labels.csv` はM4へ移した。v1の削除はM3のうち `result.html` と最新結果リンクが動いた後に行う。v2の `result.html` は中身を新規に作り、CSSと `latest.html` の仕組みだけv1から流用する（0.4、6.9、11章）。 |
-| 2.7の変更点 | M3（人が読む出力と集計CSV）の実装で決めたことを反映した。(1) ケースの `result.html` は埋め込みJSONをJavaScriptで描く形をとらず、生成時にPython側でHTMLへ書き出す。同じ内容を二重に持たない、出力文字列をテストで直接検査できる、JavaScriptが動かない環境でも読める、の3点による（7.5）。(2) 画面幅640px以下で3列以上の表を1行1ブロックへ折り返す。private memoの列を足したことで、7.6の「ケースの会話全文は横に長い表を持たない」という前提が成り立たなくなったため（7.5、7.6）。(3) `latest.html` はM3では直近に完了したケースの `result.html` を指し、M4で `experiment.html` が出たら向け直す。全ケース失敗の実行では書き換えない（7.6）。(4) 集計CSVに、9章に定義があるのに列がなかった指標を末尾へ足した（`village_vote_accuracy`・`pass_rate`・`speech_count_gini`・`decided_from_unknown_count`、およびプレイヤー側の4列）。分母が0の割合は空欄にする（6.9）。(5) 失敗として扱う範囲に脳とエンジンの生成を含めた。実行中の例外だけを捕まえる形では、モデル名の誤りで実験全体が止まる（3.5）。あわせて `record/case_summary.py` と `record/case_result_view.py` を移行期間の別名として0.4へ追記し、10章のテストを24本にした。 |
+| 2.7の変更点 | M3（人が読む出力と集計CSV）の実装で決めたことを反映した。(1) ケースの `result.html` は埋め込みJSONをJavaScriptで描く形をとらず、生成時にPython側でHTMLへ書き出す。同じ内容を二重に持たない、出力文字列をテストで直接検査できる、JavaScriptが動かない環境でも読める、の3点による（7.5）。(2) 画面幅640px以下で3列以上の表を1行1ブロックへ折り返す。private memoの列を足したことで、7.6の「ケースの会話全文は横に長い表を持たない」という前提が成り立たなくなったため（7.5、7.6）。(3) `latest.html` はM3では直近に完了したケースの `result.html` を指し、M4で `experiment.html` が出たら向け直す。全ケース失敗の実行では書き換えない（7.6）。(4) 集計CSVに、9章に定義があるのに列がなかった指標を末尾へ足した（`village_vote_accuracy`・`pass_rate`・`speech_count_gini`・`decided_from_unknown_count`、およびプレイヤー側の4列）。分母が0の割合は空欄にする（6.9）。(5) 失敗として扱う範囲に脳とエンジンの生成を含めた。実行中の例外だけを捕まえる形では、モデル名の誤りで実験全体が止まる（3.5）。あわせて `record/case_summary.py` と `record/case_result_view.py` を移行期間の別名として0.4へ追記し、10章のテストへ出力の検査3件を追加した。 |
+| 2.8の変更点 | M3の最後の作業であるv1の削除を実施し、0.4の移行期間を終了した。実施内容を0.4へ記録し、6.1のファイル構成を実装に合わせた。0.4で「削除せず残す」としていた3つを削除へ変更した。(1) `engine/tiebreak.py` は、ルールv0.7が同数得票者の全員を追放するため呼び出し元がない。残すと「使わないが消さないコード」の判断根拠が本書だけになり、次に読む人が誤って呼ぶ余地が残る（4.6）。(2) `agents/prompts/v1/` は、v1の4人版プロンプトであり、v2.0のプロンプトと入力の形が違うため版の比較対象にならない。比較の対象になるのは `prompts/v2/` 以降である（F-07の解釈を変更）。(3) `web/` は、v1のrun単位の1画面構成のままではv2.0の3階層を表示できず、M6で作り直すまで動かせない。`requirements.txt` から `fastapi` と `uvicorn` も外した。あわせて `engine/game.py` を `engine/case.py` の名前で確定し（6.1）、`agents/functions.py` は実行経路から外れた参照用として残すことを明記した。CLIから `run` と `ui` を削除した（8.1）。10章のテスト一覧から `test_failure_record`（内容を `test_resume` へ統合）と `test_web_api`（M6へ移動）を外し、19ファイルとした。テスト関数は269本が緑である。あわせて `config/default.json` を削除した。v2.0の既定値は `config.py` が持ち、この設定ファイルは読み込まれていなかった（8.2）。指標の定義と出力形式は変わっていない。 |
 
 ### 0.1 本書の位置づけ
 
@@ -77,19 +78,19 @@ v2.0は `playgrounds/mbti-werewolf` を拡張する。パッケージを新設�
 | 現行モジュール | v2.0での扱い | 理由 |
 | --- | --- | --- |
 | `brains/base.py`、`stub.py`、`ollama.py`、`gemini.py`、`factory.py` | **流用**。`Request` に `expect_keys` と `choices` があるため、個別判断・発言意欲・Judgeの呼び出しも同じ形で通る。`factory` はエージェント用とJudge用で別インスタンスを返せるようにする。 | 脳の抽象はv2.0の要求（F-58、IF-02）をそのまま満たしている。ここを作り直す理由がない。 |
-| `engine/tiebreak.py` | **廃止**。ルールv0.7は同数得票者の全員を追放するため、乱数で1人を選ぶ処理が不要になる。 | 4.6。ファイルは削除せず残すが、v2.0の実行経路からは呼ばない。 |
+| `engine/tiebreak.py` | **廃止**。ルールv0.7は同数得票者の全員を追放するため、乱数で1人を選ぶ処理が不要になる。 | 4.6。M3で削除した（下記「v1を削除した結果」）。 |
 | `engine/view.py` | **流用のうえ拡張**。`viewer_id` を取る構造は維持し、他者の年齢・性別の開示、人狼の仲間情報、占い師・怪盗の取得情報を追加する。 | 情報の非対称性を1か所に閉じる設計（F-16、F-17）はv2.0でより重要になる。 |
 | `agents/mbti_types.py` | **流用のうえ拡張**。`TYPE_STACKS` の16タイプはそのまま使う。`DISPLAY_NAMES` を4タイプから16タイプへ拡張し、候補2タイプへのフォールバックは削除する。 | v2.0ではMBTIタイプが必ず確定するため、主機能から候補を推定する経路が不要になる。 |
-| `agents/functions.py` | **流用**。心理機能の定義は人格プロンプトの材料として使う。 | 8種の定義は要求定義書6.2の人格説明の土台になる。 |
+| `agents/functions.py` | **流用**。心理機能の定義は人格プロンプトの材料として使う。実行経路からは読まない。 | 8種の定義は `prompts/v2/tendencies.json` の16タイプの傾向文を書き起こした材料である。消すと傾向文の由来が追えなくなる。 |
 | `record/pages.py` | **流用のうえ拡張**。GitHub Pagesの生成対象にTrial・実験・RQの分析HTMLを追加する。 | 生成の枠組みは変わらない。 |
 | `config.py` | **作り直し**。実験・Trial・ケースの3層になり、`player_count` や `turn_count` を持たなくなる。 | v1の設定は1試合1層を前提としている。 |
 | `runner.py` | **作り直し**。実験 → Trial → ケースの3層の実行管理と再開処理になる。 | v1は series → run の2層で、再開機能を持たない。 |
 | `engine/game.py` | **作り直し**。夜の役職処理、自由議論、2時点の個別判断、投票が新しいフェーズ構成になる。 | v1は昼議論と投票だけで、ターン固定の進行になっている。 |
 | `engine/roles.py` | **作り直し**。役職が4種（人狼・占い師・怪盗・村人）になり、開始時役職と最終役職を区別する。 | v1は人狼・村人の2種のみ。 |
 | `agents/agent.py` | **作り直し**。発言意欲の判断、個別判断、夜行動の呼び出しが増える。 | v1は発言と投票の2種のみ。 |
-| `agents/prompts/v1/` | **新設**。`prompts/v2/` を作り、v1は削除せず残す。 | プロンプト版の比較を残す（F-07）。 |
+| `agents/prompts/v1/` | **削除**。`prompts/v2/` を新設する。 | v1の4ファイルは4人・心理機能1つ・ターン固定を前提にしており、v2.0のプロンプトと入力の形が違う。版の比較（F-07）が成り立つのは `prompts/v2/` 以降である。 |
 | `record/run_log.py`、`metrics.py`、`summary.py`、`timeline.py`、`series.py`、`result_view.py` | **作り直し**。schemaと出力単位が変わる。 | 6章の新schemaに合わせる。 |
-| `web/app.py`、`web/static/` | **作り直し**。実験 → Trial → ケースの3階層になる。 | v1は run 単位の1画面構成。 |
+| `web/app.py`、`web/static/` | **削除してM6で作り直す**。実験 → Trial → ケースの3階層になる。 | v1は run 単位の1画面構成で、v2.0の3階層を表示できない。M6まで動かせないため残さない。 |
 
 新設するモジュールは `experiment.py`、`engine/rules.py`、`engine/night.py`、`engine/discussion.py`、`engine/vote.py`、`agents/persona.py`、`judge/`、`analysis/` である（6.1）。
 
@@ -101,16 +102,18 @@ v2.0は `playgrounds/mbti-werewolf` を拡張する。パッケージを新設�
 | --- | --- | --- |
 | `config.py` | v1のまま残す。v2の設定は `experiment_config.py` として新設する | v1を削除し、`experiment_config.py` を `config.py` へ改名する |
 | `runner.py` | v1のまま残す。v2の実行管理は `experiment_runner.py` として新設する | v1を削除し、`experiment_runner.py` を `runner.py` へ改名する |
-| `engine/game.py` | v1のまま残す。v2のケース進行は `engine/case.py` として新設する | v1を削除する |
+| `engine/game.py` | v1のまま残す。v2のケース進行は `engine/case.py` として新設する | v1を削除する。v2は `engine/case.py` の名前で確定する |
 | `engine/roles.py` | v1の関数を残したまま、v2の4役職の割当関数を同じファイルへ追加する | v1の関数を削除する |
-| `engine/view.py` | v1の構造を維持したまま、v2で必要な開示情報を追加する | そのまま |
+| `engine/view.py` | v1の構造を維持したまま、v2で必要な開示情報を追加する | v1の `PublicView` と `PublicViewBuilder` を削除する |
 | `record/` のv1モジュール | v1のまま残す。v2の出力は `record/case_log.py`、`record/transcript.py` などを新設する | v1を削除する |
 | `record/summary.py` | v1のまま残す。v2のケース要約は `record/case_summary.py` として新設する | v1を削除し、`record/case_summary.py` を `record/summary.py` へ改名する |
 | `record/result_view.py` | v1のまま残す。v2の結果ビューは `record/case_result_view.py` として新設する | v1を削除し、`record/case_result_view.py` を `record/result_view.py` へ改名する |
-| CLIサブコマンド | v1は `run`、v2は `experiment` として分ける | `run` を削除する |
+| `agents/agent.py` | v1のまま残す。v2のエージェントは `agents/case_agent.py` として新設する | v1を削除し、`agents/case_agent.py` を `agents/agent.py` へ改名する |
+| `brains/stub.py` | v1の `StubBrain` を残したまま、v2の `CaseStubBrain` を同じファイルへ追加する | v1の `StubBrain` を削除し、`factory` の登録を `CaseStubBrain` へ差し替える |
+| CLIサブコマンド | v1は `run`、v2は `experiment` として分ける | `run` と `ui` を削除する |
 | v1のテスト | 47本を緑のまま維持し、v2の回帰基準として使う | v1固有のテストを削除する |
 
-移行期間だけの名前は4つある。`experiment_config.py`、`experiment_runner.py`、`record/case_summary.py`、`record/case_result_view.py` である。いずれもv1が同じ名前のモジュールを持っているために付けた別名で、最終形は6.1のファイル構成である。M3でv1を削除する際にまとめて改名する。この4つ以外は6.1の名前をそのまま使えるため、改名の対象にならない。
+移行期間だけの名前は5つある。`experiment_config.py`、`experiment_runner.py`、`record/case_summary.py`、`record/case_result_view.py`、`agents/case_agent.py` である。いずれもv1が同じ名前のモジュールを持っているために付けた別名で、最終形は6.1のファイル構成である。M3でv1を削除する際にまとめて改名する。この5つ以外は6.1の名前をそのまま使えるため、改名の対象にならない。
 
 `record/case_metrics.py` は改名の対象にならない。v1が `record/metrics.py` を持っているが名前が違うため、衝突していない。
 
@@ -119,6 +122,25 @@ v2.0は `playgrounds/mbti-werewolf` を拡張する。パッケージを新設�
 M3の中でも、v2の `result.html` と最新結果へのリンクが動いた後に削除する。M3の入口で削除しない理由は、いまスマホから開ける結果がv1の `result.html` と `latest.html` だけであり、v2の `transcript.md` はGitHub上でMarkdownとして読む形にとどまるためである。要求定義書がスマホから開ける結果HTMLを重視項目に挙げているので、置き換え先が動くまで消さない。
 
 v2の `result.html` は中身を新規に作る。v1は4人・心理機能1つ・ターン固定を前提に表示しており、v2は8人・自由議論・private memo・両時点の判断を出すため、表示する項目がほぼ入れ替わる。一方、CSSと `latest.html` を書き出す仕組みはv1のまま使える。ここは表示する中身に依存しないためである。
+
+**v1を削除した結果**
+
+M3の最後に実施した。削除したのは以下である。
+
+| 削除したもの | 内容 |
+| --- | --- |
+| モジュール | `engine/game.py`、`engine/tiebreak.py`、`record/run_log.py`、`record/metrics.py`、`record/timeline.py`、`record/series.py`、`web/`（`app.py` と `static/` の3ファイル） |
+| モジュール内のv1部分 | `engine/roles.py` の `Player`・`build_players`・`build_speaking_order`・`role_composition_text`、`engine/view.py` の `PublicView`・`PublicViewBuilder`、`brains/stub.py` の `StubBrain`、`brains/factory.py` の `create_brain`、`agents/mbti_types.py` の候補2タイプ系の関数 |
+| プロンプト | `agents/prompts/v1/` の4ファイル |
+| テスト | `test_engine.py`、`test_reproducibility.py`、`test_role_isolation.py`、`test_tiebreak.py`、`test_failure_record.py`、`test_web_api.py`、`test_mbti_types.py`（v1の47本） |
+| CLI | `run` サブコマンドと `ui` サブコマンド |
+| 依存 | `requirements.txt` の `fastapi` と `uvicorn` |
+
+改名は5つの移行期間名に加えて、テストの `test_case_brain.py` を `test_brain_parse.py` へ、`tests/v2_support.py` を `tests/conftest.py` へ統合した。移行期間中は、v1の `conftest.py` が4人版の設定と応答形式を前提にしていたため別ファイルへ置いていた。
+
+`agents/mbti_types.py` は `DISPLAY_NAMES` を4タイプから16タイプへ広げた。表示に使うためではなく、プロンプトへ日本語表示名が混入していないかを検査する語彙として16タイプ分が必要になるためである（5.2、10章の `test_isolation`）。
+
+削除しなかったものが1つある。`agents/functions.py` である。実行経路からは読まないが、`prompts/v2/tendencies.json` の16タイプの傾向文を書き起こした材料であり、傾向文をv3で作り直すときに元の定義が追えなくなるためである。
 
 ### 0.5 ルール文書・Agent設定文書との対応
 
@@ -212,11 +234,11 @@ v1.1の構成を維持する。v2.0で依存を追加しない。
 
 | 実装 | 用途 | 回数の制約 | 品質 |
 | --- | --- | --- | --- |
-| `StubBrain` | 進行・出力・分析・画面の検証、CI、条件固定の検査 | なし | 議論としては無意味（固定文＋seed付き乱数の判断） |
+| `CaseStubBrain` | 進行・出力・分析・画面の検証、CI、条件固定の検査 | なし | 議論としては無意味（固定文＋seed付き乱数の判断） |
 | `OllamaBrain` | 本命。段階実行と本実行、夜間実行 | なし（ローカル） | 小型モデル相応 |
 | `GeminiBrain` | 品質比較。ローカルで自由議論や個別判断が成立しない場合の判断材料 | 無料枠の1日あたり上限に依存 | 高い |
 
-v2.0では `StubBrain` の役割がv1.1より重い。17ケースの条件固定（F-11、NF-06）、再開処理（F-53）、分析出力（F-60〜F-64）は、LLMの品質と無関係に正しさを検証できる。これらをStubで自動テストできるようにすることが、長時間実行の前に不具合を潰す唯一の手段になる。
+v2.0では `CaseStubBrain` の役割がv1.1より重い。17ケースの条件固定（F-11、NF-06）、再開処理（F-53）、分析出力（F-60〜F-64）は、LLMの品質と無関係に正しさを検証できる。これらをStubで自動テストできるようにすることが、長時間実行の前に不具合を潰す唯一の手段になる。
 
 Gemini無料枠の実際の上限はモデル・プロジェクト・時期で変わり、固定値として扱えない。実装時にAI Studioの使用量画面で確認し、確認日と値を `docs/` の実行メモに残す。1.3の試算どおり1ケースで約80回の呼び出しが必要なため、無料枠では数ケースで頭打ちになる。Geminiは品質比較専用であり、本実行の経路にしない。
 
@@ -322,7 +344,7 @@ flowchart TB
     end
 
     subgraph BRAINS["脳の実装（差し替え可能）"]
-        STUB["StubBrain"]
+        STUB["CaseStubBrain"]
         OLLAMA["OllamaBrain"]
         GEMINI["GeminiBrain"]
     end
@@ -363,15 +385,15 @@ flowchart TB
 
 | コンポーネント | 責務 | 持たない責務 |
 | --- | --- | --- |
-| Web層（`web/app.py`） | HTTPの受け付け、`runs/` の読み取り、静的ファイル配信 | ゲームのルール、推論の呼び出し、分析の算出 |
+| Web層（`web/app.py`。M6で作る） | HTTPの受け付け、`runs/` の読み取り、静的ファイル配信 | ゲームのルール、推論の呼び出し、分析の算出 |
 | ExperimentBuilder（`experiment.py`） | 人物プールからのパターン選定、役職割当、Trialと17ケースの生成、条件固定の検査 | 実行、記録 |
 | Runner（`runner.py`） | 実験・Trial・ケースの実行管理、seedの割り振り、進捗と出力の書き込み、失敗の記録、未完了ケースからの再開 | 発言の生成、勝敗の判定、評価、分析 |
 | RuleSet（`engine/rules.py`） | ルールJSONの読み込み、検証、役職構成とフェーズ定義の提供 | 進行の制御 |
-| CaseEngine（`engine/game.py`） | フェーズ進行、開始時処理の呼び出し、議論の呼び出し、投票集計、同数の決着、勝敗判定 | プロンプトの文面、HTTP通信 |
+| CaseEngine（`engine/case.py`） | フェーズ進行、開始時処理の呼び出し、議論の呼び出し、投票集計、同数の決着、勝敗判定 | プロンプトの文面、HTTP通信 |
 | NightResolver（`engine/night.py`） | 役職ごとの開始時処理と最終役職の確定 | 議論、投票 |
 | DiscussionRunner（`engine/discussion.py`） | ラウンドの構成、問い合わせ順の決定、終了条件の判定、発言と見送りの記録 | 誰が発言するかの決定（各Agentが決める） |
 | VoteResolver（`engine/vote.py`） | 投票の収集、検証、得票集計 | 勝敗判定 |
-| PublicViewBuilder（`engine/view.py`） | プレイヤー視点で与えてよい情報だけを組み立てる | 推論、記録 |
+| CaseViewBuilder（`engine/view.py`） | プレイヤー視点で与えてよい情報だけを組み立てる | 推論、記録 |
 | Agent（`agents/agent.py`） | 人格・役職・取得情報からプロンプトを作り、応答を解釈する | HTTP通信、リトライ制御 |
 | PersonaBuilder（`agents/persona.py`） | MBTIタイプと心理機能スタックから人格設定文を組み立てる | ゲームのルール |
 | Judge（`judge/judge.py`） | Transcriptの発言単位の評価、公開スタンス系列の導出 | ゲーム進行、指標の統計処理 |
@@ -435,7 +457,7 @@ sequenceDiagram
     CLI-->>U: experiment_id、Trial数、ケース数、保存先を表示
 ```
 
-条件の一致検査を実行前に必ず通す理由は、17ケースの実行が終わってから条件のずれに気付いた場合、約4時間のTrialが丸ごと無駄になるためである。検査は `StubBrain` を使わずに設定の比較だけで済むので、コストがない（NF-06、AC-02）。
+条件の一致検査を実行前に必ず通す理由は、17ケースの実行が終わってから条件のずれに気付いた場合、約4時間のTrialが丸ごと無駄になるためである。検査は脳を呼ばず設定の比較だけで済むので、コストがない（NF-06、AC-02）。
 
 ### 3.2 1ケースを進行する
 
@@ -503,7 +525,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant D as DiscussionRunner
-    participant VW as PublicViewBuilder
+    participant VW as CaseViewBuilder
     participant A as Agent
     participant B as Brain
 
@@ -801,7 +823,7 @@ HTMLは結果データをファイル内に埋め込んだ自己完結形式で�
 
 **設計上の要点**
 
-怪盗の処理が2段階である点は、推論の呼び出し回数と `PublicViewBuilder` の両方に影響する。1回目の呼び出しで対象を指定させ、その結果をビューへ加えてから2回目の呼び出しで交換の可否を判断させる。1回で「対象と交換可否」をまとめて答えさせると、対象の役職を知る前に交換を決めることになり、ルールと違う判断になる。
+怪盗の処理が2段階である点は、推論の呼び出し回数と `CaseViewBuilder` の両方に影響する。1回目の呼び出しで対象を指定させ、その結果をビューへ加えてから2回目の呼び出しで交換の可否を判断させる。1回で「対象と交換可否」をまとめて答えさせると、対象の役職を知る前に交換を決めることになり、ルールと違う判断になる。
 
 追放者が複数になりうる点、および追放者が0人になりうる点は、v1.1の設計にない分岐である。`result.executed` を単一の `player_id` ではなく配列で持つ（6.7）。
 
@@ -930,13 +952,13 @@ Trialの `complete` は、17ケースすべてが `done` のときだけ `true` 
 
 投票の解析失敗時に乱数でフォールバックしない。v1.1では試合を終了させるために乱数で投票先を決めていたが、ルールv0.7は棄権という扱いを定めている。棄権は集計から抜けるだけでゲームは終了するため、乱数を入れる必要がない。本人が決めた投票ではない値を投票先として記録すると、9.1の `vote_correct` に偽の値が混ざる。
 
-同数得票の乱数決着を持たない。ルールv0.7が同率最多者の全員追放を定めているため、決着に乱数が不要になった。`engine/tiebreak.py` は実行経路から外す（0.4）。この変更により、追放が乱数で決まるケースがなくなり、9.2の収束指標の解釈が単純になる。
+同数得票の乱数決着を持たない。ルールv0.7が同率最多者の全員追放を定めているため、決着に乱数が不要になった。v1の `engine/tiebreak.py` はM3で削除した（0.4）。この変更により、追放が乱数で決まるケースがなくなり、9.2の収束指標の解釈が単純になる。
 
 追放者の人数が0人、1人、2人以上のいずれにもなりうる。9.1の `village_correct` は「追放者の中に最終役職が人狼の者がいるか」で判定するため、人数によらず同じ式で計算できる。9.2では追放者数を `executed_count` として記録し、票が散った結果としての追放者0人を区別できるようにする。
 
 ### 4.7 情報の非対称性の担保
 
-要件のF-16、F-17、F-26にあたる。v2.0では守るべき境界がv1より多いため、`PublicViewBuilder` を唯一の入力源にする構造とテストの両方で守る。
+要件のF-16、F-17、F-26にあたる。v2.0では守るべき境界がv1より多いため、`CaseViewBuilder` を唯一の入力源にする構造とテストの両方で守る。
 
 | 与える情報 | 与えない情報 |
 | --- | --- |
@@ -953,11 +975,13 @@ Trialの `complete` は、17ケースすべてが `done` のときだけ `true` 
 
 | 手段 | 内容 |
 | --- | --- |
-| 構造 | `PublicViewBuilder` が唯一のプロンプト入力源になる。Agentはゲームの内部状態を直接受け取らない |
-| 検査（役職） | 自分と、ルール上知り得る相手以外の役職がプロンプト文字列に出現しないことをテストで検証する（10章 `test_role_isolation`） |
-| 検査（MBTI） | 16タイプのラベル、日本語表示名、「MBTI」「心理機能」「16タイプ」の語がプロンプトに出現しないことをテストで検証する（10章 `test_mbti_isolation`） |
-| 検査（個別判断） | 個別判断とprivate memoのテキストが他者へのプロンプトに出現しないことをテストで検証する（10章 `test_private_answer_isolation`） |
-| 検査（実験の存在） | 「実験」「シミュレーション」「AI」「エージェント」「WORLD」「構成種別」の語がプロンプトに出現しないことをテストで検証する（10章 `test_meta_isolation`） |
+| 構造 | `CaseViewBuilder` が唯一のプロンプト入力源になる。Agentはゲームの内部状態を直接受け取らない |
+| 検査（役職） | 自分と、ルール上知り得る相手以外の役職がプロンプト文字列に出現しないことをテストで検証する |
+| 検査（MBTI） | 16タイプのラベル、日本語表示名、「MBTI」「心理機能」「16タイプ」の語がプロンプトに出現しないことをテストで検証する |
+| 検査（個別判断） | 個別判断とprivate memoのテキストが他者へのプロンプトに出現しないことをテストで検証する |
+| 検査（実験の存在） | 「実験」「シミュレーション」「AI」「エージェント」「WORLD」「構成種別」の語がプロンプトに出現しないことをテストで検証する |
+
+4件の検査は10章の `test_isolation` に置く。検査対象がすべて「プロンプト全文に何が含まれていないか」であり、同じ道具を使うためである。
 
 「他者が見送ったかどうか」を与えない理由は、見送りが公開情報になると「黙っていること」が場に見える行動になり、ルールに定めのない情報を議論へ持ち込むことになるためである。見送りは記録には残すが、エージェントへは渡さない。
 
@@ -981,7 +1005,7 @@ class Request:
     user: str
     expect_keys: tuple[str, ...]  # 例: ("speak", "speech") / ("suspect", "confidence", "reason")
     choices: tuple[str, ...]      # 投票先など、値が限られる項目の候補
-    tag: str                      # 呼び出しの識別。StubBrainの出力切替と調査に使う
+    tag: str                      # 呼び出しの識別。Stubの出力切替と調査に使う
 
 
 class Brain(Protocol):
@@ -994,7 +1018,7 @@ class Brain(Protocol):
 
 `BrainResponse` は生成テキスト、待機時間、リトライ回数、`parse_failed` を持つ。JSONの解析とリトライはBrain側の責務とし、AgentとJudgeは解釈済みの結果だけを扱う。
 
-v2.0では `tag` の値を増やす。`night_seer` / `night_thief` / `pre_discussion` / `speak` / `pre_vote` / `vote` / `judge` の7種とする。`StubBrain` はこの `tag` で返す形を切り替えるので、Stubだけで全フェーズを完走できる。
+v2.0では `tag` の値を増やす。`night_seer` / `night_thief` / `pre_discussion` / `speak` / `pre_vote` / `vote` / `judge` の7種とする。`CaseStubBrain` はこの `tag` で返す形を切り替えるので、Stubだけで全フェーズを完走できる。
 
 `factory` はエージェント用とJudge用で別のBrainインスタンスを返せるようにする。設定は `brain` と `judge_brain` に分ける。Judgeだけ別のモデルにする、あるいはJudgeだけGeminiにする、といった構成が設定で成立する（IF-02）。
 
@@ -1222,11 +1246,11 @@ Judgeの出力から、`speech_id` の順に次の処理を行う。
 
 | 実装 | 通信先 | 備考 |
 | --- | --- | --- |
-| `StubBrain` | なし | `tag` ごとの固定テンプレートに乱数で語を差し込む。`speak` は乱数で発言と見送りを混ぜ、発言回数が偏る実行例を作る。待機時間は0 |
+| `CaseStubBrain` | なし | `tag` ごとの固定テンプレートに乱数で語を差し込む。`speak` は一定間隔で見送りを返し、発言回数が偏る実行例を作る。待機時間は0 |
 | `OllamaBrain` | `http://localhost:11434/api/generate` | モデル名は設定値。Ollamaが起動していない場合は `unreachable` を返す |
 | `GeminiBrain` | Gemini APIのHTTPエンドポイント | APIキーは環境変数 `GEMINI_API_KEY` から読む。未設定なら選択できない。429は `rate_limited` に分類する |
 
-`StubBrain` の `speak` を乱数で見送りと混ぜる点は、v2.0で追加する挙動である。全員が毎回発言するStubでは、発言回数の偏りを扱う分析コード（9.2、9.3）と、`all_pass` による終了条件（4.5）をテストできない。
+`CaseStubBrain` の `speak` に見送りを混ぜる点は、v2.0で追加した挙動である。全員が毎回発言するStubでは、発言回数の偏りを扱う分析コード（9.2、9.3）と、`all_pass` による終了条件（4.5）をテストできない。
 
 `brains/factory.py` が `brain.provider` と `judge_brain.provider` の値から実装を返す。使用した脳は `case_log.json` の `brain` と `judge.json` の `judge_brain` に、`provider`、`model`、`endpoint_kind` として残す（F-35、AC-14）。
 
@@ -1257,8 +1281,6 @@ playgrounds/mbti-werewolf/
   README.md
   requirements.txt
   pyproject.toml
-  config/
-    default.json                  # 既定の実験条件
   data/                           # 外部データ（実行結果ではない）
     persons/
       pool-001.json               # 人物プール100人
@@ -1267,26 +1289,25 @@ playgrounds/mbti-werewolf/
     rules/
       onenight-8p-v0.7.json       # ルールセット（4.1、4.2）
   src/mbti_werewolf/
-    __main__.py                   # ui / experiment / judge / analyze / pages のサブコマンド
-    config.py                     # 設定の読み込みと検証
+    __main__.py                   # experiment / masterdata / judge / analyze / pages のサブコマンド
+    config.py                     # 実験条件の読み込みと検証。既定値はこのファイルが持つ
     experiment.py                 # 人物選定、役職割当、Trialと17ケースの生成、条件固定の検査
+    masterdata.py                 # 人物プールとパターンセットの生成（6.3）
     runner.py                     # 実行管理、進捗、逐次保存、再開
     engine/
       rules.py                    # ルールセットの読み込みと検証
-      game.py                     # CaseEngine（フェーズ進行）
+      case.py                     # CaseEngine（フェーズ進行）
       roles.py                    # 役職割当と最終役職
       night.py                    # 開始時の役職処理
       discussion.py               # 自由議論のラウンド制御
       vote.py                     # 投票の収集と集計
-      view.py                     # PublicViewBuilder
-      tiebreak.py                 # v1.1の同数決着。v2.0では呼ばない（0.4）
+      view.py                     # CaseViewBuilder（4.7）
     agents/
-      agent.py
+      agent.py                    # 移行期間は case_agent.py（0.4）
       persona.py                  # PersonaBuilder（行動傾向文の組み立て）
       mbti_types.py               # 16タイプと機能スタック
-      functions.py                # 心理機能の説明
+      functions.py                # 心理機能の説明。実行経路からは読まない（0.4）
       prompts/
-        v1/                       # v1.1の4ファイル。削除せず残す
         v2/
           system_rules.md
           system_context.md
@@ -1327,13 +1348,9 @@ playgrounds/mbti-werewolf/
       metrics_csv.py              # 集計CSVの列と書き出し（6.9）
       result_view.py              # 移行期間は case_result_view.py（0.4）
       pages.py
-    web/
-      app.py                      # FastAPI
-      static/
-        index.html
-        app.js
-        style.css
+    web/                          # M6で作り直す。M3でv1を削除した（0.4）
   tests/
+    conftest.py                   # ScriptedBrain とケース実行のfixture
     test_experiment.py
     test_condition_fixation.py
     test_rules.py
@@ -1341,19 +1358,17 @@ playgrounds/mbti-werewolf/
     test_discussion.py
     test_private_answers.py
     test_vote.py
-    test_role_isolation.py
-    test_mbti_isolation.py
-    test_private_answer_isolation.py
+    test_execution.py
+    test_isolation.py
     test_brain_parse.py
     test_judge.py
     test_stance.py
     test_resume.py
+    test_transcript.py
     test_case_metrics.py
     test_case_outputs.py
     test_run_outputs.py
     test_analysis.py
-    test_failure_record.py
-    test_web_api.py
     test_cli.py
 
 runs/
@@ -2137,18 +2152,20 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 
 | 目的 | コマンド |
 | --- | --- |
-| 操作画面を開く | `python -m mbti_werewolf ui` |
-| 人物プールを生成する | `python -m mbti_werewolf make-pool --count 100 --seed 1001` |
-| 8人パターンを生成する | `python -m mbti_werewolf make-patterns --pool pool-001 --count 100 --seed 2001` |
+| 人物プールと8人パターンを生成する | `python -m mbti_werewolf masterdata --patterns 100` |
+| 生成と条件固定の検査だけを行う | `python -m mbti_werewolf experiment --dry-run` |
 | 1 Trialを実行する | `python -m mbti_werewolf experiment --trials 1 --seed 42` |
-| Trial範囲を指定して実行する | `python -m mbti_werewolf experiment --trials 100 --trial-range 26 50 --seed 42` |
+| Trial範囲を指定して実行する | `python -m mbti_werewolf experiment --trials 100 --trial-range 26-50 --seed 42` |
+| 1ケースだけ実測する | `python -m mbti_werewolf experiment --cases c00 --brain ollama` |
 | 中断した実験を再開する | `python -m mbti_werewolf experiment --resume e-20260901-210000` |
-| 脳を切り替える | `python -m mbti_werewolf experiment --brain ollama --judge-brain ollama` |
+| 脳を切り替える | `python -m mbti_werewolf experiment --brain ollama --model gemma3:4b` |
 | Judge評価だけを実行する | `python -m mbti_werewolf judge --experiment e-20260901-210000` |
 | 分析だけを生成する | `python -m mbti_werewolf analyze --experiment e-20260901-210000` |
 | GitHub Pages用サイトを生成する | `python -m mbti_werewolf pages` |
 
-`ui` は内部でuvicornを起動し、既定ポートで待ち受ける。単一のコマンドで画面まで到達するため、要件のF-77とNF-04を満たす。
+人物プールと8人パターンは1つの `masterdata` サブコマンドで作る。パターンはプールから選ぶため、別のコマンドに分けるとプールを指定し直す手間だけが増える。
+
+操作画面の `ui` はM3でv1と一緒に削除した。M6でv2.0向けに作り直したときに、この表へ戻す（0.4）。
 
 `judge` と `analyze` を分けた効果は、Judgeの評価基準や指標定義を変えたときに、ゲームを再実行せずに評価と分析だけを回し直せることである。段階2で4時間かけて取った1 Trialのデータに対し、評価基準を何度でも試せる（F-41、F-45、NF-18）。
 
@@ -2159,10 +2176,12 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 後のものが前を上書きする。
 
 ```text
-config/default.json  →  --config で指定したファイル  →  コマンド引数  →  画面のフォーム入力
+config.py の既定値  →  --config で指定したファイル  →  コマンド引数
 ```
 
-画面からの実行はフォームの値をそのままAPIに渡すため、最も優先度が高い経路になる。どの経路で実行しても、確定した設定は実験の `experiment.json`、Trialの `trial.json`、ケースの `config.json` に同じ形で保存される（F-56、IF-08）。
+既定値はコードが持つ。設定ファイルを既定の読み込み先として置かない理由は、17ケースの条件固定をコード側で保証しているため、外部ファイルの編集だけで条件が静かに変わる経路を作りたくないためである。M6で画面を作り直したときは、フォーム入力をコマンド引数と同じ層に置く。
+
+どの経路で実行しても、確定した設定は実験の `experiment.json`、Trialの `trial.json`、ケースの `config.json` に同じ形で保存される（F-56、IF-08）。
 
 Trialの固定条件は生成時に1度だけ確定し、以後は設定の優先順位の対象から外れる。再開時にコマンド引数で議論条件を変えても、既存Trialの条件は変わらない。変えたい場合は新しい実験を作る。これがないと、再開のたびにTrial内の条件が変わりうる（3.5、6.6）。
 
@@ -2357,14 +2376,14 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 
 ## 10. テスト設計
 
-`StubBrain` があるため、推論なしで受入基準の大半を検証できる。v2.0では、長時間実行の前に潰しておくべき箇所が増えるため、テストを21本に増やす。M3で出力の検査を3本足し、24本になった。
+`CaseStubBrain` があるため、推論なしで受入基準の大半を検証できる。下表は19ファイルである。M3までに16ファイルを作り、残る3ファイル（`test_judge`・`test_stance`・`test_analysis`）はM4で作る。
 
-下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。v1の47本は別ファイルとして残し、v2.0の回帰基準として使う（0.4）。v1が同じ名前のファイルを既に持つ2件は、移行期間だけ名前を分ける。
+下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。M3の時点で、v1の47本を削除し、テスト関数は269本が緑である（0.4）。
 
 | v2.0のファイル名 | 事情 |
 | --- | --- |
 | `test_isolation.py` | 情報隔離の4件（役職・MBTI・メタ・個別判断）を1ファイルにまとめる。検査対象がすべて「プロンプト全文に何が含まれていないか」であり、同じ道具を使うため |
-| `test_case_brain.py` | v1が `test_brain_parse.py` を持つ。M3でv1を削除するときに改名する |
+| `test_brain_parse.py` | 移行期間は `test_case_brain.py`。M3でv1を削除して改名した（0.4） |
 
 | テスト | 内容 | 対応要件 |
 | --- | --- | --- |
@@ -2377,18 +2396,18 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 | `test_vote` | 自分への投票が候補に入らない。候補外の応答が3回まで再要求される。3回失敗で棄権になり集計から抜ける | F-18、4.6、5.4 |
 | `test_execution` | 最多得票2票以上の同率最多者が全員追放される。最多得票が1票だけなら追放者0人になる。有効票0なら無効試合になり勝敗が付かない。追放者の中に人狼が1人でもいれば村人陣営の勝利になる | 4.6、F-19 |
 | `test_isolation` | 4件をまとめる。(1) ルール上知り得ない役職がプロンプトに出現せず、人狼は仲間を知る。(2) 16タイプのラベル、表示名、「MBTI」「心理機能」「16タイプ」の語が出現しない。混合構成と同質構成でsystemプロンプトの差が行動傾向の1文だけになる。(3)「実験」「シミュレーション」「AI」「エージェント」「構成種別」「勝率」「指標」の語が出現しない。(4) 他者の個別判断と `memo` のテキストが出現せず、自分の `memo` も次の問い合わせへ戻らない | F-16、F-17、F-26、4.7、5.2、5.3、Agent設定文書 §3 |
-| `test_case_brain` | 前置き付き応答、コードブロック囲み、JSON崩れ、候補外の値を与える。回答機会が3回で止まり、4回目を呼ばない。`swap: false` と `speak: false` を空値と誤判定しない。実Brainの内部再送が0で、Agentの3回と二重に掛からない | F-29、5.4、6.4、AC-17 |
+| `test_brain_parse` | 前置き付き応答、コードブロック囲み、JSON崩れ、候補外の値を与える。回答機会が3回で止まり、4回目を呼ばない。`swap: false` と `speak: false` を空値と誤判定しない。実Brainの内部再送が0で、Agentの3回と二重に掛からない | F-29、5.4、6.4、AC-17 |
 | `test_transcript` | `transcript.md` が先行実験のWORLD A / B結果文書と同じ章順・表の列になる。参照先の文書を読んで突き合わせる。参加者表記がP1〜P8になり、MBTIが出ない。見送りとスキップが別の文言になる。無効試合で勝敗行が出ない | 6.10、要求定義書の重視項目 |
 | `test_case_metrics` | 指標の算出。棄権と `"unknown"` が0ではなく `null` になる。追放者に人狼が1人でもいれば `village_correct` が1になる。`village_vote_accuracy` が人狼本人の投票を除く。エントロピーを対象の数ではなく参加人数で正規化する。ジニ係数が全員無発言のとき `null` になる。判断していない状態からの決定を修正と別に数える。分母が0の割合が `null` になる | 9.1〜9.3 |
 | `test_case_outputs` | `summary.md` に会話が載らずMBTIが載る。CSVのJudge依存2列が空欄で、他の列が埋まる。複数値のセルが `|` 区切りになる。`result.html` が自己完結でスクリプトを持たず、発言のHTMLがエスケープされ、章が揃い、狭い画面用の `data-label` が付く。`latest.html` が相対パスと手動リンクを持つ | 6.9、6.10、7.5、7.6 |
 | `test_run_outputs` | 完了したケースに6ファイルが揃う。`--cases` で外したケースのディレクトリを作らない。集計CSVの行数が17ケース×8人と17ケースになり、再開後も前回までの完了分を含む。ケースが0件でもヘッダだけのCSVを書く。`latest.html` が直近の完了ケースを指し、転送先が実在する。全ケース失敗の実行では書き換えない。失敗したケースにも `result.html` が残る | 6.9、7.5、7.6、F-51 |
 | `test_judge` | Judgeが発言単位の評価を返し、`speech_id` と1対1に対応する。評価基準版を変えると別ファイルになる | F-40、F-42、F-45、AC-06 |
 | `test_stance` | 公開スタンス系列の導出。同じ人が繰り返し疑っても疑念分布の合計が参加人数を超えない | F-44、5.5 |
-| `test_resume` | 中断後の再開で、`done` のケースを再実行せず、Trialの固定条件が復元される。途中で止めて再開した17ケースの記録が、一気に実行した記録と一致する。失敗したケースは再開の対象に残る。再開時の設定がTrialの記録と違う場合はTrialの記録が優先され、違いが表示される。ルール版が違う実験は再開しない。`--cases` で対象を絞れる | F-51〜F-53、5.7、6.5、AC-12 |
+| `test_resume` | 中断後の再開で、`done` のケースを再実行せず、Trialの固定条件が復元される。途中で止めて再開した17ケースの記録が、一気に実行した記録と一致する。通信失敗を模して、`error.kind` が種別ごとに残りTrialが不完全になる。失敗したケースは既定で1回作り直して再実行し、再開の対象にも残る。再開時の設定がTrialの記録と違う場合はTrialの記録が優先され、違いが表示される。ルール版が違う実験は再開しない。`--cases` で対象を絞れる | F-38、F-51〜F-53、F-59、5.7、6.5、AC-12、AC-17 |
 | `test_analysis` | 指標算出と、不完全Trialの除外。除外理由が出力に載る | F-63〜F-65、9.4 |
-| `test_failure_record` | 通信失敗を模して、部分ログと `error.kind` が残り、Trialが不完全になる | F-38、F-59、AC-17 |
-| `test_web_api` | 画面から実行するAPIの契約。条件設定、202応答、3階層の取得、再開 | F-70〜F-76、AC-19 |
-| `test_cli` | コマンド起動と、`experiment` / `judge` / `analyze` の独立実行、`--trial-range` による分割実行 | F-55、IF-09、AC-16、AC-20 |
+| `test_cli` | 各サブコマンドの起動。`--dry-run` が推論を呼ばず条件固定の検査まで通り、出力を作らない。`--cases` で1ケースだけ実測できる。`--trial-range` による分割実行。不正な範囲指定で終了コード2になる | F-55、IF-09、AC-16、AC-20 |
+
+画面のAPIを検査する `test_web_api` は、上表から外してM6へ移した。v1の画面をM3で削除したため、検査する対象が存在しない期間ができる（0.4）。M6で画面を作り直したときに上表へ戻す。
 
 `test_condition_fixation` と `test_resume` がv2.0で最も重要なテストである。前者が壊れると研究結果が無効になり、後者が壊れると数日かけた実行データを失う。どちらもStubで完全に検証できるため、実モデルでの実行前に必ず通す。
 
@@ -2407,10 +2426,10 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M0 | 設定の3層化、ルールセット読み込み、人物プールとパターンの生成、`ExperimentBuilder`、条件固定の検査 | Stubなしで1 Trialの17ケースが生成され、条件検査が通る | — |
 | M1 | `CaseEngine`、`NightResolver`、`DiscussionRunner`、`VoteResolver`、`case_log.json` | Stubで1ケースが完走する | 段階0 |
 | M2 | `Runner` の3層管理、逐次保存、`status.json`、再開 | Stubで1 Trialが完走し、中断・再開が動く | 段階0 |
-| M3 | `transcript.md`、`summary.md`、`result.html`と最新結果リンク、`trial_metrics.csv`、`experiment_metrics.csv`、v1の削除と4モジュールの改名 | ケースの出力が揃い、スマホから結果を開ける | 段階0 |
-| M4 | `Judge`、公開スタンス系列、`Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列 | Stubで分析まで通り、10章のテスト24本が緑になる | 段階0 |
+| M3 | `transcript.md`、`summary.md`、`result.html`と最新結果リンク、`trial_metrics.csv`、`experiment_metrics.csv`、v1の削除と5モジュールの改名 | ケースの出力が揃い、スマホから結果を開ける | 段階0 |
+| M4 | `Judge`、公開スタンス系列、`Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列 | Stubで分析まで通り、10章のテスト19ファイルが揃って緑になる | 段階0 |
 | M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる | 段階1 |
-| M6 | Web層と4ビュー | 画面から1 Trialを実行し、3階層をたどれる | — |
+| M6 | Web層と4ビュー、`test_web_api` | 画面から1 Trialを実行し、3階層をたどれる | — |
 | M7 | 1 Trialと5 Trialの実測、既定値の見直し | 所要時間と出力容量の実測から本実行の規模を決められる | 段階2、段階3 |
 | M8 | `GeminiBrain` での比較、GitHub Pages公開、本実行 | 品質比較ができ、URLで共有でき、決めた規模で実行できる | 段階4 |
 

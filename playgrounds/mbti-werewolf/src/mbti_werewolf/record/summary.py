@@ -1,204 +1,275 @@
-"""summary.md の生成（設計書6.7、要件F-31）。
+"""ケースの要約Markdown（設計書6.10）。
 
-実装者以外のメンバーが説明なしで結果を読める粒度にする（要件NF-13）。
+会話は載せない。`transcript.md` が全文を持っているため、同じ内容を2つのファイルへ
+置くと、片方だけ直したときに食い違う。
+
+`transcript.md` と役割が分かれる点が1つある。`transcript.md` は先行実験の結果文書と
+形式を揃えるためMBTIを書かないが、こちらは書く。どのMBTI条件のケースだったかを人が
+確認する場所が必要であり、それがこのファイルである（6.10）。
 """
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from ..agents.functions import function_label
-from ..agents.mbti_types import (
-    mbti_candidates_text,
-    mbti_type_label,
-    player_identity_text,
-    winning_mbti_text,
-)
+from ..engine.roles import role_label
+from .case_metrics import SUSPECT_UNKNOWN, case_metrics, player_metrics
 
-WINNER_LABELS = {"village": "村人陣営の勝ち", "werewolf": "人狼陣営の勝ち"}
-ROLE_LABELS = {"werewolf": "人狼", "villager": "村人"}
+_GENDER_LABELS = {"male": "男性", "female": "女性"}
+
+UNKNOWN_TEXT = "判断不能"
+MISSING_TEXT = "—"
 
 
-def render_summary(run_log: Dict[str, Any]) -> str:
-    result = run_log.get("result") or {}
-    timing = run_log.get("timing") or {}
-    config = run_log.get("config") or {}
-    brain = run_log.get("brain") or {}
-    players = run_log.get("players") or []
-    per_player = (run_log.get("metrics") or {}).get("per_player") or []
+def _upper(player_id: Optional[str]) -> str:
+    return player_id.upper() if player_id else ""
 
-    lines: List[str] = ["# 結果カード", ""]
 
-    if run_log.get("status") != "done":
-        failure = run_log.get("failure") or {}
-        lines += [
-            "> この実行は完走していません。状態: **{}**".format(run_log.get("status")),
-            ">",
-            "> 失敗の種別: `{}`".format(failure.get("kind", "不明")),
-            ">",
-            "> 内容: {}".format(failure.get("message", "（記録なし）")),
-            "",
-        ]
+def _suspect_text(suspect: Optional[str]) -> str:
+    """`"unknown"`（本人が判断できないと答えた）と欠損（応答が得られなかった）を
+    別の文言にする。混ぜると、判断しなかったことと記録できなかったことが読み分け
+    られなくなる（9.1）。
+    """
 
-    werewolf_mbti = [
-        player_identity_text(
-            p["player_id"], p["function"], p.get("mbti_type"), p.get("display_name")
-        )
-        for p in players
-        if p.get("role") == "werewolf"
+    if suspect is None:
+        return MISSING_TEXT
+    if suspect == SUSPECT_UNKNOWN:
+        return UNKNOWN_TEXT
+    return _upper(suspect)
+
+
+def _number(value: Any, suffix: str = "") -> str:
+    if value is None:
+        return MISSING_TEXT
+    return "{0}{1}".format(value, suffix)
+
+
+def _signed(value: Optional[int]) -> str:
+    if value is None:
+        return MISSING_TEXT
+    if value == 0:
+        return "±0"
+    return "{0:+d}".format(value)
+
+
+def _flag_text(value: Optional[int]) -> str:
+    if value is None:
+        return MISSING_TEXT
+    return "○" if value else "×"
+
+
+def render_summary(case_log: Dict[str, Any]) -> str:
+    lines: List[str] = []
+    lines.append("# ケース要約 {0}".format(case_log["case_id"]))
+    lines.append("")
+    lines.extend(_overview(case_log))
+    lines.extend(_players(case_log))
+    lines.extend(_answers(case_log))
+    lines.extend(_metrics(case_log))
+    lines.extend(_conditions(case_log))
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _overview(case_log: Dict[str, Any]) -> List[str]:
+    result = case_log["result"]
+    composition = case_log["composition"]
+    if composition == "mixed":
+        composition_text = "混合構成（人物プールのMBTIをそのまま使用）"
+    else:
+        composition_text = "同質構成（8人全員が {0}）".format(case_log["homogeneous_type"])
+
+    lines = [
+        "## 概要",
+        "",
+        "- 構成種別: {0}".format(composition_text),
+        "- 状態: {0}".format(case_log["status"]),
     ]
 
-    lines += [
-        "| 項目 | 内容 |",
-        "| --- | --- |",
-        "| 実行ID | `{}` |".format(run_log.get("run_id", "")),
-        "| 勝敗 | {} |".format(
-            WINNER_LABELS.get(result.get("winner"), "（決着していません）")
-        ),
-        "| 勝ったMBTI | {} |".format(winning_mbti_text(players, result.get("winner"))),
-        "| 人狼だったMBTI | {} |".format(
-            "、".join(werewolf_mbti) or "（記録なし）"
-        ),
-        "| 処刑された人 | {} |".format(_executed_text(result, players)),
-        "| 最も疑われた人 | {} |".format(_top_text(per_player, "suspected_by_count", "件")),
-        "| 最も発言した人 | {} |".format(_top_text(per_player, "speech_count", "回")),
-        "| 決着方法 | {} |".format(_tie_break_text(result)),
+    if not result["valid"]:
+        lines.append("- 結果: 無効試合（{0}）".format(result["invalid_reason"]))
+    else:
+        winner = "村人陣営" if result["winner"] == "village" else "人狼陣営"
+        executed = (
+            "、".join(_upper(pid) for pid in result["executed"])
+            if result["executed"]
+            else "なし"
+        )
+        lines.append("- 勝敗: {0}の勝利".format(winner))
+        lines.append("- 追放者: {0}".format(executed))
+    lines.append("")
+    return lines
+
+
+def _players(case_log: Dict[str, Any]) -> List[str]:
+    lines = [
+        "## 参加者",
         "",
-        "MBTIタイプが確定しているプレイヤーはタイプ名で表示する。確定していない場合は主機能からの候補2タイプ（要求定義書6.5）を表示する。",
+        "| ID | 人物 | MBTI | 年齢 | 性別 | 開始時役職 | 最終役職 | 発言 | 見送り |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    rows = {row["player_id"]: row for row in player_metrics(case_log)}
+    for player in case_log["players"]:
+        row = rows[player["player_id"]]
+        lines.append(
+            "| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7}回 | {8}回 |".format(
+                _upper(player["player_id"]),
+                player["person_id"],
+                player["mbti"],
+                player["age"],
+                _GENDER_LABELS.get(player["gender"], player["gender"]),
+                role_label(player["initial_role"]),
+                role_label(player["final_role"]),
+                row["speech_count"],
+                row["pass_count"],
+            )
+        )
+    lines.append("")
+    return lines
+
+
+def _answers(case_log: Dict[str, Any]) -> List[str]:
+    """議論前と投票前の個別判断を1つの表で対比する（設計書6.10）。
+
+    2つの時点を別の表にすると、誰の判断がどう変わったかを目で追う作業が発生する。
+    判断の変化そのものが仮説H2の観察対象なので、横に並べる。
+    """
+
+    lines = [
+        "## 個別判断の変化（議論前 → 投票前）",
         "",
+        "| ID | 議論前の疑い | 自信 | 投票前の疑い | 自信 | 自信の変化 | 投票予定 | 実際の投票 | 正答 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+    ]
+    for row in player_metrics(case_log):
+        lines.append(
+            "| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} |".format(
+                _upper(row["player_id"]),
+                _suspect_text(row["pre_suspect"]),
+                _number(row["pre_confidence"]),
+                _suspect_text(row["final_suspect"]),
+                _number(row["final_confidence"]),
+                _signed(row["confidence_delta"]),
+                _suspect_text(row["planned_vote"]),
+                "（棄権）" if row["abstained"] else _upper(row["actual_vote"]),
+                _flag_text(row["vote_correct"]),
+            )
+        )
+    lines.append("")
+    lines.append(
+        "「正答」は投票先の最終役職が人狼だったかを示す。棄権と応答なしは {0} にする。".format(
+            MISSING_TEXT
+        )
+    )
+    lines.append("")
+    return lines
+
+
+def _metrics(case_log: Dict[str, Any]) -> List[str]:
+    metrics = case_metrics(case_log)
+    lines = [
+        "## 指標",
+        "",
+        "| 指標 | 値 | 意味 |",
+        "| --- | --- | --- |",
+    ]
+    for key, label, suffix in _METRIC_ROWS:
+        lines.append(
+            "| `{0}` | {1} | {2} |".format(key, _number(metrics[key], suffix), label)
+        )
+    lines.append("")
+    lines.append(
+        "`final_entropy` と `convergence_round` は公開スタンス系列が必要なため、"
+        "Judgeを実行するまで {0} のままである（設計書6.9）。".format(MISSING_TEXT)
+    )
+    lines.append("")
+    return lines
+
+
+#: 表に出す指標と、非エンジニアが読める説明。設計書9.1〜9.3の定義に対応する。
+_METRIC_ROWS = (
+    ("village_correct", "追放者に人狼が含まれたか（1で村人陣営の的中）", ""),
+    ("village_vote_accuracy", "人狼以外6人の投票が人狼へ向いた割合", ""),
+    ("vote_concentration", "最多得票数 ÷ 有効票数。1に近いほど票が集まった", ""),
+    ("final_entropy", "最終発言時点の疑念の散らばり。0が集中、1が分散", ""),
+    ("convergence_round", "疑いが最終的な最多得票者へ固定した最初のラウンド", ""),
+    ("correction_rate", "議論前に誤っていた人のうち投票前に正した割合", ""),
+    ("deterioration_rate", "議論前に正しかった人のうち投票前に誤った割合", ""),
+    ("mean_confidence_delta", "自信度の平均変化（投票前 − 議論前）", ""),
+    ("plan_vote_mismatch_rate", "投票予定と実際の投票がずれた割合", ""),
+    ("pass_rate", "見送り ÷ 問い合わせ。沈黙の量", ""),
+    ("speech_count_gini", "発言回数の偏り。0が均等、1に近いほど1人へ集中", ""),
+    ("decided_from_unknown_count", "議論前に判断不能だった人が投票前に決めた件数", "人"),
+    ("rounds", "議論のラウンド数", ""),
+    ("total_speeches", "公開発言の件数", "件"),
+    ("total_chars", "公開発言の合計文字数", "字"),
+)
+
+
+def _conditions(case_log: Dict[str, Any]) -> List[str]:
+    versions = case_log["versions"]
+    config = case_log["config"]
+    brain = case_log["brain"]
+    timing = case_log["timing"]
+    limits = case_log["discussion"]["limits"]
+
+    lines = [
         "## 実行条件",
         "",
         "| 項目 | 値 |",
         "| --- | --- |",
-        "| 参加人数 | {}人 |".format(config.get("player_count", "")),
-        "| 議論ターン数 | {} |".format(config.get("turn_count", "")),
-        "| seed | {} |".format(config.get("seed", "")),
-        "| 役職割当方式 | {} |".format(config.get("role_assignment_mode", "")),
-        "| 心理機能 | {} |".format("、".join(config.get("functions") or [])),
-        "| history_mode | {} |".format(config.get("history_mode", "")),
-        "| 使用した脳 | {} |".format(_brain_text(brain)),
-        "| 実行環境 | {} |".format(timing.get("machine_name", "")),
-        "| 開始 | {} |".format(timing.get("started_at", "")),
-        "| 終了 | {} |".format(timing.get("ended_at", "")),
-        "| 所要時間 | {}秒 |".format(timing.get("elapsed_seconds", "")),
-        "| AI待機時間 | {}秒 |".format(timing.get("ai_wait_seconds", "")),
+        "| ルールセット | `{0}` v{1} |".format(
+            versions["rule_set_id"], versions["rule_set_version"]
+        ),
+        "| 人格プロンプト版 | `{0}` |".format(versions["persona_prompt_version"]),
+        "| Judge評価基準版 | `{0}` |".format(versions["judge_criteria_version"]),
+        "| 指標版 | `{0}`（確定日 {1}） |".format(
+            config["indicator_version"], config["indicator_frozen_at"] or "未確定"
+        ),
+        "| 人物プール / パターン | `{0}` / `{1}` |".format(
+            versions["pool_id"], versions["pattern_id"]
+        ),
+        "| Trial / seed | {0} / `{1}` |".format(
+            config["trial_index"], config["trial_seed"]
+        ),
+        "| 使用モデル | {0}（{1}） |".format(
+            brain.get("model") or MISSING_TEXT, brain.get("provider")
+        ),
+        "| 議論の上限 | max_rounds={0}、max_speeches={1}、max_total_chars={2}、max_speech_chars={3}、max_consecutive_speeches={4} |".format(
+            limits["max_rounds"],
+            limits["max_speeches"],
+            limits["max_total_chars"],
+            limits["max_speech_chars"],
+            limits["max_consecutive_speeches"],
+        ),
+        "| 実行時間 | {0}秒（うちAI待機 {1}秒） |".format(
+            timing["elapsed_seconds"], timing["ai_wait_seconds"]
+        ),
+        "| 推論呼び出し | {0}回 |".format(timing["inference_calls"]),
+        "| 実行機 | {0} |".format(timing["machine_name"]),
         "",
-        "## 心理機能ごとの集計",
-        "",
-        "| ID | 心理機能 | MBTI | 役職 | 発言数 | 平均文字数 | 投票先 | 勝敗 | 疑い | 疑われ | 質問 | 反論 | 同調 | 仮説 |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
 
-    for entry in per_player:
-        lines.append(
-            "| {} | {}（{}） | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |".format(
-                entry["player_id"],
-                entry["function"],
-                function_label(entry["function"]),
-                _mbti_display(entry.get("mbti_type"), entry.get("display_name"), entry["function"]),
-                ROLE_LABELS.get(entry["role"], entry["role"]),
-                entry["speech_count"],
-                entry["avg_chars"],
-                entry["final_vote"] or "—",
-                _win_text(entry.get("win")),
-                entry["suspicion_count"],
-                entry["suspected_by_count"],
-                entry["question_count"],
-                entry["rebuttal_count"],
-                entry["agreement_count"],
-                entry["hypothesis_count"],
-            )
+    if case_log.get("failure"):
+        failure = case_log["failure"]
+        lines.extend(
+            [
+                "## 失敗の記録",
+                "",
+                "- 種別: {0}".format(failure.get("kind")),
+                "- 内容: {0}".format(failure.get("message")),
+                "- 試行回数: {0}".format(case_log.get("attempt")),
+                "",
+            ]
         )
 
-    parse_failed = sum(1 for turn in run_log.get("turns") or [] if turn.get("parse_failed"))
-    fallback_votes = sum(1 for vote in run_log.get("votes") or [] if vote.get("fallback"))
-    lines += [
-        "",
-        "## 記録の品質",
-        "",
-        "| 項目 | 件数 |",
-        "| --- | --- |",
-        "| 形式が崩れた発言（parse_failed） | {} |".format(parse_failed),
-        "| 乱数で決めた投票（fallback） | {} |".format(fallback_votes),
-        "",
-        "## 観察メモ",
-        "",
-        "（結果を見た人が追記する欄）",
-        "",
-        "---",
-        "",
-        "MBTIおよび心理機能は、実在人物の診断や評価ではない。"
-        "エージェントの振る舞いを分けるためのフィクション設定として扱っている。",
-        "",
-    ]
-    return "\n".join(lines)
-
-
-def _brain_text(brain: Dict[str, Any]) -> str:
-    """要件F-16の推論手段。同じ語の繰り返しは1つにまとめて読みやすくする。"""
-    parts: List[str] = []
-    for key in ("provider", "model", "endpoint_kind"):
-        value = brain.get(key)
-        if value and value not in parts:
-            parts.append(value)
-    return " / ".join(parts) or "—"
-
-
-def _mbti_display(mbti_type: Optional[str], display_name: Optional[str], function: str) -> str:
-    """MBTIタイプが確定していればそれを、なければ主機能からの候補2タイプを表示する。"""
-    if mbti_type:
-        return mbti_type_label(mbti_type, display_name)
-    return mbti_candidates_text(function)
-
-
-def _executed_text(result: Dict[str, Any], players: List[Dict[str, Any]]) -> str:
-    executed = result.get("executed")
-    if not executed:
-        return "（処刑まで到達していません）"
-    role = ROLE_LABELS.get(result.get("executed_role"), result.get("executed_role", ""))
-    function = result.get("executed_function") or _function_of(players, executed)
-    mbti_type = result.get("executed_mbti_type")
-    display_name = result.get("executed_display_name")
-    return "{}（{} / {}）→ {}".format(
-        executed, function, role, _mbti_display(mbti_type, display_name, function)
+    lines.append(
+        "会話全文は同じディレクトリの `transcript.md` にある。生データは `case_log.json`。"
     )
+    lines.append("")
+    return lines
 
 
-def _function_of(players: List[Dict[str, Any]], player_id: str) -> str:
-    for player in players:
-        if player.get("player_id") == player_id:
-            return player.get("function", "")
-    return ""
-
-
-def _top_text(per_player: List[Dict[str, Any]], key: str, unit: str) -> str:
-    if not per_player:
-        return "（記録なし）"
-    top = max(entry.get(key, 0) for entry in per_player)
-    if not top:
-        return "（該当なし）"
-    names = [
-        player_identity_text(
-            entry["player_id"], entry["function"], entry.get("mbti_type"), entry.get("display_name")
-        )
-        for entry in per_player
-        if entry.get(key, 0) == top
-    ]
-    return "{} — {}{}".format("、".join(names), top, unit)
-
-
-def _tie_break_text(result: Dict[str, Any]) -> str:
-    tie_break: Optional[Dict[str, Any]] = result.get("tie_break")
-    if not tie_break:
-        return "最多得票が1人だったため、そのまま処刑"
-    return "同数得票のため {} で決着（候補: {}、seed: {}）".format(
-        tie_break.get("method", ""),
-        "、".join(tie_break.get("candidates") or []),
-        tie_break.get("seed", ""),
-    )
-
-
-def _win_text(win: Optional[bool]) -> str:
-    if win is None:
-        return "—"
-    return "勝ち" if win else "負け"
+def write_summary(path: Path, case_log: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(render_summary(case_log), encoding="utf-8")

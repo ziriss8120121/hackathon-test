@@ -12,7 +12,7 @@ import json
 
 import pytest
 
-from mbti_werewolf.experiment_runner import ExperimentRunner
+from mbti_werewolf.runner import ExperimentRunner
 from mbti_werewolf.record.metrics_csv import EXPERIMENT_COLUMNS, TRIAL_COLUMNS
 
 CASE_FILES = ("case_log.json", "config.json", "status.json", "transcript.md",
@@ -198,7 +198,7 @@ def test_latest_html_is_not_written_when_every_case_failed(runner_for, tmp_path)
         raise RuntimeError("失敗させる")
 
     runner = runner_for(case_filter=["c01"])
-    import mbti_werewolf.experiment_runner as runner_module
+    import mbti_werewolf.runner as runner_module
 
     original = runner_module.CaseEngine
     runner_module.CaseEngine = explode
@@ -220,7 +220,7 @@ def test_failed_case_still_gets_a_result_html(runner_for, tmp_path):
         raise RuntimeError("失敗させる")
 
     runner = runner_for(case_filter=["c00"], case_attempts=1)
-    import mbti_werewolf.experiment_runner as runner_module
+    import mbti_werewolf.runner as runner_module
 
     original = runner_module.CaseEngine
     runner_module.CaseEngine = explode

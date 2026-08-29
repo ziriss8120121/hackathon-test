@@ -12,36 +12,21 @@ from typing import Any, Callable, Dict
 from ..config import ConfigError
 from .gemini import GeminiBrain
 from .ollama import OllamaBrain
-from .stub import StubBrain
+from .stub import CaseStubBrain
 
 _REGISTRY: Dict[str, Callable[[Any], Any]] = {
-    "stub": StubBrain,
+    "stub": CaseStubBrain,
     "ollama": OllamaBrain,
     "gemini": GeminiBrain,
 }
 
 
-def create_brain(config) -> Any:
-    provider = config.brain.provider
-    factory = _REGISTRY.get(provider)
-    if factory is None:
-        raise ConfigError(
-            "未知の provider です: {}。使えるのは {} です。".format(
-                provider, ", ".join(sorted(_REGISTRY))
-            )
-        )
-    return factory(config)
-
-
-# --- ここから下はv2.0（8人ワンナイト）用 ---------------------------------
-
-
 class _BrainAdapterConfig:
-    """v2.0の設定を、brains/ が期待する形へ合わせる薄い層（設計書0.4）。
+    """実験条件を、brains/ が期待する形へ合わせる薄い層（設計書0.4）。
 
-    v1のBrainは `config.brain.max_retries` と `config.seed` を読む。v2.0の設定は
+    `brains/` の実装は `config.brain.max_retries` と `config.seed` を読む。実験条件は
     通信の再試行を `max_transport_retries` として持ち、seedはTrial単位で決まるため、
-    ここで名前を橋渡しする。brains/ を作り直さずに流用するための措置である。
+    ここで名前を橋渡しする。`brains/` を作り直さずに流用するための措置である。
     """
 
     def __init__(self, experiment_config, brain_config, seed: int) -> None:
@@ -67,8 +52,6 @@ def create_case_brain(experiment_config, seed: int, judge: bool = False) -> Any:
 
     温度が違うため、同じ設定オブジェクトから2つ作れる形にしている。
     """
-
-    from .stub import CaseStubBrain
 
     brain_config = experiment_config.judge_brain if judge else experiment_config.brain
     adapted = _BrainAdapterConfig(experiment_config, brain_config, seed)
