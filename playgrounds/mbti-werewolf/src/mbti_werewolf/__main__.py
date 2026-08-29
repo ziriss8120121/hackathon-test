@@ -233,7 +233,7 @@ def _case_filter(value: Optional[str]) -> Optional[List[str]]:
     return names or None
 
 
-def _print_experiment_result(summary: Dict[str, Any]) -> int:
+def _print_experiment_result(summary: Dict[str, Any], runs_dir: Path) -> int:
     print("-" * 60)
     parts = [
         "完了 {}".format(summary["done_count"]),
@@ -247,7 +247,13 @@ def _print_experiment_result(summary: Dict[str, Any]) -> int:
             " / ".join(parts), summary["inference_calls"], summary["elapsed_seconds"]
         )
     )
-    print("保存先: {}".format(summary["directory"]))
+    directory = Path(summary["directory"])
+    print("保存先: {}".format(directory))
+    print("集計:   {}".format(directory / "experiment_metrics.csv"))
+    print("-" * 60)
+    print("最新結果へのリンク: {}".format(runs_dir / "latest.html"))
+    print("公開URL（最新）: https://ziriss8120121.github.io/hackathon-test/runs/latest.html")
+    print("URLへ反映するには、runs/ を commit して main へ push する。")
     return 0 if summary["failed_count"] == 0 else 1
 
 
@@ -264,7 +270,7 @@ def _run_resume(runner, experiment_id: str) -> int:
     except Exception as exc:  # noqa: BLE001 - 復元の失敗は原因をそのまま見せる
         print("再開エラー: {}".format(exc), file=sys.stderr)
         return 1
-    return _print_experiment_result(summary)
+    return _print_experiment_result(summary, runner.runs_dir)
 
 
 def command_experiment(args: argparse.Namespace) -> int:
@@ -355,7 +361,7 @@ def command_experiment(args: argparse.Namespace) -> int:
         print("生成エラー: {}".format(exc), file=sys.stderr)
         return 1
 
-    return _print_experiment_result(summary)
+    return _print_experiment_result(summary, runner.runs_dir)
 
 
 def command_masterdata(args: argparse.Namespace) -> int:

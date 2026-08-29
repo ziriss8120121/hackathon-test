@@ -6,7 +6,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 
 | 項目 | 内容 |
 | --- | --- |
-| バージョン | 2.6 |
+| バージョン | 2.7 |
 | 最終更新 | 2026-08-29 |
 | 作成者 | ゆうじろう（Engineer） |
 | 上位文書 | [要件定義書](./system-requirements.md) v2.1 / [要求定義書](./requirements.md) v2.2-draft |
@@ -21,6 +21,7 @@ MBTI構成の異なるAIエージェント集団によるワンナイト人狼�
 | 2.4の変更点 | `transcript.md` を先行実験の結果文書（WORLD A / B）と同じ構成に変更した。実行条件・開始時役職・夜処理・公開議論・投票・結果を1ファイルに置き、公開議論と投票の表にprivate memoを横並びで載せる。v2.3で「memoを人が読む出力に含めない」としていた記述を撤回した（5.3）。あわせて `summary.md` から会話を外し、v1の4人版をM3まで動く状態で残す移行手順を0.4へ追記した。指標の定義と `case_log.json` の形式は変わっていない。 |
 | 2.5の変更点 | M0・M1とWORLD A / B形式の `transcript.md` を実装した際に決めた2点を反映した。(1) 全員が連続発言の上限に達したラウンドを `max_rounds` に数える（4.5）。数えないと上限を設けたことで議論ラウンド数が静かに減る。(2) `discussion.max_consecutive_speeches` の `null` を設定として通す（6.4）。4.5で無効化した実行を段階2で試すと決めているため。あわせて10章のテスト一覧を実際のファイル構成へ合わせ、`test_transcript` を追加した。出力形式と指標の定義は変わっていない。 |
 | 2.6の変更点 | M2（中断・再開）の実装で決めたことを3.5と6.5へ反映した。再開はケース単位で `done` を飛ばす。出力先は同じ `experiment_id` へ書き足す。条件は `trial.json` が正本で、指定と違えばTrialの記録を採用して違いを表示する。人物プールとパターンセットは読み直さず、ルールセットは版が違えば停止する。復元した座席の役職の枚数をルールセットと照合する。失敗したケースは既定で1回だけ作り直して再実行し、それでも失敗したら次のケースへ進む。Trialの `status.json` と `case_skipped` を追加し、実験の `status.json` は前回までの完了分を含めて数えることにした。`--cases` で実行対象を絞れるようにした（M5前の実測用）。あわせてM3の分担を確定した。`trial_metrics.csv` と `experiment_metrics.csv` はM3で出し、Judge依存の2列（`final_entropy`・`convergence_round`）は空欄にしてM4で埋める。`speech_labels.csv` はM4へ移した。v1の削除はM3のうち `result.html` と最新結果リンクが動いた後に行う。v2の `result.html` は中身を新規に作り、CSSと `latest.html` の仕組みだけv1から流用する（0.4、6.9、11章）。 |
+| 2.7の変更点 | M3（人が読む出力と集計CSV）の実装で決めたことを反映した。(1) ケースの `result.html` は埋め込みJSONをJavaScriptで描く形をとらず、生成時にPython側でHTMLへ書き出す。同じ内容を二重に持たない、出力文字列をテストで直接検査できる、JavaScriptが動かない環境でも読める、の3点による（7.5）。(2) 画面幅640px以下で3列以上の表を1行1ブロックへ折り返す。private memoの列を足したことで、7.6の「ケースの会話全文は横に長い表を持たない」という前提が成り立たなくなったため（7.5、7.6）。(3) `latest.html` はM3では直近に完了したケースの `result.html` を指し、M4で `experiment.html` が出たら向け直す。全ケース失敗の実行では書き換えない（7.6）。(4) 集計CSVに、9章に定義があるのに列がなかった指標を末尾へ足した（`village_vote_accuracy`・`pass_rate`・`speech_count_gini`・`decided_from_unknown_count`、およびプレイヤー側の4列）。分母が0の割合は空欄にする（6.9）。(5) 失敗として扱う範囲に脳とエンジンの生成を含めた。実行中の例外だけを捕まえる形では、モデル名の誤りで実験全体が止まる（3.5）。あわせて `record/case_summary.py` と `record/case_result_view.py` を移行期間の別名として0.4へ追記し、10章のテストを24本にした。 |
 
 ### 0.1 本書の位置づけ
 
@@ -104,10 +105,14 @@ v2.0は `playgrounds/mbti-werewolf` を拡張する。パッケージを新設�
 | `engine/roles.py` | v1の関数を残したまま、v2の4役職の割当関数を同じファイルへ追加する | v1の関数を削除する |
 | `engine/view.py` | v1の構造を維持したまま、v2で必要な開示情報を追加する | そのまま |
 | `record/` のv1モジュール | v1のまま残す。v2の出力は `record/case_log.py`、`record/transcript.py` などを新設する | v1を削除する |
+| `record/summary.py` | v1のまま残す。v2のケース要約は `record/case_summary.py` として新設する | v1を削除し、`record/case_summary.py` を `record/summary.py` へ改名する |
+| `record/result_view.py` | v1のまま残す。v2の結果ビューは `record/case_result_view.py` として新設する | v1を削除し、`record/case_result_view.py` を `record/result_view.py` へ改名する |
 | CLIサブコマンド | v1は `run`、v2は `experiment` として分ける | `run` を削除する |
 | v1のテスト | 47本を緑のまま維持し、v2の回帰基準として使う | v1固有のテストを削除する |
 
-`experiment_config.py` と `experiment_runner.py` は移行期間だけの名前である。最終形は6.1のファイル構成であり、M3でv1を削除する際に改名する。この2つ以外は6.1の名前をそのまま使えるため、改名の対象にならない。
+移行期間だけの名前は4つある。`experiment_config.py`、`experiment_runner.py`、`record/case_summary.py`、`record/case_result_view.py` である。いずれもv1が同じ名前のモジュールを持っているために付けた別名で、最終形は6.1のファイル構成である。M3でv1を削除する際にまとめて改名する。この4つ以外は6.1の名前をそのまま使えるため、改名の対象にならない。
+
+`record/case_metrics.py` は改名の対象にならない。v1が `record/metrics.py` を持っているが名前が違うため、衝突していない。
 
 **v1を削除する時点**
 
@@ -623,6 +628,8 @@ sequenceDiagram
 1ケースあたりの実行回数に上限を置く（`--case-attempts`、既定2）。1回目が失敗したら、`CaseEngine` と脳を作り直して1回だけ試す。ケースの途中で失敗した場合、その時点までの内部状態は捨てて最初から実行する。ケースの途中から再開しないのは、夜の処理と議論の履歴が途中の状態から続けられる形になっておらず、続けられる形にすると再現性の担保が難しくなるためである。
 
 上限まで失敗したケースは `status: failed` を残して次のケースへ進む。`--resume` は `done` のケースだけを飛ばすので、失敗したケースは次の再開で再び対象になる。
+
+失敗として扱う範囲は、脳の生成とエンジンの生成も含める。ケースの実行中に起きた例外だけを捕まえる形にすると、モデル名の誤りや接続不能で脳を作れなかった場合に実験全体が止まり、「1ケースの失敗で実験を止めない」という決まりを満たせない。設定の誤りは17ケースすべてで同じように起きるので、結果として全ケースが `failed` になるが、その状態が `status.json` と失敗の記録に残る方が、例外で落ちて何も残らないよりも原因を追える。
 
 **再開の単位と条件の扱い**
 
@@ -1315,9 +1322,10 @@ playgrounds/mbti-werewolf/
     record/
       case_log.py
       transcript.py
-      summary.py
-      case_metrics.py
-      result_view.py
+      summary.py                  # 移行期間は case_summary.py（0.4）
+      case_metrics.py             # ケース単位の指標算出（9.1〜9.3）
+      metrics_csv.py              # 集計CSVの列と書き出し（6.9）
+      result_view.py              # 移行期間は case_result_view.py（0.4）
       pages.py
     web/
       app.py                      # FastAPI
@@ -1340,12 +1348,16 @@ playgrounds/mbti-werewolf/
     test_judge.py
     test_stance.py
     test_resume.py
+    test_case_metrics.py
+    test_case_outputs.py
+    test_run_outputs.py
     test_analysis.py
     test_failure_record.py
     test_web_api.py
     test_cli.py
 
 runs/
+  latest.html                     # 最新結果への転送（7.6）
   e-20260901-210000/              # 実験
     experiment.json
     persons.json                  # 使用したプールのスナップショット
@@ -1875,16 +1887,24 @@ Trialの固定条件の正本。再開時はこのファイルから条件を復
 **`trial_metrics.csv`（1行 = 1プレイヤー × 1ケース）**
 
 ```text
-experiment_id,trial_id,case_id,composition,homogeneous_type,player_id,person_id,age,gender,mbti,initial_role,final_role,speech_count,pass_count,skip_count,total_chars,avg_chars,pre_suspect,pre_confidence,final_suspect,final_confidence,planned_vote,actual_vote,abstained,suspect_changed,confidence_delta,pre_correct,final_correct,vote_correct,plan_vote_match,executed,win
+experiment_id,trial_id,case_id,composition,homogeneous_type,player_id,person_id,age,gender,mbti,initial_role,final_role,speech_count,pass_count,skip_count,total_chars,avg_chars,pre_suspect,pre_confidence,final_suspect,final_confidence,planned_vote,actual_vote,abstained,suspect_changed,confidence_delta,pre_correct,final_correct,vote_correct,plan_vote_match,executed,win,decided_from_unknown,suspect_vote_match,corrected,deteriorated
 ```
 
 **`experiment_metrics.csv`（1行 = 1ケース）**
 
 ```text
-experiment_id,trial_id,case_id,case_index,composition,homogeneous_type,status,valid,invalid_reason,rule_set_version,persona_prompt_version,judge_criteria_version,indicator_version,brain_provider,brain_model,rounds,stop_reason,total_speeches,total_passes,total_skips,total_chars,valid_vote_count,abstain_count,top_vote_count,executed,executed_count,executed_final_roles,no_execution_reason,winner,village_correct,vote_concentration,final_entropy,convergence_round,correction_rate,deterioration_rate,mean_confidence_delta,plan_vote_mismatch_rate,elapsed_seconds,ai_wait_seconds,inference_calls,machine_name
+experiment_id,trial_id,case_id,case_index,composition,homogeneous_type,status,valid,invalid_reason,rule_set_version,persona_prompt_version,judge_criteria_version,indicator_version,brain_provider,brain_model,rounds,stop_reason,total_speeches,total_passes,total_skips,total_chars,valid_vote_count,abstain_count,top_vote_count,executed,executed_count,executed_final_roles,no_execution_reason,winner,village_correct,vote_concentration,final_entropy,convergence_round,correction_rate,deterioration_rate,mean_confidence_delta,plan_vote_mismatch_rate,elapsed_seconds,ai_wait_seconds,inference_calls,machine_name,village_vote_accuracy,pass_rate,speech_count_gini,decided_from_unknown_count
 ```
 
-`executed` と `executed_final_roles` は追放者が複数になりうるため、セル内で `|` 区切りの複数値にする。追放者0人の場合は空文字にし、`executed_count` が `0` になる。
+どちらの列名も9.1〜9.3の指標定義と同じ名前にしている。列の並びの後半は、M3の実装で「9章に定義があるのにCSVへ出ていない指標」を末尾へ足した分である。`village_vote_accuracy`・`pass_rate`・`speech_count_gini` は自由議論を選んだ判断の妥当性を確認する指標（9.2）なので、Judgeを待たずに出せる。プレイヤー側の `decided_from_unknown`・`suspect_vote_match`・`corrected`・`deteriorated` は、ケース単位の `correction_rate` などの内訳にあたる。
+
+`executed` と `executed_final_roles` は追放者が複数になりうるため、セル内で `|` 区切りの複数値にする。追放者0人の場合は空文字にし、`executed_count` が `0` になる。`executed_count` は `executed` の要素数から数え直す。`case_log.json` に記録された件数をそのまま書き写すと、CSVの中で一覧と件数が食い違う行を作れてしまう。
+
+**分母が0のときの扱い**
+
+`correction_rate` と `deterioration_rate` は、分母にあたる人が0人のとき空欄にする。議論前に誤っていた人が0人の状態を「修正率0」と書くと、全員が正しく判断していたケースと、誰も修正しなかったケースが同じ値になる。同じ理由で `speech_count_gini` は誰も発言しなかったケースで空欄にする（偏りが0なのではなく、偏りを測る対象がない）。
+
+この扱いはCSVだけの決まりではなく、指標算出（`record/case_metrics.py`）が `null` を返し、CSVがそれを空欄として書く形にしている。`summary.md` と `result.html` は同じ `null` を `—` と表示する。3つの出力で「算出できなかった」の表し方を1か所から決めるためである。
 
 `tie_break_used` 列は持たない。同数得票の乱数決着を廃止したため、記録する対象がなくなった（4.6）。同数得票そのものは `executed_count` が2以上であることで判別できる。
 
@@ -2052,14 +2072,40 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 | 項目 | 決定 |
 | --- | --- |
 | 生成タイミング | ケースの `result.html` は実行完了時および失敗時にRunnerが書き出す。Trial・実験・RQのHTMLは `analyze` が書き出す |
-| データの持ち方 | 対象データを `<script type="application/json">` としてHTML内に埋め込む |
+| データの持ち方 | ケースの `result.html` は生成時にPython側でHTMLへ書き出す。JavaScriptを使わない。Trial・実験・RQのHTMLは集計値を `<script type="application/json">` として埋め込む |
 | 外部依存 | なし。CSSもインラインに含める |
 | 階層 | `experiment.html` → `trial.html` → `result.html` を相対リンクで結ぶ |
 | 開き方 | `file://` で直接開く、またはGitHub Pages経由 |
+| ケースの生データ | 同じディレクトリの `case_log.json`・`transcript.md`・`summary.md` へ相対リンクを張る |
 
-データを埋め込む理由は、`file://` から `fetch` で別ファイルを読むとブラウザに拒否されるためである。1ファイルに閉じることで、ZIPで渡してもGitHub Pagesに置いても同じ挙動になる。
+ケースの `result.html` だけ「埋め込んだJSONをJavaScriptで描く」形をとらない理由は3つある。1つ目は、同じ内容をJSONとHTMLで二重に持つとファイルが約2倍になり、1,700ケース分では無視できない量になることである。2つ目は、描画をPython側に置くとテストで出力文字列を直接検査でき、表示崩れやエスケープ漏れを実行前に捕まえられることである。発言はモデルの出力なので、`<` や `&` がそのまま入りうる。3つ目は、JavaScriptが動かない環境（アプリ内ブラウザの制限設定など）でも読めることである。
+
+生データへ相対リンクを張るのは、埋め込みをやめた分をここで補うためである。`file://` から `fetch` で読むのはブラウザに拒否されるが、リンクを開くこととダウンロードは拒否されない。
+
+上位のHTML（Trial・実験・RQ）は集計値だけなので埋め込みでよい。並べ替えや絞り込みを画面上で行いたい対象であり、そのときJSONが手元にある形が扱いやすい。
 
 階層を相対リンクで結ぶ理由は、1,700ケース分のデータを1ファイルへ埋め込むと開けない大きさになるためである。上位のHTMLには集計値だけを埋め込み、会話全文はケースの `result.html` に置く。
+
+**ケースの `result.html` の構成**
+
+| 章 | 内容 |
+| --- | --- |
+| 結果 | 勝敗、追放者、得票、有効票と棄権、議論ラウンドと終了理由、推論呼び出し回数 |
+| 参加者 | ID、MBTI、人物ID、年齢と性別、開始時役職、最終役職と陣営、発言回数、見送り回数、追放されたか |
+| 夜処理 | `transcript.md` と同じ文章。文言の組み立ては `record/transcript.py` の1か所に置き、両方から呼ぶ |
+| 公開議論 | ラウンドごとに、ID・公開発言・private memo |
+| 投票 | ID・投票先・private memo |
+| 個別判断 | 議論前と投票前の疑い・自信、投票予定、実際の投票、正答 |
+| 指標 | 9.1〜9.3の主な指標と、非エンジニア向けの1行説明 |
+| 実行条件 | 各バージョン、seed、使用モデル、議論の上限、実行時間、実行機 |
+
+失敗したケースにも同じ名前で `result.html` を置く。中身は失敗の種別・内容・試行回数と、`--resume` で再実行できることの案内にする。失敗したケースだけHTMLが無い形にすると、一覧から開いたときに、失敗したのか未実行なのかが区別できない。
+
+**狭い画面での表**
+
+画面幅640px以下では、3列以上の表を「1行 = 1ブロック」に折り返す。各セルに項目名を `data-label` として持たせ、CSSがそこから見出しを出す。横スクロールのままにすると、private memoの列が画面外に出る。要求定義書が最新結果を電話から開くことを重視項目に挙げており、memoは今回追加した観察対象（0.5）なので、スマートフォンで読めない状態は避ける。
+
+7.6でスマートフォン対応を分析HTMLに限ると書いていたが、ケースの `result.html` も対象に含める。「ケースの会話全文は横に長い表を持たない」という前提が、private memoの列を足した時点で成り立たなくなったためである。
 
 ### 7.6 GitHub Pages
 
@@ -2068,14 +2114,18 @@ M3の時点では、`experiment_metrics.csv` の `final_entropy` と `convergenc
 | 項目 | 決定 |
 | --- | --- |
 | URL | https://ziriss8120121.github.io/hackathon-test/ |
-| 最新の実験 | `runs/latest.html`（最新の実験の全体分析へ転送する） |
+| 最新の実験 | `runs/latest.html`（最新の実験の全体分析へ転送する。M3の時点では直近に完了したケースの `result.html` へ転送する） |
 | 中身 | 実験の全体分析、RQ1・RQ2、Trial比較、ケース詳細、それらを選ぶ一覧 |
 | 生成 | `python -m mbti_werewolf pages` |
 | 公開 | 生成物を `gh-pages` ブランチへ載せる。リポジトリの Pages 設定は `gh-pages` / ルート |
 | 生成物 | `site/`（gitignore。リポジトリの `main` には置かない） |
 | スマートフォン | 全体分析、RQ1・RQ2、Trial比較の3種は、幅の狭い画面で表が縦に折り返る形にする |
 
-スマートフォン対応を分析HTMLに限る理由は、要求定義書の「最新結果のHTMLリンクを電話から開ける」という要求が、結果の確認を対象にしているためである。操作画面はローカル起動が前提なのでスマートフォンから使えず、対応する意味がない。ケースの会話全文は横に長い表を持たないので、そのままでも読める。
+スマートフォン対応を分析HTMLに限る理由は、要求定義書の「最新結果のHTMLリンクを電話から開ける」という要求が、結果の確認を対象にしているためである。操作画面はローカル起動が前提なのでスマートフォンから使えず、対応する意味がない。ただしケースの `result.html` は例外として対応する（7.5）。private memoの列を足したことで横に長い表になったためである。
+
+`latest.html` の転送先はM3とM4で変わる。M4で `experiment.html` が出るまでは実験の全体分析が存在しないため、M3では直近に完了したケースの `result.html` を指す。1ケース終えるごとに書き換えるので、長時間の実行中でも、いま何が出ているかをスマートフォンから確認できる。全ケースが失敗した実行では書き換えない。前回の正常な結果へのリンクを、失敗しか出ていない実行で壊さないためである。
+
+`latest.html` はメタリフレッシュによる転送に加えて、手動リンクを必ず添える。メタリフレッシュに対応しないアプリ内ブラウザがあるためで、これはv1で実際に必要になった対応である。
 
 ---
 
@@ -2307,7 +2357,7 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 
 ## 10. テスト設計
 
-`StubBrain` があるため、推論なしで受入基準の大半を検証できる。v2.0では、長時間実行の前に潰しておくべき箇所が増えるため、テストを21本に増やす。
+`StubBrain` があるため、推論なしで受入基準の大半を検証できる。v2.0では、長時間実行の前に潰しておくべき箇所が増えるため、テストを21本に増やす。M3で出力の検査を3本足し、24本になった。
 
 下表の「テスト」はテストファイル名である。1ファイルに複数のテスト関数を置く。v1の47本は別ファイルとして残し、v2.0の回帰基準として使う（0.4）。v1が同じ名前のファイルを既に持つ2件は、移行期間だけ名前を分ける。
 
@@ -2329,6 +2379,9 @@ RQ1は確認的分析であるため（9.4）、指標をいつ確定したか�
 | `test_isolation` | 4件をまとめる。(1) ルール上知り得ない役職がプロンプトに出現せず、人狼は仲間を知る。(2) 16タイプのラベル、表示名、「MBTI」「心理機能」「16タイプ」の語が出現しない。混合構成と同質構成でsystemプロンプトの差が行動傾向の1文だけになる。(3)「実験」「シミュレーション」「AI」「エージェント」「構成種別」「勝率」「指標」の語が出現しない。(4) 他者の個別判断と `memo` のテキストが出現せず、自分の `memo` も次の問い合わせへ戻らない | F-16、F-17、F-26、4.7、5.2、5.3、Agent設定文書 §3 |
 | `test_case_brain` | 前置き付き応答、コードブロック囲み、JSON崩れ、候補外の値を与える。回答機会が3回で止まり、4回目を呼ばない。`swap: false` と `speak: false` を空値と誤判定しない。実Brainの内部再送が0で、Agentの3回と二重に掛からない | F-29、5.4、6.4、AC-17 |
 | `test_transcript` | `transcript.md` が先行実験のWORLD A / B結果文書と同じ章順・表の列になる。参照先の文書を読んで突き合わせる。参加者表記がP1〜P8になり、MBTIが出ない。見送りとスキップが別の文言になる。無効試合で勝敗行が出ない | 6.10、要求定義書の重視項目 |
+| `test_case_metrics` | 指標の算出。棄権と `"unknown"` が0ではなく `null` になる。追放者に人狼が1人でもいれば `village_correct` が1になる。`village_vote_accuracy` が人狼本人の投票を除く。エントロピーを対象の数ではなく参加人数で正規化する。ジニ係数が全員無発言のとき `null` になる。判断していない状態からの決定を修正と別に数える。分母が0の割合が `null` になる | 9.1〜9.3 |
+| `test_case_outputs` | `summary.md` に会話が載らずMBTIが載る。CSVのJudge依存2列が空欄で、他の列が埋まる。複数値のセルが `|` 区切りになる。`result.html` が自己完結でスクリプトを持たず、発言のHTMLがエスケープされ、章が揃い、狭い画面用の `data-label` が付く。`latest.html` が相対パスと手動リンクを持つ | 6.9、6.10、7.5、7.6 |
+| `test_run_outputs` | 完了したケースに6ファイルが揃う。`--cases` で外したケースのディレクトリを作らない。集計CSVの行数が17ケース×8人と17ケースになり、再開後も前回までの完了分を含む。ケースが0件でもヘッダだけのCSVを書く。`latest.html` が直近の完了ケースを指し、転送先が実在する。全ケース失敗の実行では書き換えない。失敗したケースにも `result.html` が残る | 6.9、7.5、7.6、F-51 |
 | `test_judge` | Judgeが発言単位の評価を返し、`speech_id` と1対1に対応する。評価基準版を変えると別ファイルになる | F-40、F-42、F-45、AC-06 |
 | `test_stance` | 公開スタンス系列の導出。同じ人が繰り返し疑っても疑念分布の合計が参加人数を超えない | F-44、5.5 |
 | `test_resume` | 中断後の再開で、`done` のケースを再実行せず、Trialの固定条件が復元される。途中で止めて再開した17ケースの記録が、一気に実行した記録と一致する。失敗したケースは再開の対象に残る。再開時の設定がTrialの記録と違う場合はTrialの記録が優先され、違いが表示される。ルール版が違う実験は再開しない。`--cases` で対象を絞れる | F-51〜F-53、5.7、6.5、AC-12 |
@@ -2354,8 +2407,8 @@ CIで動かす場合もStubのみを使う。GitHub Actions上でLLMを呼ばな
 | M0 | 設定の3層化、ルールセット読み込み、人物プールとパターンの生成、`ExperimentBuilder`、条件固定の検査 | Stubなしで1 Trialの17ケースが生成され、条件検査が通る | — |
 | M1 | `CaseEngine`、`NightResolver`、`DiscussionRunner`、`VoteResolver`、`case_log.json` | Stubで1ケースが完走する | 段階0 |
 | M2 | `Runner` の3層管理、逐次保存、`status.json`、再開 | Stubで1 Trialが完走し、中断・再開が動く | 段階0 |
-| M3 | `transcript.md`、`summary.md`、`result.html`と最新結果リンク、`trial_metrics.csv`、`experiment_metrics.csv` | ケースの出力が揃い、スマホから結果を開ける | 段階0 |
-| M4 | `Judge`、公開スタンス系列、`Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列 | Stubで分析まで通り、10章のテスト21本が緑になる | 段階0 |
+| M3 | `transcript.md`、`summary.md`、`result.html`と最新結果リンク、`trial_metrics.csv`、`experiment_metrics.csv`、v1の削除と4モジュールの改名 | ケースの出力が揃い、スマホから結果を開ける | 段階0 |
+| M4 | `Judge`、公開スタンス系列、`Analyzer`、Trial・実験・RQの分析出力、`speech_labels.csv`、集計CSVのJudge依存列 | Stubで分析まで通り、10章のテスト24本が緑になる | 段階0 |
 | M5 | `PersonaBuilder`、プロンプトv2、Ollamaでの実行 | 実モデルで自由議論と個別判断が成立する。1ケースの実測が取れる | 段階1 |
 | M6 | Web層と4ビュー | 画面から1 Trialを実行し、3階層をたどれる | — |
 | M7 | 1 Trialと5 Trialの実測、既定値の見直し | 所要時間と出力容量の実測から本実行の規模を決められる | 段階2、段階3 |

@@ -22,6 +22,13 @@ from .engine import rules as rules_module
 from .engine.case import CaseEngine
 from .experiment_config import ENV_RUNS_DIR, ExperimentConfig, apply_fixed_conditions
 from .record.case_log import STATUS_DONE, STATUS_FAILED, build_case_log, write_json
+from .record.case_result_view import (
+    write_failure_html,
+    write_latest_redirect,
+    write_result_html,
+)
+from .record.case_summary import write_summary
+from .record.metrics_csv import write_experiment_metrics, write_trial_metrics
 from .record.transcript import write_transcript
 
 STATUS_PENDING = "pending"
@@ -267,18 +274,69 @@ class ExperimentRunner:
                 # どこまで終わったかがファイルから読める（設計書3.5）。
                 write_json(trial_dir / "trial.json", trial.to_dict())
                 self._write_trial_status(trial_dir, trial)
+                if result.status == STATUS_DONE:
+                    self._point_latest_at(exp_dir, trial, case)
 
             totals.trial_done += 1
             if all(c.status == STATUS_DONE for c in trial.cases):
                 totals.trial_complete += 1
             self._write_trial_status(trial_dir, trial)
+            write_trial_metrics(trial_dir / "trial_metrics.csv", self._case_logs(trial_dir))
 
+        write_experiment_metrics(
+            exp_dir / "experiment_metrics.csv", self._all_case_logs(exp_dir)
+        )
         summary = self._build_summary(experiment_id, exp_dir, totals, resumed)
         write_json(exp_dir / "experiment_summary.json", summary)
         self._write_experiment_status(
             exp_dir, experiment_id, STATUS_DONE, totals, started_at
         )
         return summary
+
+    # --- 集計CSVと最新結果リンク ---------------------------------------------
+
+    def _case_logs(self, trial_dir: Path) -> List[Dict[str, Any]]:
+        """1 Trialの `case_log.json` をケース順に読む（設計書6.9）。
+
+        実行中に集めた結果ではなくファイルから読む。再開したときに、前回までに
+        完了したケースもCSVへ入る必要がある。実行中の結果だけを使うと、再開した
+        実行のCSVに今回のケースしか出ない。
+        """
+
+        logs: List[Dict[str, Any]] = []
+        if not trial_dir.is_dir():
+            return logs
+        for case_dir in sorted(d for d in trial_dir.iterdir() if d.is_dir()):
+            path = case_dir / "case_log.json"
+            if not path.is_file():
+                continue
+            try:
+                logs.append(json.loads(path.read_text(encoding="utf-8")))
+            except (json.JSONDecodeError, ValueError, OSError):
+                # 書き込み途中で止まったファイルはCSVから外す。ここで例外にすると
+                # 1件の壊れたファイルで実験全体のCSVが出なくなる。
+                self._on_progress("{0} を読めないためCSVから外した".format(path))
+        return logs
+
+    def _all_case_logs(self, exp_dir: Path) -> List[Dict[str, Any]]:
+        logs: List[Dict[str, Any]] = []
+        for trial_dir in sorted(
+            d for d in exp_dir.iterdir() if d.is_dir() and (d / "trial.json").is_file()
+        ):
+            logs.extend(self._case_logs(trial_dir))
+        return logs
+
+    def _point_latest_at(self, exp_dir: Path, trial, case) -> None:
+        """`runs/latest.html` を直近に完了したケースへ向ける（設計書7.6）。
+
+        1ケース終えるごとに更新する。長時間の実行中でも、いま何が出ているかを
+        スマートフォンから確認できる状態にしておくため。
+        """
+
+        target = "{0}/{1}/{2}/result.html".format(
+            exp_dir.name, trial.dir_name, case.dir_name
+        )
+        write_latest_redirect(self.runs_dir, case.case_id, target)
 
     def _should_skip(self, case, resumed: bool) -> bool:
         """完了済みのケースと、対象外に絞られたケースを実行しない。"""
@@ -339,12 +397,15 @@ class ExperimentRunner:
             max_rounds=max_rounds,
         )
 
-        # ケースごとに脳を作る。Stubは呼び出し順で出力が決まるため、ケース間で
-        # 状態を共有すると17ケースの比較に別の変数が入る。
-        brain = create_case_brain(trial.config, seed=trial.trial_seed)
-        engine = CaseEngine(case, rule_set, trial.config, brain, trial.trial_seed)
-
         try:
+            # ケースごとに脳を作る。Stubは呼び出し順で出力が決まるため、ケース間で
+            # 状態を共有すると17ケースの比較に別の変数が入る。
+            #
+            # 脳とエンジンの生成もこの中に入れる。外に出すと、モデル名の誤りや接続
+            # 不能で生成に失敗したときに実験全体が止まり、1ケースの失敗で17ケースを
+            # 止めないという決まり（3.5、F-51）を満たせない。
+            brain = create_case_brain(trial.config, seed=trial.trial_seed)
+            engine = CaseEngine(case, rule_set, trial.config, brain, trial.trial_seed)
             outcome = engine.run()
         except Exception as exc:  # noqa: BLE001 - 失敗を記録して次のケースへ進む
             error = {"kind": error_kind_of(exc), "message": str(exc)}
@@ -357,6 +418,9 @@ class ExperimentRunner:
                 max_rounds=max_rounds,
                 error=error,
             )
+            # 失敗時も result.html を残す（設計書7.5）。実行担当がブラウザだけで
+            # 何が起きたかを追えるようにするため。
+            write_failure_html(case_dir / "result.html", case, error, attempt)
             self._on_progress("{0}: 失敗 ({1})".format(case.case_id, error["kind"]))
             return CaseResult(
                 case_id=case.case_id,
@@ -372,6 +436,8 @@ class ExperimentRunner:
         write_json(case_dir / "case_log.json", log)
         write_json(case_dir / "config.json", log["config"])
         write_transcript(case_dir / "transcript.md", log)
+        write_summary(case_dir / "summary.md", log)
+        write_result_html(case_dir / "result.html", log)
         self._write_case_status(
             case_dir,
             case,

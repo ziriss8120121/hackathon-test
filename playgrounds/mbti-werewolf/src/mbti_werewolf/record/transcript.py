@@ -168,16 +168,17 @@ def _initial_roles(case_log: Dict[str, Any]) -> List[str]:
     return lines
 
 
-def _night(case_log: Dict[str, Any]) -> List[str]:
-    """先行実験の結果文書と同じ、番号付きの文章にする。
+def night_steps(case_log: Dict[str, Any]) -> List[str]:
+    """夜処理を1文ずつの並びで返す。番号は付けない。
 
-    怪盗の確認と交換は2つのフェーズだが、1つの番号にまとめる。先行実験が
+    怪盗の確認と交換は2つのフェーズだが、1つの項目にまとめる。先行実験が
     「怪盗P2はP1を確認。結果は…。P2は「交換しない」を選択。」と1項目で
     書いているため、形式を揃えている。
+
+    `result.html` も同じ文言を出すため、文章の組み立てをここ1か所に置く。
     """
 
-    lines = ["## 夜処理", ""]
-    step = 0
+    steps: List[str] = []
     seen_wolves = False
     swaps = {
         a["actor"]: a for a in case_log["night_actions"] if a["phase"] == "thief_swap"
@@ -187,22 +188,28 @@ def _night(case_log: Dict[str, Any]) -> List[str]:
         phase = action["phase"]
 
         if phase == "seer_inspection":
-            step += 1
-            lines.append("{0}. {1}".format(step, _seer_text(action)))
+            steps.append(_seer_text(action))
         elif phase == "werewolf_recognition":
             if seen_wolves:
                 continue
             seen_wolves = True
-            step += 1
-            lines.append("{0}. {1}".format(step, _wolf_text(case_log)))
+            steps.append(_wolf_text(case_log))
         elif phase == "thief_inspection":
-            step += 1
             parts = [_thief_inspect_text(action)]
             swap = swaps.get(action["actor"])
             if swap is not None:
                 parts.append(_thief_swap_text(swap))
-            lines.append("{0}. {1}".format(step, "".join(parts)))
+            steps.append("".join(parts))
 
+    return steps
+
+
+def _night(case_log: Dict[str, Any]) -> List[str]:
+    """先行実験の結果文書と同じ、番号付きの文章にする。"""
+
+    lines = ["## 夜処理", ""]
+    for index, step in enumerate(night_steps(case_log), start=1):
+        lines.append("{0}. {1}".format(index, step))
     lines.append("")
     return lines
 
