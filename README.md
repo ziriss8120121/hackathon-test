@@ -54,6 +54,8 @@ MBTI×人狼のAIエージェントシミュレーションで探索します。
 | 操作画面 | https://ziriss8120121.github.io/hackathon-test/simulator.html |
 | 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
 
+`python -m mbti_werewolf pages` で静的サイトを生成します。
+
 ## リポジトリ構成
 
 ```text

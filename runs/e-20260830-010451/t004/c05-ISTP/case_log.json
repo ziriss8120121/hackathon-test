@@ -1,0 +1,754 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010451-t004-c05",
+  "trial_id": "e-20260830-010451-t004",
+  "experiment_id": "e-20260830-010451",
+  "case_index": 5,
+  "composition": "homogeneous",
+  "homogeneous_type": "ISTP",
+  "status": "done",
+  "attempt": 1,
+  "versions": {
+    "rule_set_id": "onenight-8p-v0.7",
+    "rule_set_version": "0.7",
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "pool_id": "pool-001",
+    "pattern_id": "pt004"
+  },
+  "brain": {
+    "provider": "ollama",
+    "model": "gemma3:4b",
+    "endpoint_kind": "local",
+    "name": "ollama:gemma3:4b"
+  },
+  "config": {
+    "pool_id": "pool-001",
+    "pattern_set_id": "pattern-set-001",
+    "pattern_id": "pt004",
+    "rule_set_id": "onenight-8p-v0.7",
+    "trial_index": 4,
+    "trial_seed": 45,
+    "discussion": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "indicator_version": "v1",
+    "indicator_frozen_at": null,
+    "brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.8,
+      "timeout_seconds": 120,
+      "max_transport_retries": 3
+    },
+    "judge_brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.2,
+      "timeout_seconds": 180,
+      "max_transport_retries": 3
+    },
+    "machine_name": ""
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "person_id": "pe056",
+      "mbti": "ISTP",
+      "age": 49,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p2",
+      "person_id": "pe062",
+      "mbti": "ISTP",
+      "age": 20,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p3",
+      "person_id": "pe085",
+      "mbti": "ISTP",
+      "age": 64,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p4",
+      "person_id": "pe046",
+      "mbti": "ISTP",
+      "age": 64,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p5",
+      "person_id": "pe039",
+      "mbti": "ISTP",
+      "age": 27,
+      "gender": "male",
+      "initial_role": "seer",
+      "final_role": "seer"
+    },
+    {
+      "player_id": "p6",
+      "person_id": "pe049",
+      "mbti": "ISTP",
+      "age": 41,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p7",
+      "person_id": "pe054",
+      "mbti": "ISTP",
+      "age": 17,
+      "gender": "male",
+      "initial_role": "thief",
+      "final_role": "thief"
+    },
+    {
+      "player_id": "p8",
+      "person_id": "pe021",
+      "mbti": "ISTP",
+      "age": 45,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    }
+  ],
+  "night_actions": [
+    {
+      "phase": "seer_inspection",
+      "actor": "p5",
+      "target": "p1",
+      "revealed_initial_role": "villager",
+      "reason": "彼の落ち着いた態度から、人狼ではない可能性を疑いたい",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.777
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p3",
+      "partners": [
+        "p4"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p4",
+      "partners": [
+        "p3"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "thief_inspection",
+      "actor": "p7",
+      "target": "p1",
+      "revealed_initial_role": "villager",
+      "reason": "49歳という年齢から、村人か人狼の可能性を検討するため",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.707
+    },
+    {
+      "phase": "thief_swap",
+      "actor": "p7",
+      "target": "p1",
+      "swapped": false,
+      "actor_final_role": "thief",
+      "target_final_role": "villager",
+      "target_notified": false,
+      "reason": "交換の根拠が不明なため、現状維持を選択する",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.259
+    }
+  ],
+  "pre_discussion_answers": [
+    {
+      "player_id": "p1",
+      "role_awareness": "私は村人の役職を持っており、夜に得られる情報はありません。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰の役職もわかりません。まずは議論を始める必要があります。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.834
+    },
+    {
+      "player_id": "p2",
+      "role_awareness": "私は村人の役職を持ち、GMから個別に通知された情報以外は何も知らない。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないので、誰が人狼なのか判断できない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.119
+    },
+    {
+      "player_id": "p3",
+      "role_awareness": "私は人狼であり、P4が私の仲間である。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "夜の確認で仲間が特定されたのみで、他の参加者の役職は不明",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.04
+    },
+    {
+      "player_id": "p4",
+      "role_awareness": "私は人狼であり、P3と仲間です。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ情報がないため、誰一人疑う根拠はありません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.842
+    },
+    {
+      "player_id": "p5",
+      "role_awareness": "占い師として、P1が村人であることが分かった。",
+      "suspect": "unknown",
+      "confidence": 3,
+      "reason": "夜の確認でP1が村人であることが判明したのみで、他の参加者の役職は不明",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 5.112
+    },
+    {
+      "player_id": "p6",
+      "role_awareness": "私は村人であり、特に誰を疑う根拠も持っていません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "夜の結果も、他者の情報も一切得られていないため、誰を疑うべきか判断不能",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.345
+    },
+    {
+      "player_id": "p7",
+      "role_awareness": "私は怪盗であり、P1が村人であるという情報を知っています。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないので、誰が人狼か特定できません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.935
+    },
+    {
+      "player_id": "p8",
+      "role_awareness": "私は村人の役職を持っており、GMから他の参加者の役職に関する情報は一切得られていません。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないため、疑うべき対象は特定できません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.485
+    }
+  ],
+  "discussion": {
+    "rounds": 3,
+    "stop_reason": "all_pass",
+    "limits": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "events": [
+      {
+        "order": 1,
+        "round": 1,
+        "poll_position": 1,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.69,
+        "speech_id": "e-20260830-010451-t004-c05-s001",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さんとお話できる機会をいただき、ありがとうございます。まずは、自分が人狼だと分かったことと、P4さんが私と同じ役職だと分かったことです。夜の確認でP4さんとアイコンタクトしたことを確認しました。",
+        "memo": "人狼であることを隠しつつ、仲間を特定するために最初の行動をとる",
+        "chars": 98,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 2,
+        "round": 1,
+        "poll_position": 2,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 3.801,
+        "speech_id": "e-20260830-010451-t004-c05-s002",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。まずは、P3さんとP4さんの情報ありがとうございます。人狼と分かりましたが、まだ誰が誰か特定できません。まずは、夜の確認で誰かとアイコンタクトした人がいるのかどうかを確認したいです。",
+        "memo": "夜の確認で情報収集するため、相手の存在を確認する",
+        "chars": 101,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 3,
+        "round": 1,
+        "poll_position": 3,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 4.1,
+        "speech_id": "e-20260830-010451-t004-c05-s003",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P2さん、夜の確認で誰かとアイコンタクトした人がいるのかどうかを確認したいとのことですが、私もそう思います。まずは、夜の確認で誰か特定の人がアイコンタクトをしたかどうかをまとめて確認してみましょう。",
+        "memo": "夜の確認で誰か特定の人がアイコンタクトをしたかどうかを把握するため、情報を集約することを提案",
+        "chars": 99,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 4,
+        "round": 1,
+        "poll_position": 4,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.49,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは皆さんの発言を待ちたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 5,
+        "round": 1,
+        "poll_position": 5,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 3.182,
+        "speech_id": "e-20260830-010451-t004-c05-s004",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認で、P1さんとアイコンタクトしました。村人だと分かりました。",
+        "memo": "占い師としての最初の確認。P1が村人であることを確認しました。",
+        "chars": 34,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 6,
+        "round": 1,
+        "poll_position": 6,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 5.084,
+        "speech_id": "e-20260830-010451-t004-c05-s005",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認でP1さんとアイコンタクトしたというP5さんの話は興味深いです。P1さんは村人でしょうか？",
+        "memo": "P5さんの情報から、P1さんの役職を推測するために質問した。",
+        "chars": 49,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 7,
+        "round": 1,
+        "poll_position": 7,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 4.26,
+        "speech_id": "e-20260830-010451-t004-c05-s006",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認で、P1さんとアイコンタクトしたとのこと、P5さん。P1さんが村人だと確認できてよかったです。それ以外とアイコンタクトした人がいるか、引き続き確認していきましょう。",
+        "memo": "P1さんの情報が確定したことで、議論の焦点を絞れるように見送る。",
+        "chars": 86,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 8,
+        "round": 1,
+        "poll_position": 8,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 4.837,
+        "speech_id": "e-20260830-010451-t004-c05-s007",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認で、P1さんとP5さんがアイコンタクトしたこと、ありがとうございます。P1さんが村人だとP4さんとP5さんで確認できて、安心しました。まずは、他のプレイヤーとアイコンタクトした人がいるか、確認していきましょう。",
+        "memo": "P1さんの村人を確認できたので、村人グループを形成するため、他のプレイヤーのアイコンタクト状況を確認したい。",
+        "chars": 109,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 9,
+        "round": 2,
+        "poll_position": 1,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.938,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰とアイコンタクトしたか、情報が少ないため見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 10,
+        "round": 2,
+        "poll_position": 2,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 4.802,
+        "speech_id": "e-20260830-010451-t004-c05-s008",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認で、P1さんとのアイコンタクトについて、P5さんとP6さんが確認してくださりありがとうございます。まずは、P2さん、P3さん、P7さんとのアイコンタクト状況を確認させていただけないでしょうか。",
+        "memo": "他のプレイヤーとのアイコンタクト状況を把握するために、情報収集を開始する",
+        "chars": 100,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 11,
+        "round": 2,
+        "poll_position": 3,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 4.017,
+        "speech_id": "e-20260830-010451-t004-c05-s009",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P2さん、P3さん、P7さんとのアイコンタクト状況についてですが、夜の確認では誰もアイコンタクトしていません。これは、村人ばかりがアイコンタクトしているという興味深い状況です。",
+        "memo": "状況を整理し、議論の焦点を定めたい。",
+        "chars": 88,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 12,
+        "round": 2,
+        "poll_position": 4,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 4.669,
+        "speech_id": "e-20260830-010451-t004-c05-s010",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P4さんの仰る通り、夜の確認でアイコンタクトが確認されていないのは、村人ばかりだと考えるのはまだ早い気がします。P2さん、P3さん、P7さんとのアイコンタクト状況について、改めて確認させてください。",
+        "memo": "夜の確認で誰とアイコンタクトしたか情報を集め、状況を把握するため。",
+        "chars": 99,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 13,
+        "round": 2,
+        "poll_position": 5,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 4.718,
+        "speech_id": "e-20260830-010451-t004-c05-s011",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P2さん、P3さん、P7さんとのアイコンタクトについてですが、夜の確認で誰もアイコンタクトしていなかったとのこと、承知しました。人狼が複数いる可能性も考慮し、今後の議論を進めていきたいと思います。",
+        "memo": "状況把握のため、現時点での情報を整理し、今後の議論の方向性を定めるため",
+        "chars": 98,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 14,
+        "round": 2,
+        "poll_position": 6,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 3.097,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 15,
+        "round": 2,
+        "poll_position": 7,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 5.563,
+        "speech_id": "e-20260830-010451-t004-c05-s012",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P4さんの仰る通り、夜の確認でアイコンタクトがなかったのは、やはり村人ばかりかもしれません。しかし、人狼がいないとアイコンタクトができないというのも考えられます。P2さん、P3さん、P7さんとのアイコンタクト状況について、もう一度確認させてください。",
+        "memo": "アイコンタクトがなかった理由を推測するため、さらに情報を集めたい。",
+        "chars": 125,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 16,
+        "round": 2,
+        "poll_position": 8,
+        "player_id": "p6",
+        "attempts": 3,
+        "wait_seconds": 77.403,
+        "spoke": false,
+        "skipped": false,
+        "memo": "現時点では、他のプレイヤーとのアイコンタクト状況について、具体的な情報を得ることができません。まずは、他のプレイヤーの発",
+        "parse_failed": false
+      },
+      {
+        "order": 17,
+        "round": 3,
+        "poll_position": 1,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 3.871,
+        "spoke": false,
+        "skipped": false,
+        "memo": "現時点では情報が不足しており、発言するメリットが少ないため見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 18,
+        "round": 3,
+        "poll_position": 2,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 4.23,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、発言は見送ります。まずは、P2さん、P3さん、P7さんとのアイコンタクト状況を確認したいです。",
+        "parse_failed": false
+      },
+      {
+        "order": 19,
+        "round": 3,
+        "poll_position": 3,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 4.22,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が不足しているため、発言は見送ります。P2、P3、P7とのアイコンタクト状況を確認してから発言することを検討しま",
+        "parse_failed": false
+      }
+    ]
+  },
+  "pre_vote_answers": [
+    {
+      "player_id": "p1",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 6.547
+    },
+    {
+      "player_id": "p2",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 6.592
+    },
+    {
+      "player_id": "p3",
+      "suspect": "p1",
+      "confidence": 3,
+      "reason": "夜の確認でP4、P5とアイコンタクトしているため、村人である可能性が高い。",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 3,
+      "wait_seconds": 7.035
+    },
+    {
+      "player_id": "p4",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 6.559
+    },
+    {
+      "player_id": "p5",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 6.17
+    },
+    {
+      "player_id": "p6",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 7.396
+    },
+    {
+      "player_id": "p7",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 7.007
+    },
+    {
+      "player_id": "p8",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 6.658
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p1",
+      "target": "p2",
+      "memo": "アイコンタクトがないことから、人狼の可能性を疑う",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.441
+    },
+    {
+      "voter": "p2",
+      "target": "p1",
+      "memo": "夜の確認でアイコンタクトがあったため",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.282
+    },
+    {
+      "voter": "p3",
+      "target": "p8",
+      "memo": "人狼がいないとアイコンタクトができない可能性を考慮し、P8を疑う",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.586
+    },
+    {
+      "voter": "p4",
+      "target": "p8",
+      "memo": "夜のアイコンタクトがなかったことから、人狼の可能性が高い",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.439
+    },
+    {
+      "voter": "p5",
+      "target": "p8",
+      "memo": "人狼が複数いる可能性を考慮し、慎重に",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.383
+    },
+    {
+      "voter": "p6",
+      "target": "p8",
+      "memo": "夜の確認でアイコンタクトがなかったことから、人狼の可能性を考慮",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.497
+    },
+    {
+      "voter": "p7",
+      "target": "p8",
+      "memo": "アイコンタクトがなかったことから人狼の可能性を考慮",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.343
+    },
+    {
+      "voter": "p8",
+      "target": "p7",
+      "memo": "夜の確認でアイコンタクトがなかったため、人狼の可能性を疑う",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.528
+    }
+  ],
+  "result": {
+    "vote_tally": {
+      "p1": 1,
+      "p2": 1,
+      "p7": 1,
+      "p8": 5
+    },
+    "valid_vote_count": 8,
+    "abstain_count": 0,
+    "top_vote_count": 5,
+    "executed": [
+      "p8"
+    ],
+    "executed_count": 1,
+    "executed_roles": [
+      {
+        "player_id": "p8",
+        "initial_role": "villager",
+        "final_role": "villager"
+      }
+    ],
+    "no_execution_reason": null,
+    "winner": "werewolf",
+    "valid": true,
+    "invalid_reason": null
+  },
+  "timing": {
+    "started_at": "2026-08-30T07:00:48+09:00",
+    "ended_at": "2026-08-30T07:05:17+09:00",
+    "elapsed_seconds": 268.919,
+    "ai_wait_seconds": 268.89,
+    "inference_calls": 64,
+    "machine_name": ""
+  },
+  "failure": null
+}

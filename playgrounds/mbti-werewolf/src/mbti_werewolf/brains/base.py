@@ -45,9 +45,10 @@ class BrainError(Exception):
 class Request:
     """1回の推論要求。
 
-    choices と tag は形式に関する補助情報であり、ゲームのルールではない。
-      choices : expect_keys のうち選択肢が限られる項目の候補（投票先など）
-      tag     : 呼び出しの識別ラベル。StubBrainの出力切り替えと調査に使う
+    choices、subjects、tag は形式に関する補助情報であり、ゲームのルールではない。
+      choices  : expect_keys のうち選択肢が限られる項目の候補（投票先など）
+      subjects : 1回の応答で1件ずつ答える対象の識別子。Judgeの発言バッチで使う
+      tag      : 呼び出しの識別ラベル。StubBrainの出力切り替えと調査に使う
     """
 
     system: str
@@ -55,6 +56,7 @@ class Request:
     expect_keys: Tuple[str, ...] = ()
     choices: Tuple[str, ...] = ()
     tag: str = ""
+    subjects: Tuple[str, ...] = ()
 
 
 @dataclass
@@ -122,11 +124,22 @@ class BaseBrain:
     #: 通信失敗時の待機の基準秒数。テストから短くできるように属性で持つ。
     backoff_base_seconds = 1.0
 
+    #: 形式が崩れたときにBrain内部で送り直す回数。None なら通信の再試行回数を流用する。
+    #: v2.0では0にする。ルール文書v0.7が定める「回答機会は最大3回」はAgent側が数え、
+    #: Brain内部の再送と二重に掛からないようにするためである（設計書5.4、6.4）。
+    max_format_retries: Optional[int] = None
+
     def __init__(self, config) -> None:
         self.config = config
         self.brain_config = config.brain
         self.model = config.brain.model
         self._call_index = 0
+
+    @property
+    def _format_retries(self) -> int:
+        if self.max_format_retries is not None:
+            return max(0, self.max_format_retries)
+        return max(0, self.brain_config.max_retries)
 
     # --- サブクラスが実装する部分 -------------------------------------------
 
@@ -145,7 +158,7 @@ class BaseBrain:
         }
 
     def generate(self, request: Request) -> BrainResponse:
-        max_retries = max(0, self.brain_config.max_retries)
+        max_retries = self._format_retries
         wait_seconds = 0.0
         text = ""
         data: Optional[Dict[str, Any]] = None
@@ -196,6 +209,12 @@ class BaseBrain:
         if request.choices:
             lines.append(
                 "選べる値は {} のいずれかです。".format("、".join(request.choices))
+            )
+        if request.subjects:
+            lines.append(
+                "{} の{}件すべてについて答えてください。".format(
+                    "、".join(request.subjects), len(request.subjects)
+                )
             )
         return "\n".join(lines)
 

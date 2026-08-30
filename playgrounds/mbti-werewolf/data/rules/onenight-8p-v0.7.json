@@ -1,0 +1,64 @@
+{
+  "rule_set_id": "onenight-8p-v0.7",
+  "rule_set_version": "0.7",
+  "source_document": "docs/m-plus-experiment/01_werewolf-rules_v0.7.md",
+  "player_count": 8,
+  "center_cards": 0,
+  "role_composition": {
+    "werewolf": 2,
+    "seer": 1,
+    "thief": 1,
+    "villager": 4
+  },
+  "max_response_attempts": 3,
+  "night_phases": [
+    {
+      "phase": "seer_inspection",
+      "actor_role": "seer",
+      "requires_inference": true,
+      "target": "other_player",
+      "reveals": "initial_role",
+      "on_exhausted_attempts": "skip_ability"
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor_role": "werewolf",
+      "requires_inference": false
+    },
+    {
+      "phase": "thief_inspection",
+      "actor_role": "thief",
+      "requires_inference": true,
+      "target": "other_player",
+      "reveals": "initial_role",
+      "on_exhausted_attempts": "skip_ability"
+    },
+    {
+      "phase": "thief_swap",
+      "actor_role": "thief",
+      "requires_inference": true,
+      "choices": ["swap", "keep"],
+      "effect": "swap_role",
+      "notify_actor_final_role": true,
+      "notify_target": false,
+      "on_exhausted_attempts": "skip_ability"
+    }
+  ],
+  "day_phases": ["pre_discussion_answer", "free_discussion", "pre_vote_answer", "vote"],
+  "discussion": {
+    "mode": "free"
+  },
+  "vote": {
+    "rounds": 1,
+    "self_vote": false,
+    "revote": false,
+    "on_exhausted_attempts": "abstain",
+    "execute": "all_top_voted",
+    "min_votes_to_execute": 2,
+    "invalid_game_if": "no_valid_votes"
+  },
+  "win_condition": {
+    "basis": "final_role",
+    "village_wins_if": "any_executed_final_role_is_werewolf"
+  }
+}

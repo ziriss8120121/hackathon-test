@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from .base import BaseBrain, BrainError
 
 DEFAULT_MODEL = "gemma3:4b"
 DEFAULT_BASE_URL = "http://localhost:11434"
+PROBE_TIMEOUT_SECONDS = 3.0
 
 
 class OllamaBrain(BaseBrain):
@@ -31,15 +32,95 @@ class OllamaBrain(BaseBrain):
         self.name = "ollama:{}".format(self.model)
         self.base_url = os.environ.get("OLLAMA_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
 
-    def _complete(self, system: str, user: str, temperature: float) -> str:
-        try:
-            import httpx
-        except ImportError:
-            raise BrainError(
-                "unreachable",
-                "httpx が入っていません。pip install -r requirements.txt を実行してください。",
-            )
+    def probe(self) -> Dict[str, Any]:
+        """実行前の接続確認（設計書5.6）。推論は呼ばない。"""
 
+        try:
+            httpx = _load_httpx()
+        except BrainError as exc:
+            return {
+                "ok": False,
+                "kind": exc.kind,
+                "has_model": False,
+                "models": [],
+                "message": exc.message,
+            }
+        url = "{}/api/tags".format(self.base_url)
+        try:
+            response = httpx.get(url, timeout=PROBE_TIMEOUT_SECONDS)
+        except httpx.ConnectError:
+            return {
+                "ok": False,
+                "kind": "unreachable",
+                "has_model": False,
+                "models": [],
+                "message": "Ollamaに接続できません（{}）。ollama serve が動いているか確認してください。".format(
+                    url
+                ),
+            }
+        except httpx.TimeoutException:
+            return {
+                "ok": False,
+                "kind": "timeout",
+                "has_model": False,
+                "models": [],
+                "message": "Ollamaの応答が {} 秒以内に返りませんでした。".format(
+                    PROBE_TIMEOUT_SECONDS
+                ),
+            }
+        except httpx.HTTPError as exc:
+            return {
+                "ok": False,
+                "kind": "unreachable",
+                "has_model": False,
+                "models": [],
+                "message": "Ollamaへの通信に失敗しました: {}".format(exc),
+            }
+
+        if response.status_code >= 400:
+            return {
+                "ok": False,
+                "kind": "invalid_response",
+                "has_model": False,
+                "models": [],
+                "message": "Ollamaが {} を返しました: {}".format(
+                    response.status_code, response.text[:200]
+                ),
+            }
+
+        try:
+            body = response.json()
+        except (json.JSONDecodeError, ValueError):
+            return {
+                "ok": False,
+                "kind": "invalid_response",
+                "has_model": False,
+                "models": [],
+                "message": "Ollamaの応答がJSONではありません。",
+            }
+
+        models = _model_names(body)
+        has_model = _has_model(models, self.model)
+        if not has_model:
+            return {
+                "ok": False,
+                "kind": "invalid_response",
+                "has_model": False,
+                "models": models,
+                "message": "モデル {} が見つかりません。ollama pull {} を実行してください。".format(
+                    self.model, self.model
+                ),
+            }
+        return {
+            "ok": True,
+            "kind": None,
+            "has_model": True,
+            "models": models,
+            "message": "Ollamaに接続でき、モデル {} があります。".format(self.model),
+        }
+
+    def _complete(self, system: str, user: str, temperature: float) -> str:
+        httpx = _load_httpx()
         payload: Dict[str, Any] = {
             "model": self.model,
             "system": system,
@@ -47,6 +128,8 @@ class OllamaBrain(BaseBrain):
             "stream": False,
             # Ollamaのjsonモード。応答をJSONに寄せることで解析失敗を減らす（設計書5.4）。
             "format": "json",
+            # 1ケースは十数分かかる。既定の5分だと途中でモデルがアンロードされる。
+            "keep_alive": "30m",
             "options": {
                 "temperature": temperature,
                 # 呼び出しごとに違う値を渡す。同じseedなら同じ並びになるため、
@@ -104,3 +187,38 @@ class OllamaBrain(BaseBrain):
         if not isinstance(text, str) or not text.strip():
             raise BrainError("invalid_response", "Ollamaの応答に本文が含まれていません。")
         return text
+
+
+def _load_httpx():
+    try:
+        import httpx
+    except ImportError:
+        raise BrainError(
+            "unreachable",
+            "httpx が入っていません。pip install -r requirements.txt を実行してください。",
+        )
+    return httpx
+
+
+def _model_names(body: Dict[str, Any]) -> List[str]:
+    names: List[str] = []
+    for entry in body.get("models") or []:
+        if not isinstance(entry, dict):
+            continue
+        name = entry.get("name") or entry.get("model")
+        if isinstance(name, str) and name.strip():
+            names.append(name.strip())
+    return names
+
+
+def _has_model(names: List[str], model: str) -> bool:
+    target = model.strip()
+    if not target:
+        return False
+    for name in names:
+        if name == target:
+            return True
+        # `gemma3:4b` と `gemma3:4b-instruct-q4_K_M` のようにタグが付く場合がある。
+        if name.startswith(target + "-") or name.startswith(target + ":"):
+            return True
+    return False
