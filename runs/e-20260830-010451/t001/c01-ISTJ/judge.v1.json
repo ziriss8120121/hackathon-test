@@ -3,47 +3,29 @@
   "case_id": "e-20260830-010451-t001-c01",
   "judge_criteria_version": "v1",
   "judge_brain": {
-    "provider": "ollama",
-    "model": "gemma3:4b",
-    "endpoint_kind": "local",
-    "name": "ollama:gemma3:4b"
+    "provider": "claude-code",
+    "model": "sonnet",
+    "endpoint_kind": "subscription_cli",
+    "name": "claude-code:sonnet"
   },
   "judge_batch_size": 8,
-  "evaluated_at": "2026-08-30T18:06:27+09:00",
+  "evaluated_at": "2026-08-30T21:28:15+09:00",
   "speeches": [
     {
       "speech_id": "e-20260830-010451-t001-c01-s001",
       "labels": [
-        "question",
-        "other"
+        "question"
       ],
-      "mentions": [
-        "p2",
-        "p3",
-        "p4",
-        "p5",
-        "p6",
-        "p7",
-        "p8"
-      ],
+      "mentions": [],
       "stances": [],
       "parse_failed": false
     },
     {
       "speech_id": "e-20260830-010451-t001-c01-s002",
       "labels": [
-        "question",
-        "other"
+        "question"
       ],
-      "mentions": [
-        "p2",
-        "p3",
-        "p4",
-        "p5",
-        "p6",
-        "p7",
-        "p8"
-      ],
+      "mentions": [],
       "stances": [],
       "parse_failed": false
     }
@@ -81,8 +63,8 @@
     }
   ],
   "timing": {
-    "elapsed_seconds": 18.203,
-    "ai_wait_seconds": 18.202,
+    "elapsed_seconds": 4.864,
+    "ai_wait_seconds": 4.863,
     "inference_calls": 1
   }
 }

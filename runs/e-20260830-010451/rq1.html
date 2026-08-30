@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RQ1 混合と同質の比較</title>
+<style>
+:root { --bg:#f5f6f8; --panel:#fff; --line:#e2e5ea; --text:#1f2328; --muted:#667085; --accent:#3b66d6; }
+* { box-sizing: border-box; }
+body { margin:0; padding:0 0 64px; background:var(--bg); color:var(--text);
+  font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif; line-height:1.7; }
+main { max-width:960px; margin:0 auto; padding:20px 16px 0; }
+.site-header { background:#fff; border-bottom:1px solid var(--line); }
+.site-header-inner { max-width:960px; margin:0 auto; padding:14px 16px; }
+.brand { font-size:17px; font-weight:700; }
+.brand-accent { color:var(--accent); font-weight:500; }
+nav { max-width:960px; margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:0 16px 10px; }
+nav a { flex-shrink:0; font-size:12px; color:var(--muted); text-decoration:none; padding:6px 12px; }
+h1 { font-size:19px; margin:0 0 8px; }
+h2 { font-size:16px; margin:32px 0 12px; padding-left:10px; border-left:3px solid var(--accent); }
+.sub, .note { color:var(--muted); font-size:13px; }
+.note { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { color:var(--muted); font-weight:600; white-space:nowrap; }
+ul { padding-left:1.2em; }
+@media (max-width: 640px) {
+  table.wrap thead { display:none; }
+  table.wrap tr { display:block; padding:10px 8px; border-bottom:1px solid var(--line); }
+  table.wrap td { display:flex; justify-content:space-between; gap:12px; border:0; padding:4px 0; }
+  table.wrap td::before { content:attr(data-label); color:var(--muted); flex:0 0 42%; }
+}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="site-header-inner"><div class="brand">MBTI人狼 <span class="brand-accent">分析</span></div></div><nav><a href="./experiment.html">実験</a><a href="./rq2.html">RQ2</a></nav></header>
+<main>
+<h1>RQ1 混合と同質の比較</h1>
+<p class="note">実行後に定義された指標を含むため、探索的分析として読む必要がある</p><p>単位はTrial。混合側は c00、同質側は16ケースの中央値。Wilcoxon符号付順位検定（両側）。</p><h2>指標ごとの比較</h2><div class="scroll"><table class="wrap"><thead><tr><th>指標</th><th>混合 中央値</th><th>同質 中央値</th><th>Wilcoxon p</th><th>効果量 r</th><th>組数</th></tr></thead><tbody><tr><td data-label="指標">村人側の正答（追放に人狼が含まれる）</td><td data-label="混合 中央値">0.0000</td><td data-label="同質 中央値">0.5000</td><td data-label="Wilcoxon p">0.3750</td><td data-label="効果量 r">0.6499</td><td data-label="組数">4</td></tr><tr><td data-label="指標">村人側の投票正答率</td><td data-label="混合 中央値">0.0833</td><td data-label="同質 中央値">0.5000</td><td data-label="Wilcoxon p">0.4844</td><td data-label="効果量 r">0.2880</td><td data-label="組数">7</td></tr><tr><td data-label="指標">得票の集中（最多得票 ÷ 有効票）</td><td data-label="混合 中央値">0.6875</td><td data-label="同質 中央値">0.6250</td><td data-label="Wilcoxon p">0.1250</td><td data-label="効果量 r">0.7912</td><td data-label="組数">5</td></tr><tr><td data-label="指標">最終発言時点の疑念の分散（0が集中、1が分散）</td><td data-label="混合 中央値">0.2845</td><td data-label="同質 中央値">0.2043</td><td data-label="Wilcoxon p">0.5469</td><td data-label="効果量 r">0.2475</td><td data-label="組数">8</td></tr><tr><td data-label="指標">疑念が最多得票者へ固定された最初のラウンド</td><td data-label="混合 中央値">2.0000</td><td data-label="同質 中央値">2.0000</td><td data-label="Wilcoxon p">0.5000</td><td data-label="効果量 r">0.9487</td><td data-label="組数">2</td></tr><tr><td data-label="指標">誤った初期判断を修正した割合</td><td data-label="混合 中央値">0.0000</td><td data-label="同質 中央値">0.5000</td><td data-label="Wilcoxon p">0.5000</td><td data-label="効果量 r">1.0000</td><td data-label="組数">2</td></tr><tr><td data-label="指標">正しい初期判断を崩した割合</td><td data-label="混合 中央値">0.0000</td><td data-label="同質 中央値">0.0000</td><td data-label="Wilcoxon p">—</td><td data-label="効果量 r">—</td><td data-label="組数">0</td></tr><tr><td data-label="指標">自信度の変化（投票前 − 議論前）</td><td data-label="混合 中央値">2.2250</td><td data-label="同質 中央値">2.1131</td><td data-label="Wilcoxon p">0.2344</td><td data-label="効果量 r">0.4461</td><td data-label="組数">8</td></tr><tr><td data-label="指標">見送り率</td><td data-label="混合 中央値">0.5411</td><td data-label="同質 中央値">0.5123</td><td data-label="Wilcoxon p">0.7422</td><td data-label="効果量 r">0.1485</td><td data-label="組数">8</td></tr><tr><td data-label="指標">発言回数の偏り（ジニ係数）</td><td data-label="混合 中央値">0.2809</td><td data-label="同質 中央値">0.2378</td><td data-label="Wilcoxon p">0.7422</td><td data-label="効果量 r">0.1485</td><td data-label="組数">8</td></tr></tbody></table></div><h2>除外したTrial</h2><div class="scroll"><table class="wrap"><thead><tr><th>Trial</th><th>理由</th></tr></thead><tbody><tr><td data-label="Trial">e-20260830-010451-t009</td><td data-label="理由">17ケース揃っていない（12件）</td></tr><tr><td data-label="Trial">e-20260830-010451-t010</td><td data-label="理由">17ケース揃っていない（1件）</td></tr></tbody></table></div>
+</main>
+<script type="application/json" id="analysis-data">{
+  "indicator_version": "v1",
+  "frozen_note": "実行後に定義された指標を含むため、探索的分析として読む必要がある",
+  "eligible_count": 8,
+  "exclusions": [
+    {
+      "trial_id": "e-20260830-010451-t009",
+      "reason": "17ケース揃っていない（12件）"
+    },
+    {
+      "trial_id": "e-20260830-010451-t010",
+      "reason": "17ケース揃っていない（1件）"
+    }
+  ],
+  "tests": {
+    "village_correct": {
+      "n": 4,
+      "w_plus": 1.5,
+      "w_minus": 8.5,
+      "p_two_sided": 0.375,
+      "r": 0.6499,
+      "method": "exact",
+      "mixed_median": 0.0,
+      "homogeneous_median": 0.5
+    },
+    "village_vote_accuracy": {
+      "n": 7,
+      "w_plus": 9.5,
+      "w_minus": 18.5,
+      "p_two_sided": 0.484375,
+      "r": 0.288,
+      "method": "exact",
+      "mixed_median": 0.08335,
+      "homogeneous_median": 0.5
+    },
+    "vote_concentration": {
+      "n": 5,
+      "w_plus": 14.0,
+      "w_minus": 1.0,
+      "p_two_sided": 0.125,
+      "r": 0.7912,
+      "method": "exact",
+      "mixed_median": 0.6875,
+      "homogeneous_median": 0.625
+    },
+    "final_entropy": {
+      "n": 8,
+      "w_plus": 23.0,
+      "w_minus": 13.0,
+      "p_two_sided": 0.546875,
+      "r": 0.2475,
+      "method": "exact",
+      "mixed_median": 0.284526,
+      "homogeneous_median": 0.204292
+    },
+    "convergence_round": {
+      "n": 2,
+      "w_plus": 0,
+      "w_minus": 3.0,
+      "p_two_sided": 0.5,
+      "r": 0.9487,
+      "method": "exact",
+      "mixed_median": 2.0,
+      "homogeneous_median": 2.0
+    },
+    "correction_rate": {
+      "n": 2,
+      "w_plus": 0,
+      "w_minus": 3.0,
+      "p_two_sided": 0.5,
+      "r": 1.0,
+      "method": "exact",
+      "mixed_median": 0.0,
+      "homogeneous_median": 0.5
+    },
+    "deterioration_rate": {
+      "n": 0,
+      "w_plus": null,
+      "w_minus": null,
+      "p_two_sided": null,
+      "r": null,
+      "method": null,
+      "mixed_median": 0.0,
+      "homogeneous_median": 0.0
+    },
+    "mean_confidence_delta": {
+      "n": 8,
+      "w_plus": 27.0,
+      "w_minus": 9.0,
+      "p_two_sided": 0.234375,
+      "r": 0.4461,
+      "method": "exact",
+      "mixed_median": 2.225,
+      "homogeneous_median": 2.113125
+    },
+    "pass_rate": {
+      "n": 8,
+      "w_plus": 21.0,
+      "w_minus": 15.0,
+      "p_two_sided": 0.742188,
+      "r": 0.1485,
+      "method": "exact",
+      "mixed_median": 0.54105,
+      "homogeneous_median": 0.51235
+    },
+    "speech_count_gini": {
+      "n": 8,
+      "w_plus": 21.0,
+      "w_minus": 15.0,
+      "p_two_sided": 0.742188,
+      "r": 0.1485,
+      "method": "exact",
+      "mixed_median": 0.28095,
+      "homogeneous_median": 0.23784999999999998
+    }
+  },
+  "pairs": [
+    {
+      "trial_id": "e-20260830-010451-t001",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.3333,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.5,
+        "convergence_round": null,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.375,
+        "pass_rate": 0.5854,
+        "speech_count_gini": 0.375
+      },
+      "homogeneous_median": {
+        "village_correct": 0.0,
+        "village_vote_accuracy": 0.08335,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.0,
+        "convergence_round": 2.0,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.0833500000000003,
+        "pass_rate": 0.5294,
+        "speech_count_gini": 0.32084999999999997
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t002",
+      "mixed": {
+        "village_correct": 1,
+        "village_vote_accuracy": 1.0,
+        "vote_concentration": 0.75,
+        "final_entropy": 0.0,
+        "convergence_round": 2,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.2,
+        "pass_rate": 0.5263,
+        "speech_count_gini": 0.4306
+      },
+      "homogeneous_median": {
+        "village_correct": 0.5,
+        "village_vote_accuracy": 0.5,
+        "vote_concentration": 0.5625,
+        "final_entropy": 0.2555345,
+        "convergence_round": 3.5,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.0625,
+        "pass_rate": 0.3704,
+        "speech_count_gini": 0.19735
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t003",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.875,
+        "final_entropy": 0.0,
+        "convergence_round": null,
+        "correction_rate": null,
+        "deterioration_rate": 0.0,
+        "mean_confidence_delta": 2.5,
+        "pass_rate": 0.1765,
+        "speech_count_gini": 0.125
+      },
+      "homogeneous_median": {
+        "village_correct": 1.0,
+        "village_vote_accuracy": 0.6667,
+        "vote_concentration": 0.6875,
+        "final_entropy": 0.306099,
+        "convergence_round": 2.0,
+        "correction_rate": null,
+        "deterioration_rate": 0.0,
+        "mean_confidence_delta": 2.1429,
+        "pass_rate": 0.44965,
+        "speech_count_gini": 0.193
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t004",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.0,
+        "convergence_round": null,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.2,
+        "pass_rate": 0.6,
+        "speech_count_gini": 0.3036
+      },
+      "homogeneous_median": {
+        "village_correct": 0.0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.1530495,
+        "convergence_round": 2.0,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.0625,
+        "pass_rate": 0.41795000000000004,
+        "speech_count_gini": 0.19855
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t005",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.875,
+        "final_entropy": 0.240643,
+        "convergence_round": 3,
+        "correction_rate": 0.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 1.875,
+        "pass_rate": 0.5455,
+        "speech_count_gini": 0.2583
+      },
+      "homogeneous_median": {
+        "village_correct": 1.0,
+        "village_vote_accuracy": 0.58335,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.0,
+        "convergence_round": 3.0,
+        "correction_rate": 0.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.0,
+        "pass_rate": 0.5246999999999999,
+        "speech_count_gini": 0.26875000000000004
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t006",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.1667,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.328409,
+        "convergence_round": 1,
+        "correction_rate": null,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.375,
+        "pass_rate": 0.5366,
+        "speech_count_gini": 0.1908
+      },
+      "homogeneous_median": {
+        "village_correct": 0.0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.75,
+        "final_entropy": 0.0,
+        "convergence_round": 3.0,
+        "correction_rate": 0.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.1429,
+        "pass_rate": 0.525,
+        "speech_count_gini": 0.25529999999999997
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t007",
+      "mixed": {
+        "village_correct": 0,
+        "village_vote_accuracy": 0.0,
+        "vote_concentration": 0.875,
+        "final_entropy": 0.528321,
+        "convergence_round": null,
+        "correction_rate": 0.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.0,
+        "pass_rate": 0.2778,
+        "speech_count_gini": 0.1827
+      },
+      "homogeneous_median": {
+        "village_correct": 0.5,
+        "village_vote_accuracy": 0.5,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.2882625,
+        "convergence_round": 2.0,
+        "correction_rate": 1.0,
+        "deterioration_rate": 0.0,
+        "mean_confidence_delta": 2.25,
+        "pass_rate": 0.53945,
+        "speech_count_gini": 0.33335000000000004
+      }
+    },
+    {
+      "trial_id": "e-20260830-010451-t008",
+      "mixed": {
+        "village_correct": 1,
+        "village_vote_accuracy": 0.6667,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.333333,
+        "convergence_round": null,
+        "correction_rate": 0.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.25,
+        "pass_rate": 0.5676,
+        "speech_count_gini": 0.3438
+      },
+      "homogeneous_median": {
+        "village_correct": 1.0,
+        "village_vote_accuracy": 0.75,
+        "vote_concentration": 0.625,
+        "final_entropy": 0.270426,
+        "convergence_round": 2.0,
+        "correction_rate": 1.0,
+        "deterioration_rate": null,
+        "mean_confidence_delta": 2.3541499999999997,
+        "pass_rate": 0.5,
+        "speech_count_gini": 0.22039999999999998
+      }
+    }
+  ]
+}</script>
+</body>
+</html>

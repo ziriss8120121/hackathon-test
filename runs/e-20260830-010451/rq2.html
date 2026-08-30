@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RQ2 同質16タイプの比較</title>
+<style>
+:root { --bg:#f5f6f8; --panel:#fff; --line:#e2e5ea; --text:#1f2328; --muted:#667085; --accent:#3b66d6; }
+* { box-sizing: border-box; }
+body { margin:0; padding:0 0 64px; background:var(--bg); color:var(--text);
+  font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif; line-height:1.7; }
+main { max-width:960px; margin:0 auto; padding:20px 16px 0; }
+.site-header { background:#fff; border-bottom:1px solid var(--line); }
+.site-header-inner { max-width:960px; margin:0 auto; padding:14px 16px; }
+.brand { font-size:17px; font-weight:700; }
+.brand-accent { color:var(--accent); font-weight:500; }
+nav { max-width:960px; margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:0 16px 10px; }
+nav a { flex-shrink:0; font-size:12px; color:var(--muted); text-decoration:none; padding:6px 12px; }
+h1 { font-size:19px; margin:0 0 8px; }
+h2 { font-size:16px; margin:32px 0 12px; padding-left:10px; border-left:3px solid var(--accent); }
+.sub, .note { color:var(--muted); font-size:13px; }
+.note { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { color:var(--muted); font-weight:600; white-space:nowrap; }
+ul { padding-left:1.2em; }
+@media (max-width: 640px) {
+  table.wrap thead { display:none; }
+  table.wrap tr { display:block; padding:10px 8px; border-bottom:1px solid var(--line); }
+  table.wrap td { display:flex; justify-content:space-between; gap:12px; border:0; padding:4px 0; }
+  table.wrap td::before { content:attr(data-label); color:var(--muted); flex:0 0 42%; }
+}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="site-header-inner"><div class="brand">MBTI人狼 <span class="brand-accent">分析</span></div></div><nav><a href="./experiment.html">実験</a><a href="./rq1.html">RQ1</a></nav></header>
+<main>
+<h1>RQ2 同質16タイプの比較</h1>
+<p class="note">探索的分析である。タイプ間の個別比較は行わない。</p><h2>Friedman検定（全体）</h2><div class="scroll"><table class="wrap"><thead><tr><th>指標</th><th>Q</th><th>p</th><th>有効行数</th></tr></thead><tbody><tr><td data-label="指標">村人側の正答（追放に人狼が含まれる）</td><td data-label="Q">13.5662</td><td data-label="p">0.5592</td><td data-label="有効行数">8</td></tr><tr><td data-label="指標">村人側の投票正答率</td><td data-label="Q">12.3722</td><td data-label="p">0.6514</td><td data-label="有効行数">8</td></tr><tr><td data-label="指標">得票の集中（最多得票 ÷ 有効票）</td><td data-label="Q">15.3116</td><td data-label="p">0.4293</td><td data-label="有効行数">8</td></tr><tr><td data-label="指標">最終発言時点の疑念の分散（0が集中、1が分散）</td><td data-label="Q">17.1066</td><td data-label="p">0.3122</td><td data-label="有効行数">8</td></tr><tr><td data-label="指標">疑念が最多得票者へ固定された最初のラウンド</td><td data-label="Q">—</td><td data-label="p">—</td><td data-label="有効行数">0</td></tr><tr><td data-label="指標">誤った初期判断を修正した割合</td><td data-label="Q">—</td><td data-label="p">—</td><td data-label="有効行数">0</td></tr><tr><td data-label="指標">正しい初期判断を崩した割合</td><td data-label="Q">—</td><td data-label="p">—</td><td data-label="有効行数">0</td></tr><tr><td data-label="指標">自信度の変化（投票前 − 議論前）</td><td data-label="Q">17.4338</td><td data-label="p">0.2932</td><td data-label="有効行数">6</td></tr><tr><td data-label="指標">見送り率</td><td data-label="Q">59.0322</td><td data-label="p">0.0000</td><td data-label="有効行数">8</td></tr><tr><td data-label="指標">発言回数の偏り（ジニ係数）</td><td data-label="Q">70.7702</td><td data-label="p">0.0000</td><td data-label="有効行数">8</td></tr></tbody></table></div><h2>タイプごとの順位（村人正答）</h2><div class="scroll"><table class="wrap"><thead><tr><th>順位</th><th>タイプ</th><th>中央値</th><th>四分位範囲</th><th>有効Trial数</th></tr></thead><tbody><tr><td data-label="順位">1</td><td data-label="タイプ">ENTJ</td><td data-label="中央値">1.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">2</td><td data-label="タイプ">ESFJ</td><td data-label="中央値">1.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">3</td><td data-label="タイプ">ESFP</td><td data-label="中央値">1.0</td><td data-label="四分位範囲">0.25</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">4</td><td data-label="タイプ">INTP</td><td data-label="中央値">1.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">5</td><td data-label="タイプ">ESTJ</td><td data-label="中央値">0.5</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">6</td><td data-label="タイプ">ISFJ</td><td data-label="中央値">0.5</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">7</td><td data-label="タイプ">ENFJ</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">8</td><td data-label="タイプ">ENFP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">0.25</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">9</td><td data-label="タイプ">ENTP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">10</td><td data-label="タイプ">ESTP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">0.25</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">11</td><td data-label="タイプ">INFJ</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">12</td><td data-label="タイプ">INFP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">0.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">13</td><td data-label="タイプ">INTJ</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">14</td><td data-label="タイプ">ISFP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">0.25</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">15</td><td data-label="タイプ">ISTJ</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">0.0</td><td data-label="有効Trial数">8</td></tr><tr><td data-label="順位">16</td><td data-label="タイプ">ISTP</td><td data-label="中央値">0.0</td><td data-label="四分位範囲">1.0</td><td data-label="有効Trial数">8</td></tr></tbody></table></div>
+</main>
+<script type="application/json" id="analysis-data">{
+  "indicator_version": "v1",
+  "eligible_count": 8,
+  "exclusions": [
+    {
+      "trial_id": "e-20260830-010451-t009",
+      "reason": "17ケース揃っていない（12件）"
+    },
+    {
+      "trial_id": "e-20260830-010451-t010",
+      "reason": "17ケース揃っていない（1件）"
+    }
+  ],
+  "friedman": {
+    "village_correct": {
+      "n": 8,
+      "k": 16,
+      "q": 13.5662,
+      "p": 0.559175,
+      "rank_sums": [
+        42.5,
+        74.5,
+        66.5,
+        66.5,
+        66.5,
+        58.5,
+        50.5,
+        82.5,
+        58.5,
+        90.5,
+        58.5,
+        66.5,
+        74.5,
+        82.5,
+        66.5,
+        82.5
+      ]
+    },
+    "village_vote_accuracy": {
+      "n": 8,
+      "k": 16,
+      "q": 12.3722,
+      "p": 0.651418,
+      "rank_sums": [
+        44.5,
+        72.5,
+        62.5,
+        75.0,
+        70.5,
+        53.0,
+        57.0,
+        68.5,
+        55.0,
+        87.0,
+        62.0,
+        67.5,
+        69.0,
+        84.0,
+        72.0,
+        88.0
+      ]
+    },
+    "vote_concentration": {
+      "n": 8,
+      "k": 16,
+      "q": 15.3116,
+      "p": 0.429278,
+      "rank_sums": [
+        66.5,
+        74.0,
+        58.0,
+        34.5,
+        82.0,
+        76.5,
+        61.0,
+        58.5,
+        51.5,
+        77.0,
+        81.0,
+        68.0,
+        66.0,
+        65.0,
+        89.0,
+        79.5
+      ]
+    },
+    "final_entropy": {
+      "n": 8,
+      "k": 16,
+      "q": 17.1066,
+      "p": 0.312205,
+      "rank_sums": [
+        75.5,
+        76.0,
+        73.0,
+        62.0,
+        60.5,
+        69.5,
+        42.0,
+        66.5,
+        92.5,
+        54.5,
+        94.0,
+        67.0,
+        48.5,
+        55.0,
+        81.0,
+        70.5
+      ]
+    },
+    "convergence_round": {
+      "n": 0,
+      "k": 16,
+      "q": null,
+      "p": null,
+      "rank_sums": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "correction_rate": {
+      "n": 0,
+      "k": 16,
+      "q": null,
+      "p": null,
+      "rank_sums": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "deterioration_rate": {
+      "n": 0,
+      "k": 16,
+      "q": null,
+      "p": null,
+      "rank_sums": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "mean_confidence_delta": {
+      "n": 6,
+      "k": 16,
+      "q": 17.4338,
+      "p": 0.293223,
+      "rank_sums": [
+        37.5,
+        61.0,
+        49.0,
+        45.0,
+        32.0,
+        68.5,
+        65.5,
+        32.5,
+        44.5,
+        48.5,
+        73.0,
+        58.5,
+        45.5,
+        56.0,
+        59.0,
+        40.0
+      ]
+    },
+    "pass_rate": {
+      "n": 8,
+      "k": 16,
+      "q": 59.0322,
+      "p": 1e-06,
+      "rank_sums": [
+        89.0,
+        94.5,
+        107.0,
+        108.5,
+        92.5,
+        93.0,
+        50.0,
+        65.0,
+        31.0,
+        19.5,
+        60.0,
+        46.5,
+        59.5,
+        48.0,
+        57.0,
+        67.0
+      ]
+    },
+    "speech_count_gini": {
+      "n": 8,
+      "k": 16,
+      "q": 70.7702,
+      "p": 0.0,
+      "rank_sums": [
+        86.5,
+        96.0,
+        105.0,
+        111.0,
+        91.5,
+        102.5,
+        45.0,
+        82.5,
+        26.5,
+        18.0,
+        40.0,
+        45.5,
+        65.0,
+        47.5,
+        60.5,
+        65.0
+      ]
+    }
+  },
+  "ranking_rows": [
+    [
+      1,
+      "ENTJ",
+      1.0,
+      1.0,
+      8
+    ],
+    [
+      2,
+      "ESFJ",
+      1.0,
+      1.0,
+      8
+    ],
+    [
+      3,
+      "ESFP",
+      1.0,
+      0.25,
+      8
+    ],
+    [
+      4,
+      "INTP",
+      1.0,
+      1.0,
+      8
+    ],
+    [
+      5,
+      "ESTJ",
+      0.5,
+      1.0,
+      8
+    ],
+    [
+      6,
+      "ISFJ",
+      0.5,
+      1.0,
+      8
+    ],
+    [
+      7,
+      "ENFJ",
+      0.0,
+      1.0,
+      8
+    ],
+    [
+      8,
+      "ENFP",
+      0.0,
+      0.25,
+      8
+    ],
+    [
+      9,
+      "ENTP",
+      0.0,
+      1.0,
+      8
+    ],
+    [
+      10,
+      "ESTP",
+      0.0,
+      0.25,
+      8
+    ],
+    [
+      11,
+      "INFJ",
+      0.0,
+      1.0,
+      8
+    ],
+    [
+      12,
+      "INFP",
+      0.0,
+      0.0,
+      8
+    ],
+    [
+      13,
+      "INTJ",
+      0.0,
+      1.0,
+      8
+    ],
+    [
+      14,
+      "ISFP",
+      0.0,
+      0.25,
+      8
+    ],
+    [
+      15,
+      "ISTJ",
+      0.0,
+      0.0,
+      8
+    ],
+    [
+      16,
+      "ISTP",
+      0.0,
+      1.0,
+      8
+    ]
+  ]
+}</script>
+</body>
+</html>

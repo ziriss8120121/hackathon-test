@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trial e-20260830-010451-t010</title>
+<style>
+:root { --bg:#f5f6f8; --panel:#fff; --line:#e2e5ea; --text:#1f2328; --muted:#667085; --accent:#3b66d6; }
+* { box-sizing: border-box; }
+body { margin:0; padding:0 0 64px; background:var(--bg); color:var(--text);
+  font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif; line-height:1.7; }
+main { max-width:960px; margin:0 auto; padding:20px 16px 0; }
+.site-header { background:#fff; border-bottom:1px solid var(--line); }
+.site-header-inner { max-width:960px; margin:0 auto; padding:14px 16px; }
+.brand { font-size:17px; font-weight:700; }
+.brand-accent { color:var(--accent); font-weight:500; }
+nav { max-width:960px; margin:0 auto; display:flex; gap:4px; overflow-x:auto; padding:0 16px 10px; }
+nav a { flex-shrink:0; font-size:12px; color:var(--muted); text-decoration:none; padding:6px 12px; }
+h1 { font-size:19px; margin:0 0 8px; }
+h2 { font-size:16px; margin:32px 0 12px; padding-left:10px; border-left:3px solid var(--accent); }
+.sub, .note { color:var(--muted); font-size:13px; }
+.note { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+th { color:var(--muted); font-weight:600; white-space:nowrap; }
+ul { padding-left:1.2em; }
+@media (max-width: 640px) {
+  table.wrap thead { display:none; }
+  table.wrap tr { display:block; padding:10px 8px; border-bottom:1px solid var(--line); }
+  table.wrap td { display:flex; justify-content:space-between; gap:12px; border:0; padding:4px 0; }
+  table.wrap td::before { content:attr(data-label); color:var(--muted); flex:0 0 42%; }
+}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="site-header-inner"><div class="brand">MBTI人狼 <span class="brand-accent">分析</span></div></div><nav><a href="../experiment.html">実験</a><a href="../rq1.html">RQ1</a><a href="../rq2.html">RQ2</a></nav></header>
+<main>
+<h1>Trial e-20260830-010451-t010</h1>
+<p class="sub">この表は補助分析である。RQ1の確認的比較は実験全体の <a href="../rq1.html">rq1.html</a> を見る。</p><h2>17ケースの比較</h2><div class="scroll"><table class="wrap"><thead><tr><th>ケース</th><th>構成</th><th>勝敗</th><th>追放</th><th>村人正答</th><th>得票集中</th><th>最終エントロピー</th><th>収束ラウンド</th><th>修正率</th></tr></thead><tbody><tr><td data-label="ケース">e-20260830-010451-t010-c00</td><td data-label="構成">混合</td><td data-label="勝敗">人狼陣営</td><td data-label="追放">P5</td><td data-label="村人正答">0</td><td data-label="得票集中">0.8750</td><td data-label="最終エントロピー">0.0000</td><td data-label="収束ラウンド">1</td><td data-label="修正率">—</td></tr></tbody></table></div><h2>ケースの結果画面</h2><ul><li><a href="c00-mixed/result.html">e-20260830-010451-t010-c00</a> 混合</li></ul><h2>混合と同質16タイプの差</h2><div class="scroll"><table class="wrap"><thead><tr><th>指標</th><th>混合</th><th>同質中央値</th><th>差</th></tr></thead><tbody></tbody></table></div>
+</main>
+<script type="application/json" id="analysis-data">{
+  "trial_id": "e-20260830-010451-t010",
+  "cases": [
+    {
+      "case_id": "e-20260830-010451-t010-c00",
+      "composition": "mixed",
+      "homogeneous_type": null,
+      "winner": "werewolf",
+      "village_correct": 0,
+      "village_vote_accuracy": 0.0,
+      "vote_concentration": 0.875,
+      "final_entropy": 0.0,
+      "convergence_round": 1,
+      "correction_rate": null,
+      "deterioration_rate": null,
+      "mean_confidence_delta": 2.1429,
+      "pass_rate": 0.3333,
+      "speech_count_gini": 0.0
+    }
+  ]
+}</script>
+</body>
+</html>
