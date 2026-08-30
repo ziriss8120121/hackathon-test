@@ -4,9 +4,9 @@
   "trial_index": 10,
   "status": "running",
   "case_total": 17,
-  "case_done": 1,
+  "case_done": 2,
   "case_failed": 0,
-  "case_pending": 16,
+  "case_pending": 15,
   "complete": false,
-  "updated_at": "2026-08-30T14:02:37+09:00"
+  "updated_at": "2026-08-30T14:14:19+09:00"
 }
