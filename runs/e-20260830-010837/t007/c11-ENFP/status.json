@@ -1,0 +1,17 @@
+{
+  "case_id": "e-20260830-010837-t007-c11",
+  "trial_id": "e-20260830-010837-t007",
+  "experiment_id": "e-20260830-010837",
+  "composition": "homogeneous",
+  "homogeneous_type": "ENFP",
+  "status": "done",
+  "phase": "finished",
+  "round": 5,
+  "max_rounds": 6,
+  "speech_count": 17,
+  "inference_calls": 75,
+  "attempt": 1,
+  "started_at": "2026-08-30T10:13:55+09:00",
+  "updated_at": "2026-08-30T10:19:33+09:00",
+  "error": null
+}

@@ -1,0 +1,17 @@
+{
+  "case_id": "e-20260830-010837-t002-c03",
+  "trial_id": "e-20260830-010837-t002",
+  "experiment_id": "e-20260830-010837",
+  "composition": "homogeneous",
+  "homogeneous_type": "INFJ",
+  "status": "done",
+  "phase": "finished",
+  "round": 5,
+  "max_rounds": 6,
+  "speech_count": 14,
+  "inference_calls": 79,
+  "attempt": 1,
+  "started_at": "2026-08-30T02:46:07+09:00",
+  "updated_at": "2026-08-30T02:51:48+09:00",
+  "error": null
+}

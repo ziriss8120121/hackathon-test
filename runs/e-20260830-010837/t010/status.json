@@ -1,0 +1,12 @@
+{
+  "trial_id": "e-20260830-010837-t010",
+  "experiment_id": "e-20260830-010837",
+  "trial_index": 10,
+  "status": "running",
+  "case_total": 17,
+  "case_done": 1,
+  "case_failed": 0,
+  "case_pending": 16,
+  "complete": false,
+  "updated_at": "2026-08-30T14:02:37+09:00"
+}
