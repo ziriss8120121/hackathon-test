@@ -53,6 +53,20 @@ MBTI×人狼のAIエージェントシミュレーションで検証しました
 
 詳細な分析結果、仮説との対応、今回できなかった分析は [`result.md`](docs/submission/result.md) を参照してください。
 
+## 資料ハイライト
+
+### 1セット17試合の実験設計
+
+![同じ条件でMBTI構成だけを変える17試合の実験設計](docs/submission/assets/experiment-design.png)
+
+### RQ1：同質構成では最終的な疑いが一人に集まりやすかった
+
+![混合構成と同質構成における疑いの集中度の比較](docs/submission/assets/rq1-suspicion-convergence.png)
+
+### RQ2：MBTIタイプ構成によって疑いのまとまり方が異なった
+
+![MBTIタイプ別の最終的な疑いの分散度](docs/submission/assets/rq2-suspicion-patterns.png)
+
 ## 結果を見る
 
 既存の実験結果は、以下から確認できます。
