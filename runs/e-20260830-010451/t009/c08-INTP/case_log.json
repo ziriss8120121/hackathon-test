@@ -1,0 +1,1045 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010451-t009-c08",
+  "trial_id": "e-20260830-010451-t009",
+  "experiment_id": "e-20260830-010451",
+  "case_index": 8,
+  "composition": "homogeneous",
+  "homogeneous_type": "INTP",
+  "status": "done",
+  "attempt": 1,
+  "versions": {
+    "rule_set_id": "onenight-8p-v0.7",
+    "rule_set_version": "0.7",
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "pool_id": "pool-001",
+    "pattern_id": "pt009"
+  },
+  "brain": {
+    "provider": "ollama",
+    "model": "gemma3:4b",
+    "endpoint_kind": "local",
+    "name": "ollama:gemma3:4b"
+  },
+  "config": {
+    "pool_id": "pool-001",
+    "pattern_set_id": "pattern-set-001",
+    "pattern_id": "pt009",
+    "rule_set_id": "onenight-8p-v0.7",
+    "trial_index": 9,
+    "trial_seed": 50,
+    "discussion": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "indicator_version": "v1",
+    "indicator_frozen_at": null,
+    "brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.8,
+      "timeout_seconds": 120,
+      "max_transport_retries": 3
+    },
+    "judge_brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.2,
+      "timeout_seconds": 180,
+      "max_transport_retries": 3
+    },
+    "machine_name": ""
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "person_id": "pe094",
+      "mbti": "INTP",
+      "age": 43,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p2",
+      "person_id": "pe081",
+      "mbti": "INTP",
+      "age": 60,
+      "gender": "male",
+      "initial_role": "thief",
+      "final_role": "thief"
+    },
+    {
+      "player_id": "p3",
+      "person_id": "pe046",
+      "mbti": "INTP",
+      "age": 64,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p4",
+      "person_id": "pe078",
+      "mbti": "INTP",
+      "age": 26,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p5",
+      "person_id": "pe049",
+      "mbti": "INTP",
+      "age": 41,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p6",
+      "person_id": "pe080",
+      "mbti": "INTP",
+      "age": 53,
+      "gender": "female",
+      "initial_role": "seer",
+      "final_role": "seer"
+    },
+    {
+      "player_id": "p7",
+      "person_id": "pe069",
+      "mbti": "INTP",
+      "age": 62,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p8",
+      "person_id": "pe043",
+      "mbti": "INTP",
+      "age": 51,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    }
+  ],
+  "night_actions": [
+    {
+      "phase": "seer_inspection",
+      "actor": "p6",
+      "target": "p2",
+      "revealed_initial_role": "thief",
+      "reason": "年齢と性別から、人狼ではない可能性が高い",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.799
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p1",
+      "partners": [
+        "p4"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p4",
+      "partners": [
+        "p1"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "thief_inspection",
+      "actor": "p2",
+      "target": "p1",
+      "revealed_initial_role": "werewolf",
+      "reason": "女性なので、占い師か人狼の可能性を疑う",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.696
+    },
+    {
+      "phase": "thief_swap",
+      "actor": "p2",
+      "target": "p1",
+      "swapped": false,
+      "actor_final_role": "thief",
+      "target_final_role": "werewolf",
+      "target_notified": false,
+      "reason": "人狼と交換すれば、僕が人狼になるリスクが高まるため、交換はしません。",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.488
+    }
+  ],
+  "pre_discussion_answers": [
+    {
+      "player_id": "p1",
+      "role_awareness": "私は人狼であり、P4と開始時の役職が確定している。",
+      "suspect": "unknown",
+      "confidence": 3,
+      "reason": "まだ誰かに疑われる根拠がないため、まずは状況を把握する",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 5.161
+    },
+    {
+      "player_id": "p2",
+      "role_awareness": "私は怪盗であり、P1が人狼であることが分かっている。",
+      "suspect": "unknown",
+      "confidence": 3,
+      "reason": "まだ誰かに疑われたわけではないため、まずは状況を把握する必要がある",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.263
+    },
+    {
+      "player_id": "p3",
+      "role_awareness": "私は村人の役職を持っており、他の参加者の役職や夜の結果を知らない。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰にも根拠がないため、疑う対象はいない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.368
+    },
+    {
+      "player_id": "p4",
+      "role_awareness": "私は人狼であり、P1と共通の秘密情報を持っている。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないため、疑うべき対象は特に決まっていない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.225
+    },
+    {
+      "player_id": "p5",
+      "role_awareness": "私は村人であり、開始時の役職としてGMから通知された情報のみを持っている。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないため、特定の人物を疑う根拠はない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.26
+    },
+    {
+      "player_id": "p6",
+      "role_awareness": "私は占い師で、夜にP2が怪盗だと確認しました。",
+      "suspect": "p2",
+      "confidence": 3,
+      "reason": "怪盗の確認と交換のタイミングから疑い深く観察します。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 5.18
+    },
+    {
+      "player_id": "p7",
+      "role_awareness": "私は村人の役職を持ち、GMから個別に通知された情報以外は何も知らない。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰にも話していないので、誰も疑う理由がない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.411
+    },
+    {
+      "player_id": "p8",
+      "role_awareness": "私は村人の役職を持っており、夜に得られた情報はありません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰かに疑う根拠がないため、まずは様子を見る",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.151
+    }
+  ],
+  "discussion": {
+    "rounds": 6,
+    "stop_reason": "max_rounds",
+    "limits": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "events": [
+      {
+        "order": 1,
+        "round": 1,
+        "poll_position": 1,
+        "player_id": "p6",
+        "attempts": 2,
+        "wait_seconds": 43.076,
+        "speech_id": "e-20260830-010451-t009-c08-s001",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "怪盗の交換相手を知ることで、自分の役目を推測しやすくなるからです。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 2,
+        "round": 1,
+        "poll_position": 2,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 2.594,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは状況を把握することを優先する。",
+        "parse_failed": false
+      },
+      {
+        "order": 3,
+        "round": 1,
+        "poll_position": 3,
+        "player_id": "p8",
+        "attempts": 2,
+        "wait_seconds": 5.911,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは誰かから何か情報を集めてみたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 4,
+        "round": 1,
+        "poll_position": 4,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 2.277,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、様子を見ることにします。",
+        "parse_failed": false
+      },
+      {
+        "order": 5,
+        "round": 1,
+        "poll_position": 5,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 2.424,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果が分からないので、まずは誰かから情報を集めてみたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 6,
+        "round": 1,
+        "poll_position": 6,
+        "player_id": "p5",
+        "attempts": 2,
+        "wait_seconds": 42.104,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰と交換したか分からないので、何も言わないのが無難です。",
+        "parse_failed": false
+      },
+      {
+        "order": 7,
+        "round": 1,
+        "poll_position": 7,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.25,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果はわからないので、P6の質問には答えられません。",
+        "parse_failed": false
+      },
+      {
+        "order": 8,
+        "round": 1,
+        "poll_position": 8,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 2.158,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果がまだ分からないため、何も言わないのが賢明である",
+        "parse_failed": false
+      },
+      {
+        "order": 9,
+        "round": 2,
+        "poll_position": 1,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 2.227,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは様子を見ることにします。",
+        "parse_failed": false
+      },
+      {
+        "order": 10,
+        "round": 2,
+        "poll_position": 2,
+        "player_id": "p6",
+        "attempts": 2,
+        "wait_seconds": 8.909,
+        "speech_id": "e-20260830-010451-t009-c08-s002",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P2が誰と交換したのかを知ることで、人狼の動向を推測できる可能性があるため、まずは夜の結果を確認したい。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 11,
+        "round": 2,
+        "poll_position": 3,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 3.283,
+        "speech_id": "e-20260830-010451-t009-c08-s003",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P6の質問に答えるため、夜の結果を尋ねる",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 12,
+        "round": 2,
+        "poll_position": 4,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 2.265,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果がまだ分からないので、まずは状況把握のために様子を見る",
+        "parse_failed": false
+      },
+      {
+        "order": 13,
+        "round": 2,
+        "poll_position": 5,
+        "player_id": "p8",
+        "attempts": 3,
+        "wait_seconds": 42.316,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは状況を把握するために黙って待つ",
+        "parse_failed": false
+      },
+      {
+        "order": 14,
+        "round": 2,
+        "poll_position": 6,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.165,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果が分からないため、何も言いません。",
+        "parse_failed": false
+      },
+      {
+        "order": 15,
+        "round": 2,
+        "poll_position": 7,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.291,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは皆の意見を聞いてみたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 16,
+        "round": 2,
+        "poll_position": 8,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 2.338,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰と交換したかという情報がないので、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 17,
+        "round": 3,
+        "poll_position": 1,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 1.996,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは様子を見る。",
+        "parse_failed": false
+      },
+      {
+        "order": 18,
+        "round": 3,
+        "poll_position": 2,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.204,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 19,
+        "round": 3,
+        "poll_position": 3,
+        "player_id": "p4",
+        "attempts": 2,
+        "wait_seconds": 38.658,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは様子を見る。",
+        "parse_failed": false
+      },
+      {
+        "order": 20,
+        "round": 3,
+        "poll_position": 4,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.14,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは皆の意見を聞いてみたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 21,
+        "round": 3,
+        "poll_position": 5,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 2.934,
+        "speech_id": "e-20260830-010451-t009-c08-s004",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P6の発言に答えるため、夜の結果を知る必要があるため",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 22,
+        "round": 3,
+        "poll_position": 6,
+        "player_id": "p3",
+        "attempts": 2,
+        "wait_seconds": 4.925,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、様子を見ることにします。",
+        "parse_failed": false
+      },
+      {
+        "order": 23,
+        "round": 3,
+        "poll_position": 7,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 2.381,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは皆の意見を聞いてから判断したい",
+        "parse_failed": false
+      },
+      {
+        "order": 24,
+        "round": 4,
+        "poll_position": 1,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 1.54,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、まずは様子を見ることにします。",
+        "parse_failed": false
+      },
+      {
+        "order": 25,
+        "round": 4,
+        "poll_position": 2,
+        "player_id": "p2",
+        "attempts": 2,
+        "wait_seconds": 41.845,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないので、黙って様子を見ます。人狼との交換について、他の参加者の反応を観察します。",
+        "parse_failed": false
+      },
+      {
+        "order": 26,
+        "round": 4,
+        "poll_position": 3,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 2.703,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報がまだないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 27,
+        "round": 4,
+        "poll_position": 4,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 3.295,
+        "speech_id": "e-20260830-010451-t009-c08-s005",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P6の発言に答えるため、夜の結果を尋ねる。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 28,
+        "round": 4,
+        "poll_position": 5,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.48,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2との交換について、夜の結果がまだ分からないため、発言する価値はない",
+        "parse_failed": false
+      },
+      {
+        "order": 29,
+        "round": 4,
+        "poll_position": 6,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 3.613,
+        "speech_id": "e-20260830-010451-t009-c08-s006",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P2が誰と交換したのかが分かれば、人狼の特定に繋がるかもしれないため、確認する必要がある。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 30,
+        "round": 4,
+        "poll_position": 7,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 5.1,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報がまだ得られないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 31,
+        "round": 5,
+        "poll_position": 1,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 3.388,
+        "speech_id": "e-20260830-010451-t009-c08-s007",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P6が繰り返し質問しているので、P2の交換状況を確認したい。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 32,
+        "round": 5,
+        "poll_position": 2,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 4.013,
+        "speech_id": "e-20260830-010451-t009-c08-s008",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "P2が誰と交換したかを知るのが最優先事項です。交換相手が分かれば、人狼の可能性を絞り込めます。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 33,
+        "round": 5,
+        "poll_position": 3,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.771,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したのかが分からないため、まずは夜の結果をGMから知りたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 34,
+        "round": 5,
+        "poll_position": 4,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 2.571,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報がまだないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 35,
+        "round": 5,
+        "poll_position": 5,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.87,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰と交換したか分からないため、何も言わない",
+        "parse_failed": false
+      },
+      {
+        "order": 36,
+        "round": 5,
+        "poll_position": 6,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 3.027,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報は夜の結果から得られないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 37,
+        "round": 5,
+        "poll_position": 7,
+        "player_id": "p4",
+        "attempts": 2,
+        "wait_seconds": 44.849,
+        "speech_id": "e-20260830-010451-t009-c08-s009",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "全員がP2の交換について質問しているため、まずは夜の結果を確認し、P2の交換相手を把握したい。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 38,
+        "round": 5,
+        "poll_position": 8,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.146,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報がまだないため、発言は見送ります。",
+        "parse_failed": false
+      },
+      {
+        "order": 39,
+        "round": 6,
+        "poll_position": 1,
+        "player_id": "p1",
+        "attempts": 2,
+        "wait_seconds": 44.702,
+        "speech_id": "e-20260830-010451-t009-c08-s010",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の結果を教えてください。特に、P2が誰と交換したのかを知りたいです。",
+        "memo": "全員が同じように質問しているので、P2の交換状況が分かれば、人狼の可能性を考慮しやすくなります。",
+        "chars": 35,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 40,
+        "round": 6,
+        "poll_position": 2,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.712,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかという情報がまだありません。夜の結果を待つのが賢明です。",
+        "parse_failed": false
+      },
+      {
+        "order": 41,
+        "round": 6,
+        "poll_position": 3,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.693,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2との交換について、夜の結果がまだ出たっていないため、発言する内容を決定できません。",
+        "parse_failed": false
+      },
+      {
+        "order": 42,
+        "round": 6,
+        "poll_position": 4,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 2.458,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかに関する情報が不足しており、発言する価値はない",
+        "parse_failed": false
+      },
+      {
+        "order": 43,
+        "round": 6,
+        "poll_position": 5,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 3.311,
+        "spoke": false,
+        "skipped": false,
+        "memo": "P2が誰と交換したかを知るには、夜の結果を知る必要がある。しかし、誰も夜の結果を報告していないため、発言することはできな",
+        "parse_failed": false
+      },
+      {
+        "order": 44,
+        "round": 6,
+        "poll_position": 6,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.248,
+        "spoke": false,
+        "skipped": false,
+        "memo": "夜の結果がまだ分からないため、発言を見送ります。",
+        "parse_failed": false
+      }
+    ]
+  },
+  "pre_vote_answers": [
+    {
+      "player_id": "p1",
+      "suspect": "p2",
+      "confidence": 3,
+      "reason": "P2が夜に誰と交換したかを知りたいという発言が繰り返されているため、人狼である可能性が高い。",
+      "planned_vote": "p2",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.656
+    },
+    {
+      "player_id": "p2",
+      "suspect": "p1",
+      "confidence": 3,
+      "reason": "夜の結果を何度も尋ねているため、人狼である可能性が高い。",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.702
+    },
+    {
+      "player_id": "p3",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "夜の結果を何度も尋ねているため、何かを知っている可能性が高い。",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 2,
+      "wait_seconds": 3.831
+    },
+    {
+      "player_id": "p4",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "夜の結果を何度も尋ねているため、何か隠している可能性が高い",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 3,
+      "wait_seconds": 5.881
+    },
+    {
+      "player_id": "p5",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "夜の結果を何度も尋ねているため、何か隠している可能性が高い",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.811
+    },
+    {
+      "player_id": "p6",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "P1が継続的にP2の交換について質問しているため、怪盗である可能性が高い",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.211
+    },
+    {
+      "player_id": "p7",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "P1が繰り返しP2の交換について質問しているため、何か知っている可能性がある。",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.116
+    },
+    {
+      "player_id": "p8",
+      "suspect": "p1",
+      "confidence": 4,
+      "reason": "P1が夜の情報を繰り返し要求しており、何か隠している可能性が高い。",
+      "planned_vote": "p1",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.864
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p1",
+      "target": "p2",
+      "memo": "P2が夜に誰と交換したかを知りたいので、疑って歩く",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.788
+    },
+    {
+      "voter": "p2",
+      "target": "p1",
+      "memo": "人狼が複数いる可能性があるので、まずはP1を追放する",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.924
+    },
+    {
+      "voter": "p3",
+      "target": "p2",
+      "memo": "P2が交換した可能性を疑うため、追放候補として",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.909
+    },
+    {
+      "voter": "p4",
+      "target": "p8",
+      "memo": "P8はまだ発言がないので、とりあえず疑って見て",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.898
+    },
+    {
+      "voter": "p5",
+      "target": "p2",
+      "memo": "P2が交換した可能性を疑い、投了します",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.923
+    },
+    {
+      "voter": "p6",
+      "target": "p8",
+      "memo": "P2が怪盗なので、P8を追放するのが最善",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.966
+    },
+    {
+      "voter": "p7",
+      "target": "p8",
+      "memo": "P8はまだ発言がないので、まずは様子を見る",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.665
+    },
+    {
+      "voter": "p8",
+      "target": "p2",
+      "memo": "P2が交換した可能性を考慮し、疑念を表明する",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.656
+    }
+  ],
+  "result": {
+    "vote_tally": {
+      "p1": 1,
+      "p2": 4,
+      "p8": 3
+    },
+    "valid_vote_count": 8,
+    "abstain_count": 0,
+    "top_vote_count": 4,
+    "executed": [
+      "p2"
+    ],
+    "executed_count": 1,
+    "executed_roles": [
+      {
+        "player_id": "p2",
+        "initial_role": "thief",
+        "final_role": "thief"
+      }
+    ],
+    "no_execution_reason": null,
+    "winner": "werewolf",
+    "valid": true,
+    "invalid_reason": null
+  },
+  "timing": {
+    "started_at": "2026-08-30T17:55:05+09:00",
+    "ended_at": "2026-08-30T18:03:22+09:00",
+    "elapsed_seconds": 496.999,
+    "ai_wait_seconds": 496.964,
+    "inference_calls": 85,
+    "machine_name": ""
+  },
+  "failure": null
+}
