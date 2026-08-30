@@ -1,0 +1,885 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010837-t010-c13",
+  "trial_id": "e-20260830-010837-t010",
+  "experiment_id": "e-20260830-010837",
+  "case_index": 13,
+  "composition": "homogeneous",
+  "homogeneous_type": "ESTJ",
+  "status": "done",
+  "attempt": 1,
+  "versions": {
+    "rule_set_id": "onenight-8p-v0.7",
+    "rule_set_version": "0.7",
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "pool_id": "pool-001",
+    "pattern_id": "pt010"
+  },
+  "brain": {
+    "provider": "ollama",
+    "model": "gemma3:4b",
+    "endpoint_kind": "local",
+    "name": "ollama:gemma3:4b"
+  },
+  "config": {
+    "pool_id": "pool-001",
+    "pattern_set_id": "pattern-set-001",
+    "pattern_id": "pt010",
+    "rule_set_id": "onenight-8p-v0.7",
+    "trial_index": 10,
+    "trial_seed": 51,
+    "discussion": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "indicator_version": "v1",
+    "indicator_frozen_at": null,
+    "brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.8,
+      "timeout_seconds": 120,
+      "max_transport_retries": 3
+    },
+    "judge_brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.2,
+      "timeout_seconds": 180,
+      "max_transport_retries": 3
+    },
+    "machine_name": ""
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "person_id": "pe046",
+      "mbti": "ESTJ",
+      "age": 64,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p2",
+      "person_id": "pe013",
+      "mbti": "ESTJ",
+      "age": 24,
+      "gender": "male",
+      "initial_role": "seer",
+      "final_role": "seer"
+    },
+    {
+      "player_id": "p3",
+      "person_id": "pe064",
+      "mbti": "ESTJ",
+      "age": 32,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p4",
+      "person_id": "pe006",
+      "mbti": "ESTJ",
+      "age": 48,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p5",
+      "person_id": "pe097",
+      "mbti": "ESTJ",
+      "age": 31,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p6",
+      "person_id": "pe035",
+      "mbti": "ESTJ",
+      "age": 33,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p7",
+      "person_id": "pe036",
+      "mbti": "ESTJ",
+      "age": 36,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p8",
+      "person_id": "pe095",
+      "mbti": "ESTJ",
+      "age": 41,
+      "gender": "male",
+      "initial_role": "thief",
+      "final_role": "thief"
+    }
+  ],
+  "night_actions": [
+    {
+      "phase": "seer_inspection",
+      "actor": "p2",
+      "target": "p1",
+      "revealed_initial_role": "villager",
+      "reason": "高齢なので、人狼である可能性を疑いたい",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.622
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p3",
+      "partners": [
+        "p4"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p4",
+      "partners": [
+        "p3"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "thief_inspection",
+      "actor": "p8",
+      "target": "p1",
+      "revealed_initial_role": "villager",
+      "reason": "高齢なので、人狼ではない可能性が高い",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.805
+    },
+    {
+      "phase": "thief_swap",
+      "actor": "p8",
+      "target": "p1",
+      "swapped": false,
+      "actor_final_role": "thief",
+      "target_final_role": "villager",
+      "target_notified": false,
+      "reason": "情報が少ないため、とりあえず交換しない",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 0.912
+    }
+  ],
+  "pre_discussion_answers": [
+    {
+      "player_id": "p1",
+      "role_awareness": "私は村人であり、GMから何も情報が通知されていません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰も発言していないので、誰の役職もわかりません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.081
+    },
+    {
+      "player_id": "p2",
+      "role_awareness": "私は占い師であり、P1は村人であるという情報を持っている。",
+      "suspect": "unknown",
+      "confidence": 3,
+      "reason": "まだ情報がないため、特定の人物を疑う根拠はない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.412
+    },
+    {
+      "player_id": "p3",
+      "role_awareness": "私は人狼であり、P4が私の仲間である。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰かに疑われる根拠がないため、とりあえずunknownで",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.222
+    },
+    {
+      "player_id": "p4",
+      "role_awareness": "私は人狼であり、P3が私の仲間である。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "夜の情報がないため、誰が人狼か判断できない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.574
+    },
+    {
+      "player_id": "p5",
+      "role_awareness": "私は村人であり、特に誰を疑う根拠もありません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "夜の情報がないため、誰が人狼か判断できない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.894
+    },
+    {
+      "player_id": "p6",
+      "role_awareness": "私は村人の役職を持ち、GMから個別に通知された情報以外は何も知らない。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰も発言していないため、誰の役職も特定できない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.892
+    },
+    {
+      "player_id": "p7",
+      "role_awareness": "私は村人の役職を持っており、夜に得られた情報はありません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰も発言していないため、誰にでも疑いの対象となりえます",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.53
+    },
+    {
+      "player_id": "p8",
+      "role_awareness": "私は怪盗で、夜の結果ではP1が村人であることが分かった。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないので、誰にでも疑念がある",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 5.136
+    }
+  ],
+  "discussion": {
+    "rounds": 4,
+    "stop_reason": "all_pass",
+    "limits": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "events": [
+      {
+        "order": 1,
+        "round": 1,
+        "poll_position": 1,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 3.345,
+        "speech_id": "e-20260830-010837-t010-c13-s001",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認で、P1が村人だったという情報だけが頼りです。まずは全員の安全を祈ります。",
+        "memo": "現状の情報を整理し、議論の方向性を定めるため",
+        "chars": 41,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 2,
+        "round": 1,
+        "poll_position": 2,
+        "player_id": "p5",
+        "attempts": 2,
+        "wait_seconds": 5.645,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰も何も言っていないので、まずは状況を把握するために黙って様子を見ます。",
+        "parse_failed": false
+      },
+      {
+        "order": 3,
+        "round": 1,
+        "poll_position": 3,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.862,
+        "speech_id": "e-20260830-010837-t010-c13-s002",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "夜の確認でP1が村人だったとのこと、ありがとうございます。まずは誰が人狼か見当もつきません。まずは皆で冷静に議論していきましょう。",
+        "memo": "P1が村人であるという情報を共有し、議論を始めるため",
+        "chars": 65,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 4,
+        "round": 1,
+        "poll_position": 4,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 3.439,
+        "speech_id": "e-20260830-010837-t010-c13-s003",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さんの発言を聞いて、まずは誰か怪しい人がいないか確認させてください。特に、何かいつもと違う行動をとる人がいないか注意深く見ていきたいです。",
+        "memo": "まずは誰が人狼なのか、その兆候を探るため",
+        "chars": 70,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 5,
+        "round": 1,
+        "poll_position": 5,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 3.689,
+        "speech_id": "e-20260830-010837-t010-c13-s004",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、まずは落ち着いて議論しましょう。夜の確認で村人さんが多いということは、人狼の人数は少ない可能性が高いと考えられます。まずは誰が特に疑わしいか、冷静に意見を交換していきたいです。",
+        "memo": "人狼の人数を絞り込むための議論を促すため",
+        "chars": 92,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 6,
+        "round": 1,
+        "poll_position": 6,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 4.48,
+        "speech_id": "e-20260830-010837-t010-c13-s005",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さんの発言、ありがとうございます。まずは、夜の確認で村人が多いという情報から、人狼の数が少ない可能性が高いと判断します。しかし、夜の情報がないため、誰が人狼なのか断定はできません。まずは、発言の少ない人から、普段の生活で嘘をつかない人を探ってみましょう。",
+        "memo": "人狼の数が少ないと仮定し、疑わしい人物を特定するため、まずは発言の少ない人を観察する方針に決定。",
+        "chars": 128,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 7,
+        "round": 1,
+        "poll_position": 7,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 4.319,
+        "speech_id": "e-20260830-010837-t010-c13-s006",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、夜の確認でP1さんが村人だったとのこと、ありがとうございます。P1さんの落ち着いた様子から、普段から嘘をつかない人柄だと推測します。まずはP1さんから、夜の確認で他に気になる点があれば教えていただきたいです。",
+        "memo": "P1さんが村人であることから、彼女を警戒しつつ、情報収集のために話を聞くことを優先する",
+        "chars": 108,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 8,
+        "round": 1,
+        "poll_position": 8,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 4.509,
+        "speech_id": "e-20260830-010837-t010-c13-s007",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P1さん、夜の確認で村人さんが多いということは、人狼の数が少ない可能性が高いと仰られていますが、私もそう思います。まずは、発言が少ない方から、誰か特に警戒が必要な人がいないかを見ていきましょう。",
+        "memo": "人狼の数が少ない可能性を考慮し、発言の少ない人から警戒する必要性を確認するため",
+        "chars": 97,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 9,
+        "round": 2,
+        "poll_position": 1,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 5.66,
+        "speech_id": "e-20260830-010837-t010-c13-s008",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さんの発言、ありがとうございます。夜の確認でP1さんが村人だったという情報と、夜の確認で村人が多いという情報から、人狼の数が少ない可能性が高いと考えています。しかし、まだ情報が少ないため、誰が人狼なのか断定はできません。まずは、発言が少ない方、特にP1さんを中心に、普段の生活で嘘をつかない人柄だと見極められる人を探していきたいです。",
+        "memo": "人狼の数を減らすために、村人の情報を集め、慎重に判断する方針を示す",
+        "chars": 168,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 10,
+        "round": 2,
+        "poll_position": 2,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 2.965,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは皆で冷静に議論していきましょう。",
+        "parse_failed": false
+      },
+      {
+        "order": 11,
+        "round": 2,
+        "poll_position": 3,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.596,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。発言を控えます。",
+        "parse_failed": false
+      },
+      {
+        "order": 12,
+        "round": 2,
+        "poll_position": 4,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.66,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言が少ない人を中心に、普段の生活で嘘をつかない人柄だと見極",
+        "parse_failed": false
+      },
+      {
+        "order": 13,
+        "round": 2,
+        "poll_position": 5,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 3.137,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼か断定できません。まずは発言の少ない人を観察し、焦らずじっくり議論していきましょう。",
+        "parse_failed": false
+      },
+      {
+        "order": 14,
+        "round": 2,
+        "poll_position": 6,
+        "player_id": "p1",
+        "attempts": 2,
+        "wait_seconds": 37.257,
+        "spoke": false,
+        "skipped": false,
+        "memo": "情報が少ないため、まずは誰か特定の人物に焦点を当てずに、全体的な雰囲気で議論を進めたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 15,
+        "round": 2,
+        "poll_position": 7,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.775,
+        "spoke": false,
+        "skipped": false,
+        "memo": "情報が足りないため、積極的に発言するのではなく、他の参加者の発言を観察し、今後の議論の方向性を占みたい。",
+        "parse_failed": false
+      },
+      {
+        "order": 16,
+        "round": 2,
+        "poll_position": 8,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 5.024,
+        "speech_id": "e-20260830-010837-t010-c13-s009",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、夜の確認でP1さんが村人だったこと、そして村人が多いという情報から、人狼の数は少ない可能性が高いと考えています。しかし、まだ誰が人狼なのか全く分かりません。まずは、発言が少ない方、特にP1さんの行動をよく観察してみましょう。普段の生活で嘘をつかない人柄だと見極められるような点がないか、注意深く見ていきます。",
+        "memo": "人狼の数が少ない可能性を考慮し、P1さんの行動を観察することを明確にしました。",
+        "chars": 158,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 17,
+        "round": 3,
+        "poll_position": 1,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 4.424,
+        "speech_id": "e-20260830-010837-t010-c13-s010",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P1さん、夜の確認で村人さんが多いというのは、ご自身も村人だったことを示唆しているのでしょうか？もしそうなら、夜の確認で他の村人が多かったということは、人狼が少ない可能性を意識されているのかもしれません。",
+        "memo": "P1さんの発言を注意深く観察し、人狼が少ない可能性を意識しているか判断する。",
+        "chars": 102,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 18,
+        "round": 3,
+        "poll_position": 2,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 3.612,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言が少ない方から、普段の生活で嘘をつかない人柄だと見極めら",
+        "parse_failed": false
+      },
+      {
+        "order": 19,
+        "round": 3,
+        "poll_position": 3,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 5.786,
+        "speech_id": "e-20260830-010837-t010-c13-s011",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P1さん、P7さんの発言ありがとうございます。夜の確認で村人が多いというのは、P7さんご自身も村人だと示唆している可能性もあるかと思います。ただ、仮にP7さんも村人だと仮定しても、まだ人狼が誰なのか分かりません。まずは、P7さんの行動や発言に注意を払い、何か不自然な点がないか確認していきたいです。",
+        "memo": "P7さんの発言を注意深く観察し、発言の矛盾点がないか確認するため。",
+        "chars": 149,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 20,
+        "round": 3,
+        "poll_position": 4,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 3.566,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言が少ない人から、誰か特に警戒が必要な人がいないか見ていき",
+        "parse_failed": false
+      },
+      {
+        "order": 21,
+        "round": 3,
+        "poll_position": 5,
+        "player_id": "p2",
+        "attempts": 2,
+        "wait_seconds": 37.436,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が不足しており、発言するに値しない。冷静に状況を観察するにとどまる。",
+        "parse_failed": false
+      },
+      {
+        "order": 22,
+        "round": 3,
+        "poll_position": 6,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 5.546,
+        "speech_id": "e-20260830-010837-t010-c13-s012",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "P7さんの発言、興味深いです。P7さんが村人だと示唆しているのですね。夜の確認で村人が多いという状況と合わせて考えると、人狼の数が少ない可能性を意識しているのかもしれません。しかし、現時点では誰が人狼なのか全く分かりません。まずはP7さんの行動や発言に注意を払い、何か不自然な点がないか確認していきたいです。",
+        "memo": "P7さんの発言に注目し、人狼の可能性を考慮するために発言しました。",
+        "chars": 154,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 23,
+        "round": 4,
+        "poll_position": 1,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 3.804,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言の少ない人から、普段の生活で嘘をつかない人柄だと見極めら",
+        "parse_failed": false
+      },
+      {
+        "order": 24,
+        "round": 4,
+        "poll_position": 2,
+        "player_id": "p8",
+        "attempts": 3,
+        "wait_seconds": 77.859,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは発言が少ないP1さんを中心に、普段の生活で嘘をつかない人柄だと",
+        "parse_failed": false
+      },
+      {
+        "order": 25,
+        "round": 4,
+        "poll_position": 3,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.377,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が足りないため、発言は見送ります。冷静に議論を待ちたいと思います。",
+        "parse_failed": false
+      },
+      {
+        "order": 26,
+        "round": 4,
+        "poll_position": 4,
+        "player_id": "p2",
+        "attempts": 2,
+        "wait_seconds": 42.062,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは発言の少ない人から、普段の生活で嘘をつかない人柄だと見極められ",
+        "parse_failed": false
+      },
+      {
+        "order": 27,
+        "round": 4,
+        "poll_position": 5,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 3.625,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは発言の少ない人を観察し、普段の生活で嘘をつかない人柄だと見極め",
+        "parse_failed": false
+      },
+      {
+        "order": 28,
+        "round": 4,
+        "poll_position": 6,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 3.551,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか全く分かりません。発言を控えます。",
+        "parse_failed": false
+      },
+      {
+        "order": 29,
+        "round": 4,
+        "poll_position": 7,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 3.998,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言の少ない人から、普段の生活で嘘をつかない人を探ってみまし",
+        "parse_failed": false
+      },
+      {
+        "order": 30,
+        "round": 4,
+        "poll_position": 8,
+        "player_id": "p5",
+        "attempts": 2,
+        "wait_seconds": 42.851,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ情報が少ないため、誰が人狼なのか断定できません。まずは、発言が少ない人から、普段の生活で嘘をつかない人柄だと見極めら",
+        "parse_failed": false
+      }
+    ]
+  },
+  "pre_vote_answers": [
+    {
+      "player_id": "p1",
+      "suspect": "p2",
+      "confidence": 3,
+      "reason": "夜の確認で発言が最も少なく、冷静な姿勢が気になる。",
+      "planned_vote": "p2",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.903
+    },
+    {
+      "player_id": "p2",
+      "suspect": "p7",
+      "confidence": 3,
+      "reason": "P7の発言が少し過剰で、人狼を意識しているように見えるため。",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.452
+    },
+    {
+      "player_id": "p3",
+      "suspect": "p7",
+      "confidence": 4,
+      "reason": "P7の発言が過剰で、人狼を意識している可能性が高い",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.018
+    },
+    {
+      "player_id": "p4",
+      "suspect": "p7",
+      "confidence": 4,
+      "reason": "P7さんのP1さんへの発言と、夜の確認で村人が多いという状況を考慮すると、人狼を隠している可能性が考えられる。",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 2,
+      "wait_seconds": 6.391
+    },
+    {
+      "player_id": "p5",
+      "suspect": "p7",
+      "confidence": 4,
+      "reason": "P7さんが村人だと示唆していることと、発言内容から警戒が必要な可能性を考慮",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.876
+    },
+    {
+      "player_id": "p6",
+      "suspect": "p7",
+      "confidence": 3,
+      "reason": "P7さんのP1さんへの言及と、夜の状況への言及から、何か隠している可能性を疑う。",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.661
+    },
+    {
+      "player_id": "p7",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 7.683
+    },
+    {
+      "player_id": "p8",
+      "suspect": "p7",
+      "confidence": 3,
+      "reason": "P7さんの発言で人狼を意識している可能性に繋がるため",
+      "planned_vote": "p7",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.149
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p1",
+      "target": "p8",
+      "memo": "発言が少ないことと、P1さんが村人だと認識していることから、村人の可能性が高い",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.451
+    },
+    {
+      "voter": "p2",
+      "target": "p7",
+      "memo": "P7さんの発言から、人狼を警戒している可能性を考慮",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.412
+    },
+    {
+      "voter": "p3",
+      "target": "p2",
+      "memo": "発言が少ないため、人狼ではない可能性を疑う",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.123
+    },
+    {
+      "voter": "p4",
+      "target": "p2",
+      "memo": "夜の確認でP1が村人だったため、疑わしい",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.189
+    },
+    {
+      "voter": "p5",
+      "target": "p2",
+      "memo": "発言が少ないため、人狼ではない可能性を考慮",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.866
+    },
+    {
+      "voter": "p6",
+      "target": "p8",
+      "memo": "発言が少ないことと、夜の確認で村人さんが多いという情報を総合して、信頼できると判断した",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.473
+    },
+    {
+      "voter": "p7",
+      "target": "p2",
+      "memo": "発言が少なく、冷静な姿勢が安心感",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 3.032
+    },
+    {
+      "voter": "p8",
+      "target": "p2",
+      "memo": "発言が少ないため、人狼ではない可能性を疑う",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.985
+    }
+  ],
+  "result": {
+    "vote_tally": {
+      "p2": 5,
+      "p7": 1,
+      "p8": 2
+    },
+    "valid_vote_count": 8,
+    "abstain_count": 0,
+    "top_vote_count": 5,
+    "executed": [
+      "p2"
+    ],
+    "executed_count": 1,
+    "executed_roles": [
+      {
+        "player_id": "p2",
+        "initial_role": "seer",
+        "final_role": "seer"
+      }
+    ],
+    "no_execution_reason": null,
+    "winner": "werewolf",
+    "valid": true,
+    "invalid_reason": null
+  },
+  "timing": {
+    "started_at": "2026-08-30T15:27:10+09:00",
+    "ended_at": "2026-08-30T15:34:34+09:00",
+    "elapsed_seconds": 443.639,
+    "ai_wait_seconds": 443.603,
+    "inference_calls": 67,
+    "machine_name": ""
+  },
+  "failure": null
+}
