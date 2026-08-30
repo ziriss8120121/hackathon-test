@@ -1,0 +1,9 @@
+experiment_id,trial_id,case_id,composition,homogeneous_type,player_id,person_id,age,gender,mbti,initial_role,final_role,speech_count,pass_count,skip_count,total_chars,avg_chars,pre_suspect,pre_confidence,final_suspect,final_confidence,planned_vote,actual_vote,abstained,suspect_changed,confidence_delta,pre_correct,final_correct,vote_correct,plan_vote_match,executed,win,decided_from_unknown,suspect_vote_match,corrected,deteriorated
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p1,pe046,64,female,ESTP,villager,villager,2,1,0,168,84.0,unknown,1,p5,4,p5,p5,false,,3,,0,0,1,0,0,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p2,pe013,24,male,ESFJ,seer,seer,2,1,0,121,60.5,unknown,3,p5,4,p5,p5,false,,1,,0,0,1,0,0,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p3,pe064,32,female,ENTP,werewolf,werewolf,2,1,0,138,69.0,unknown,2,p5,4,p5,p5,false,,2,,0,0,1,0,1,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p4,pe006,48,female,ESTP,werewolf,werewolf,2,1,0,191,95.5,unknown,2,p5,4,p5,p5,false,,2,,0,0,1,0,1,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p5,pe097,31,female,ESFJ,villager,villager,2,1,0,189,94.5,unknown,1,,,,p8,false,,,,,0,,1,0,0,,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p6,pe035,33,female,ESFP,villager,villager,2,1,0,176,88.0,unknown,2,p5,4,p5,p5,false,,2,,0,0,1,0,0,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p7,pe036,36,male,ESTJ,villager,villager,2,1,0,161,80.5,unknown,1,p5,4,p5,p5,false,,3,,0,0,1,0,0,1,1,,
+e-20260830-010451,e-20260830-010451-t010,e-20260830-010451-t010-c00,mixed,,p8,pe095,41,male,INTP,thief,thief,2,1,0,139,69.5,unknown,2,p5,4,p5,p5,false,,2,,0,0,1,0,0,1,1,,
