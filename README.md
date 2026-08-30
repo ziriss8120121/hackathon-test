@@ -20,7 +20,7 @@ MBTI×人狼のAIエージェントシミュレーションで検証しました
 
 - GitHubリポジトリ：このページ
 - 説明資料：[MBTI×人狼ゲームシミュレーション レポート（PDF）](https://www.dropbox.com/scl/fi/kyu31bh3s9yq4meoekhbi/0125_M-_mbti-werewolf_Report.pdf?rlkey=mnly0mbx36h3t30yyvuwd1z74&st=a2pmahg8&dl=0)
-- デモ動画：`【ここにYouTube限定公開URLを入力】`
+- デモ動画：[混合構成とESFP同質構成の比較デモ](https://youtu.be/MSzocO34WuM)
 
 ## デモの見どころ
 
@@ -59,9 +59,9 @@ MBTI×人狼のAIエージェントシミュレーションで検証しました
 
 | ページ | URL |
 |---|---|
-| 実験結果一覧 | https://ziriss8120121.github.io/hackathon-test/ |
-| 操作画面 | https://ziriss8120121.github.io/hackathon-test/simulator.html |
-| 最新の試合 | https://ziriss8120121.github.io/hackathon-test/runs/latest.html |
+| 実験結果一覧 | https://ziriss8120121.github.io/mbti-werewolf/ |
+| 操作画面 | https://ziriss8120121.github.io/mbti-werewolf/simulator.html |
+| 最新の試合 | https://ziriss8120121.github.io/mbti-werewolf/runs/latest.html |
 
 `python -m mbti_werewolf pages` で静的サイトを生成します。
 
