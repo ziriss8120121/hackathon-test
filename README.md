@@ -21,6 +21,7 @@ MBTI×人狼のAIエージェントシミュレーションで検証しました
 - GitHubリポジトリ：このページ
 - 説明資料：[MBTI×人狼ゲームシミュレーション レポート（PDF）](https://www.dropbox.com/scl/fi/kyu31bh3s9yq4meoekhbi/0125_M-_mbti-werewolf_Report.pdf?rlkey=mnly0mbx36h3t30yyvuwd1z74&st=a2pmahg8&dl=0)
 - デモ動画：[混合構成とESFP同質構成の比較デモ](https://youtu.be/MSzocO34WuM)
+  - 高画質版はこちら：[混合構成とESFP同質構成の比較デモ（高画質版）](https://youtu.be/0vCyT6dDqQ)
 
 ## デモの見どころ
 
@@ -66,6 +67,14 @@ MBTI×人狼のAIエージェントシミュレーションで検証しました
 ### RQ2：MBTIタイプ構成によって疑いのまとまり方が異なった
 
 ![MBTIタイプ別の最終的な疑いの分散度](docs/submission/assets/rq2-suspicion-patterns.png)
+
+### デモ：混合構成とESFP同質構成の議論を同時に比較
+
+![混合構成とESFP同質構成のチャット比較](docs/submission/assets/demo-chat-comparison.png)
+
+### デモ：試合後に集団と各プレイヤーの判断結果を確認
+
+![混合構成とESFP同質構成の判断結果比較](docs/submission/assets/demo-result-comparison.png)
 
 ## 結果を見る
 
