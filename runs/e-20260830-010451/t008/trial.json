@@ -1,79 +1,79 @@
 {
   "schema_version": "2",
-  "trial_id": "e-20260830-010451-t007",
+  "trial_id": "e-20260830-010451-t008",
   "experiment_id": "e-20260830-010451",
-  "trial_index": 7,
-  "trial_seed": 48,
+  "trial_index": 8,
+  "trial_seed": 49,
   "pool_id": "pool-001",
   "pattern_set_id": "pattern-set-001",
-  "pattern_id": "pt007",
+  "pattern_id": "pt008",
   "rule_set_id": "onenight-8p-v0.7",
   "rule_set_version": "0.7",
   "fixed_conditions": {
     "seats": [
       {
         "player_id": "p1",
-        "person_id": "pe028",
-        "age": 53,
+        "person_id": "pe100",
+        "age": 43,
+        "gender": "male",
+        "pool_mbti": "ENFP",
+        "initial_role": "villager"
+      },
+      {
+        "player_id": "p2",
+        "person_id": "pe089",
+        "age": 38,
         "gender": "female",
         "pool_mbti": "ISFP",
         "initial_role": "villager"
       },
       {
-        "player_id": "p2",
-        "person_id": "pe018",
-        "age": 58,
-        "gender": "male",
-        "pool_mbti": "ENTP",
-        "initial_role": "werewolf"
-      },
-      {
         "player_id": "p3",
-        "person_id": "pe067",
-        "age": 25,
+        "person_id": "pe001",
+        "age": 54,
         "gender": "female",
-        "pool_mbti": "ISTJ",
-        "initial_role": "thief"
+        "pool_mbti": "INFP",
+        "initial_role": "villager"
       },
       {
         "player_id": "p4",
-        "person_id": "pe037",
-        "age": 48,
-        "gender": "female",
-        "pool_mbti": "ESFJ",
-        "initial_role": "seer"
+        "person_id": "pe004",
+        "age": 35,
+        "gender": "male",
+        "pool_mbti": "ISTJ",
+        "initial_role": "villager"
       },
       {
         "player_id": "p5",
-        "person_id": "pe070",
-        "age": 54,
-        "gender": "female",
-        "pool_mbti": "ESTJ",
-        "initial_role": "villager"
-      },
-      {
-        "player_id": "p6",
-        "person_id": "pe058",
-        "age": 19,
-        "gender": "female",
+        "person_id": "pe054",
+        "age": 17,
+        "gender": "male",
         "pool_mbti": "ESFP",
-        "initial_role": "villager"
-      },
-      {
-        "player_id": "p7",
-        "person_id": "pe085",
-        "age": 64,
-        "gender": "female",
-        "pool_mbti": "ISFJ",
         "initial_role": "werewolf"
       },
       {
-        "player_id": "p8",
-        "person_id": "pe041",
-        "age": 40,
+        "player_id": "p6",
+        "person_id": "pe043",
+        "age": 51,
+        "gender": "male",
+        "pool_mbti": "ISFJ",
+        "initial_role": "thief"
+      },
+      {
+        "player_id": "p7",
+        "person_id": "pe022",
+        "age": 63,
         "gender": "female",
         "pool_mbti": "ESTJ",
-        "initial_role": "villager"
+        "initial_role": "seer"
+      },
+      {
+        "player_id": "p8",
+        "person_id": "pe088",
+        "age": 25,
+        "gender": "female",
+        "pool_mbti": "ESTJ",
+        "initial_role": "werewolf"
       }
     ],
     "role_assignment_mode": "seeded_random",
@@ -98,103 +98,103 @@
   },
   "cases": [
     {
-      "case_id": "e-20260830-010451-t007-c00",
+      "case_id": "e-20260830-010451-t008-c00",
       "composition": "mixed",
       "homogeneous_type": null,
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c01",
+      "case_id": "e-20260830-010451-t008-c01",
       "composition": "homogeneous",
       "homogeneous_type": "ISTJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c02",
+      "case_id": "e-20260830-010451-t008-c02",
       "composition": "homogeneous",
       "homogeneous_type": "ISFJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c03",
+      "case_id": "e-20260830-010451-t008-c03",
       "composition": "homogeneous",
       "homogeneous_type": "INFJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c04",
+      "case_id": "e-20260830-010451-t008-c04",
       "composition": "homogeneous",
       "homogeneous_type": "INTJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c05",
+      "case_id": "e-20260830-010451-t008-c05",
       "composition": "homogeneous",
       "homogeneous_type": "ISTP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c06",
+      "case_id": "e-20260830-010451-t008-c06",
       "composition": "homogeneous",
       "homogeneous_type": "ISFP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c07",
+      "case_id": "e-20260830-010451-t008-c07",
       "composition": "homogeneous",
       "homogeneous_type": "INFP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c08",
+      "case_id": "e-20260830-010451-t008-c08",
       "composition": "homogeneous",
       "homogeneous_type": "INTP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c09",
+      "case_id": "e-20260830-010451-t008-c09",
       "composition": "homogeneous",
       "homogeneous_type": "ESTP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c10",
+      "case_id": "e-20260830-010451-t008-c10",
       "composition": "homogeneous",
       "homogeneous_type": "ESFP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c11",
+      "case_id": "e-20260830-010451-t008-c11",
       "composition": "homogeneous",
       "homogeneous_type": "ENFP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c12",
+      "case_id": "e-20260830-010451-t008-c12",
       "composition": "homogeneous",
       "homogeneous_type": "ENTP",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c13",
+      "case_id": "e-20260830-010451-t008-c13",
       "composition": "homogeneous",
       "homogeneous_type": "ESTJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c14",
+      "case_id": "e-20260830-010451-t008-c14",
       "composition": "homogeneous",
       "homogeneous_type": "ESFJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c15",
+      "case_id": "e-20260830-010451-t008-c15",
       "composition": "homogeneous",
       "homogeneous_type": "ENFJ",
       "status": "done"
     },
     {
-      "case_id": "e-20260830-010451-t007-c16",
+      "case_id": "e-20260830-010451-t008-c16",
       "composition": "homogeneous",
       "homogeneous_type": "ENTJ",
       "status": "done"
