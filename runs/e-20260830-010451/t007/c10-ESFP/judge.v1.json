@@ -1,0 +1,538 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010451-t007-c10",
+  "judge_criteria_version": "v1",
+  "judge_brain": {
+    "provider": "claude-code",
+    "model": "sonnet",
+    "endpoint_kind": "subscription_cli",
+    "name": "claude-code:sonnet"
+  },
+  "judge_batch_size": 8,
+  "evaluated_at": "2026-08-30T21:45:10+09:00",
+  "speeches": [
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s001",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s002",
+      "labels": [
+        "other"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s003",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s004",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s005",
+      "labels": [
+        "claim",
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s006",
+      "labels": [
+        "claim",
+        "suspect"
+      ],
+      "mentions": [
+        "p2"
+      ],
+      "stances": [
+        {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        }
+      ],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s007",
+      "labels": [
+        "other"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s008",
+      "labels": [
+        "claim",
+        "question",
+        "intent"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s009",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s010",
+      "labels": [
+        "claim",
+        "suspect"
+      ],
+      "mentions": [
+        "p2"
+      ],
+      "stances": [
+        {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        }
+      ],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s011",
+      "labels": [
+        "question",
+        "intent"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s012",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s013",
+      "labels": [
+        "question",
+        "suspect"
+      ],
+      "mentions": [
+        "p7"
+      ],
+      "stances": [
+        {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        }
+      ],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s014",
+      "labels": [
+        "question"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s015",
+      "labels": [
+        "question",
+        "hypothesis"
+      ],
+      "mentions": [],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t007-c10-s016",
+      "labels": [
+        "claim",
+        "suspect",
+        "question"
+      ],
+      "mentions": [
+        "p2"
+      ],
+      "stances": [
+        {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        }
+      ],
+      "parse_failed": false
+    }
+  ],
+  "stance_series": [
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s001",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s002",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s003",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s004",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s005",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s006",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s007",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s008",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s009",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s010",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s011",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s012",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p2": 1
+      },
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s013",
+      "current_stances": {
+        "p1": null,
+        "p2": {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        },
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p7": 1,
+        "p2": 1
+      },
+      "entropy": 0.333333
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s014",
+      "current_stances": {
+        "p1": null,
+        "p2": {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        },
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p7": 1,
+        "p2": 1
+      },
+      "entropy": 0.333333
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s015",
+      "current_stances": {
+        "p1": null,
+        "p2": {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        },
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p7": 1,
+        "p2": 1
+      },
+      "entropy": 0.333333
+    },
+    {
+      "at_speech_id": "e-20260830-010451-t007-c10-s016",
+      "current_stances": {
+        "p1": null,
+        "p2": {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        },
+        "p3": null,
+        "p4": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p5": null,
+        "p6": null,
+        "p7": {
+          "target": "p2",
+          "direction": "suspect",
+          "strength": 3
+        },
+        "p8": null
+      },
+      "suspicion_distribution": {
+        "p7": 1,
+        "p2": 2
+      },
+      "entropy": 0.306099
+    }
+  ],
+  "timing": {
+    "elapsed_seconds": 22.119,
+    "ai_wait_seconds": 22.116,
+    "inference_calls": 2
+  }
+}

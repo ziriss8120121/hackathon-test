@@ -3,23 +3,20 @@
   "case_id": "e-20260830-010451-t001-c15",
   "judge_criteria_version": "v1",
   "judge_brain": {
-    "provider": "ollama",
-    "model": "gemma3:4b",
-    "endpoint_kind": "local",
-    "name": "ollama:gemma3:4b"
+    "provider": "claude-code",
+    "model": "sonnet",
+    "endpoint_kind": "subscription_cli",
+    "name": "claude-code:sonnet"
   },
   "judge_batch_size": 8,
-  "evaluated_at": "2026-08-30T18:30:29+09:00",
+  "evaluated_at": "2026-08-30T21:30:30+09:00",
   "speeches": [
     {
       "speech_id": "e-20260830-010451-t001-c15-s001",
       "labels": [
-        "claim",
-        "other"
+        "claim"
       ],
-      "mentions": [
-        "p1"
-      ],
+      "mentions": [],
       "stances": [],
       "parse_failed": false
     },
@@ -28,32 +25,26 @@
       "labels": [
         "other"
       ],
-      "mentions": [
-        "p2"
-      ],
+      "mentions": [],
       "stances": [],
       "parse_failed": false
     },
     {
       "speech_id": "e-20260830-010451-t001-c15-s003",
       "labels": [
-        "claim",
-        "other"
+        "claim"
       ],
-      "mentions": [
-        "p8"
-      ],
+      "mentions": [],
       "stances": [],
       "parse_failed": false
     },
     {
       "speech_id": "e-20260830-010451-t001-c15-s004",
       "labels": [
-        "question",
-        "other"
+        "claim",
+        "question"
       ],
       "mentions": [
-        "p7",
         "p8"
       ],
       "stances": [],
@@ -62,8 +53,8 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s005",
       "labels": [
-        "question",
-        "other"
+        "intent",
+        "question"
       ],
       "mentions": [
         "p8"
@@ -74,11 +65,11 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s006",
       "labels": [
-        "other"
+        "claim",
+        "hypothesis"
       ],
       "mentions": [
-        "p7",
-        "p8"
+        "p7"
       ],
       "stances": [],
       "parse_failed": false
@@ -86,9 +77,8 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s007",
       "labels": [
-        "suspect",
         "question",
-        "other"
+        "hypothesis"
       ],
       "mentions": [
         "p7",
@@ -100,24 +90,36 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s008",
       "labels": [
+        "agree",
         "hypothesis",
-        "other"
+        "intent"
       ],
       "mentions": [
         "p7",
         "p8"
       ],
-      "stances": [],
+      "stances": [
+        {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 1
+        },
+        {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        }
+      ],
       "parse_failed": false
     },
     {
       "speech_id": "e-20260830-010451-t001-c15-s009",
       "labels": [
-        "hypothesis",
-        "suspect"
+        "agree",
+        "suspect",
+        "hypothesis"
       ],
       "mentions": [
-        "p6",
         "p7",
         "p8"
       ],
@@ -130,7 +132,7 @@
         {
           "target": "p8",
           "direction": "suspect",
-          "strength": 1
+          "strength": 2
         }
       ],
       "parse_failed": false
@@ -139,10 +141,9 @@
       "speech_id": "e-20260830-010451-t001-c15-s010",
       "labels": [
         "question",
-        "suspect"
+        "hypothesis"
       ],
       "mentions": [
-        "p6",
         "p7",
         "p8"
       ],
@@ -150,7 +151,7 @@
         {
           "target": "p7",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         {
           "target": "p8",
@@ -163,11 +164,12 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s011",
       "labels": [
+        "agree",
         "suspect",
-        "hypothesis"
+        "hypothesis",
+        "intent"
       ],
       "mentions": [
-        "p5",
         "p6",
         "p7",
         "p8"
@@ -176,7 +178,33 @@
         {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 2
+        },
+        {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        }
+      ],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010451-t001-c15-s012",
+      "labels": [
+        "agree",
+        "suspect",
+        "question"
+      ],
+      "mentions": [
+        "p5",
+        "p7",
+        "p8"
+      ],
+      "stances": [
+        {
+          "target": "p7",
+          "direction": "suspect",
+          "strength": 2
         },
         {
           "target": "p8",
@@ -187,13 +215,12 @@
       "parse_failed": false
     },
     {
-      "speech_id": "e-20260830-010451-t001-c15-s012",
+      "speech_id": "e-20260830-010451-t001-c15-s013",
       "labels": [
+        "claim",
         "suspect"
       ],
       "mentions": [
-        "p3",
-        "p5",
         "p7",
         "p8"
       ],
@@ -201,27 +228,7 @@
         {
           "target": "p7",
           "direction": "suspect",
-          "strength": 2
-        }
-      ],
-      "parse_failed": false
-    },
-    {
-      "speech_id": "e-20260830-010451-t001-c15-s013",
-      "labels": [
-        "question",
-        "claim"
-      ],
-      "mentions": [
-        "p1",
-        "p7",
-        "p8"
-      ],
-      "stances": [
-        {
-          "target": "p7",
-          "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         {
           "target": "p8",
@@ -234,17 +241,17 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s014",
       "labels": [
-        "question"
+        "question",
+        "suspect"
       ],
       "mentions": [
-        "p8",
         "p7"
       ],
       "stances": [
         {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 1
         }
       ],
       "parse_failed": false
@@ -252,24 +259,17 @@
     {
       "speech_id": "e-20260830-010451-t001-c15-s015",
       "labels": [
-        "claim",
-        "hypothesis"
+        "defend"
       ],
       "mentions": [
-        "p5",
         "p7",
         "p2"
       ],
       "stances": [
         {
           "target": "p7",
-          "direction": "suspect",
-          "strength": 3
-        },
-        {
-          "target": "p2",
-          "direction": "suspect",
-          "strength": 1
+          "direction": "defend",
+          "strength": 2
         }
       ],
       "parse_failed": false
@@ -384,7 +384,11 @@
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s008",
       "current_stances": {
-        "p1": null,
+        "p1": {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        },
         "p2": null,
         "p3": null,
         "p4": null,
@@ -393,19 +397,25 @@
         "p7": null,
         "p8": null
       },
-      "suspicion_distribution": {},
+      "suspicion_distribution": {
+        "p8": 1
+      },
       "entropy": 0.0
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s009",
       "current_stances": {
-        "p1": null,
+        "p1": {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        },
         "p2": null,
         "p3": null,
         "p4": null,
         "p5": null,
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
           "strength": 2
         },
@@ -413,63 +423,76 @@
         "p8": null
       },
       "suspicion_distribution": {
-        "p7": 1
+        "p8": 2
       },
       "entropy": 0.0
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s010",
       "current_stances": {
-        "p1": null,
+        "p1": {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        },
         "p2": null,
         "p3": null,
         "p4": null,
         "p5": null,
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": null
       },
       "suspicion_distribution": {
-        "p7": 1
+        "p8": 2
       },
       "entropy": 0.0
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s011",
       "current_stances": {
-        "p1": null,
+        "p1": {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        },
         "p2": null,
         "p3": null,
         "p4": null,
         "p5": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 2
         },
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": null
       },
       "suspicion_distribution": {
-        "p7": 2
+        "p8": 2,
+        "p7": 1
       },
-      "entropy": 0.0
+      "entropy": 0.306099
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s012",
       "current_stances": {
-        "p1": null,
+        "p1": {
+          "target": "p8",
+          "direction": "suspect",
+          "strength": 1
+        },
         "p2": null,
         "p3": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
           "strength": 2
         },
@@ -477,32 +500,33 @@
         "p5": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 2
         },
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": null
       },
       "suspicion_distribution": {
-        "p7": 3
+        "p8": 3,
+        "p7": 1
       },
-      "entropy": 0.0
+      "entropy": 0.270426
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s013",
       "current_stances": {
         "p1": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p2": null,
         "p3": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
           "strength": 2
         },
@@ -510,32 +534,33 @@
         "p5": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 2
         },
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": null
       },
       "suspicion_distribution": {
-        "p7": 4
+        "p8": 3,
+        "p7": 1
       },
-      "entropy": 0.0
+      "entropy": 0.270426
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s014",
       "current_stances": {
         "p1": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p2": null,
         "p3": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
           "strength": 2
         },
@@ -543,66 +568,68 @@
         "p5": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 2
         },
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 1
         }
       },
       "suspicion_distribution": {
-        "p7": 5
+        "p8": 3,
+        "p7": 2
       },
-      "entropy": 0.0
+      "entropy": 0.32365
     },
     {
       "at_speech_id": "e-20260830-010451-t001-c15-s015",
       "current_stances": {
         "p1": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p2": null,
         "p3": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
           "strength": 2
         },
         "p4": null,
         "p5": {
           "target": "p7",
-          "direction": "suspect",
-          "strength": 3
+          "direction": "defend",
+          "strength": 2
         },
         "p6": {
-          "target": "p7",
+          "target": "p8",
           "direction": "suspect",
-          "strength": 2
+          "strength": 1
         },
         "p7": null,
         "p8": {
           "target": "p7",
           "direction": "suspect",
-          "strength": 3
+          "strength": 1
         }
       },
       "suspicion_distribution": {
-        "p7": 5
+        "p8": 3,
+        "p7": 1
       },
-      "entropy": 0.0
+      "entropy": 0.270426
     }
   ],
   "timing": {
-    "elapsed_seconds": 127.819,
-    "ai_wait_seconds": 127.817,
+    "elapsed_seconds": 58.891,
+    "ai_wait_seconds": 58.888,
     "inference_calls": 2
   }
 }
