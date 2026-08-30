@@ -1,0 +1,17 @@
+{
+  "case_id": "e-20260830-010837-t003-c00",
+  "trial_id": "e-20260830-010837-t003",
+  "experiment_id": "e-20260830-010837",
+  "composition": "mixed",
+  "homogeneous_type": null,
+  "status": "done",
+  "phase": "finished",
+  "round": 3,
+  "max_rounds": 6,
+  "speech_count": 14,
+  "inference_calls": 61,
+  "attempt": 1,
+  "started_at": "2026-08-30T03:40:56+09:00",
+  "updated_at": "2026-08-30T03:44:19+09:00",
+  "error": null
+}

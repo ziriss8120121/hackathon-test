@@ -1,0 +1,17 @@
+{
+  "case_id": "e-20260830-010837-t003-c06",
+  "trial_id": "e-20260830-010837-t003",
+  "experiment_id": "e-20260830-010837",
+  "composition": "homogeneous",
+  "homogeneous_type": "ISFP",
+  "status": "done",
+  "phase": "finished",
+  "round": 6,
+  "max_rounds": 6,
+  "speech_count": 22,
+  "inference_calls": 73,
+  "attempt": 1,
+  "started_at": "2026-08-30T04:05:55+09:00",
+  "updated_at": "2026-08-30T04:11:31+09:00",
+  "error": null
+}

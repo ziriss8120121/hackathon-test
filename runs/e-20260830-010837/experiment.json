@@ -1,0 +1,56 @@
+{
+  "schema_version": "2",
+  "experiment_id": "e-20260830-010837",
+  "config": {
+    "pool_id": "pool-001",
+    "pattern_set_id": "pattern-set-001",
+    "rule_set_id": "onenight-8p-v0.7",
+    "trial_count": 10,
+    "trial_range": null,
+    "base_seed": 42,
+    "pattern_selection_mode": "seeded_random_without_replacement",
+    "discussion": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "judge_batch_size": 8,
+    "indicator_version": "v1",
+    "indicator_frozen_at": null,
+    "brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.8,
+      "timeout_seconds": 120,
+      "max_transport_retries": 3
+    },
+    "judge_brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.2,
+      "timeout_seconds": 180,
+      "max_transport_retries": 3
+    },
+    "machine_name": ""
+  },
+  "rule_set_id": "onenight-8p-v0.7",
+  "rule_set_version": "0.7",
+  "trial_ids": [
+    "e-20260830-010837-t001",
+    "e-20260830-010837-t002",
+    "e-20260830-010837-t003",
+    "e-20260830-010837-t004",
+    "e-20260830-010837-t005",
+    "e-20260830-010837-t006",
+    "e-20260830-010837-t007",
+    "e-20260830-010837-t008",
+    "e-20260830-010837-t009",
+    "e-20260830-010837-t010"
+  ],
+  "case_count": 170
+}

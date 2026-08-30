@@ -1,0 +1,748 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010837-t003-c07",
+  "trial_id": "e-20260830-010837-t003",
+  "experiment_id": "e-20260830-010837",
+  "case_index": 7,
+  "composition": "homogeneous",
+  "homogeneous_type": "INFP",
+  "status": "done",
+  "attempt": 1,
+  "versions": {
+    "rule_set_id": "onenight-8p-v0.7",
+    "rule_set_version": "0.7",
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "pool_id": "pool-001",
+    "pattern_id": "pt003"
+  },
+  "brain": {
+    "provider": "ollama",
+    "model": "gemma3:4b",
+    "endpoint_kind": "local",
+    "name": "ollama:gemma3:4b"
+  },
+  "config": {
+    "pool_id": "pool-001",
+    "pattern_set_id": "pattern-set-001",
+    "pattern_id": "pt003",
+    "rule_set_id": "onenight-8p-v0.7",
+    "trial_index": 3,
+    "trial_seed": 44,
+    "discussion": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "persona_prompt_version": "v2",
+    "judge_criteria_version": "v1",
+    "indicator_version": "v1",
+    "indicator_frozen_at": null,
+    "brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.8,
+      "timeout_seconds": 120,
+      "max_transport_retries": 3
+    },
+    "judge_brain": {
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.2,
+      "timeout_seconds": 180,
+      "max_transport_retries": 3
+    },
+    "machine_name": ""
+  },
+  "players": [
+    {
+      "player_id": "p1",
+      "person_id": "pe060",
+      "mbti": "INFP",
+      "age": 39,
+      "gender": "male",
+      "initial_role": "seer",
+      "final_role": "seer"
+    },
+    {
+      "player_id": "p2",
+      "person_id": "pe020",
+      "mbti": "INFP",
+      "age": 18,
+      "gender": "male",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p3",
+      "person_id": "pe009",
+      "mbti": "INFP",
+      "age": 48,
+      "gender": "female",
+      "initial_role": "thief",
+      "final_role": "thief"
+    },
+    {
+      "player_id": "p4",
+      "person_id": "pe083",
+      "mbti": "INFP",
+      "age": 27,
+      "gender": "female",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p5",
+      "person_id": "pe056",
+      "mbti": "INFP",
+      "age": 49,
+      "gender": "male",
+      "initial_role": "werewolf",
+      "final_role": "werewolf"
+    },
+    {
+      "player_id": "p6",
+      "person_id": "pe011",
+      "mbti": "INFP",
+      "age": 52,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p7",
+      "person_id": "pe046",
+      "mbti": "INFP",
+      "age": 64,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    },
+    {
+      "player_id": "p8",
+      "person_id": "pe022",
+      "mbti": "INFP",
+      "age": 63,
+      "gender": "female",
+      "initial_role": "villager",
+      "final_role": "villager"
+    }
+  ],
+  "night_actions": [
+    {
+      "phase": "seer_inspection",
+      "actor": "p1",
+      "target": "p5",
+      "revealed_initial_role": "werewolf",
+      "reason": "年齢と性別から、人狼である可能性を考慮",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 1.427
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p4",
+      "partners": [
+        "p5"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "werewolf_recognition",
+      "actor": "p5",
+      "partners": [
+        "p4"
+      ],
+      "requires_inference": false
+    },
+    {
+      "phase": "thief_inspection",
+      "actor": "p3",
+      "target": "p1",
+      "revealed_initial_role": "seer",
+      "reason": "男性で年齢が比較的若いので、人狼ではない可能性を疑う",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.432
+    },
+    {
+      "phase": "thief_swap",
+      "actor": "p3",
+      "target": "p1",
+      "swapped": false,
+      "actor_final_role": "thief",
+      "target_final_role": "seer",
+      "target_notified": false,
+      "reason": "占い師の確認で情報収集が難しいため、現状維持を選択",
+      "ability_used": true,
+      "skip_reason": null,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 0.982
+    }
+  ],
+  "pre_discussion_answers": [
+    {
+      "player_id": "p1",
+      "role_awareness": "私は占い師であり、夜にP5が人狼であることが分かった。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ情報が少ないため、誰かに疑念を抱くのは時期尚早",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.384
+    },
+    {
+      "player_id": "p2",
+      "role_awareness": "私は村人の役職を持っており、夜に得られる情報はありません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰か特定の人物を疑う根拠がないため、とりあえずunknownを選択します。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.364
+    },
+    {
+      "player_id": "p3",
+      "role_awareness": "私は怪盗であり、占い師が1人いることを知っています。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないので、誰が人狼か特定できないため",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.117
+    },
+    {
+      "player_id": "p4",
+      "role_awareness": "私は人狼であり、P5とが仲間です。GMから個別に通知された情報のみが私の役職に関する唯一の情報です。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰にも根拠がないので、皆を疑うことはできません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.009
+    },
+    {
+      "player_id": "p5",
+      "role_awareness": "私は人狼であり、P4と仲間です。GMから通知された情報のみに基づいて行動します。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないので、誰か特定するのは時期尚早です。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.572
+    },
+    {
+      "player_id": "p6",
+      "role_awareness": "私は村人であり、GMから別々に役職が通知されたのみで、他の参加者の情報や夜の結果は一切不明である。",
+      "suspect": "unknown",
+      "confidence": 2,
+      "reason": "まだ誰も発言していないため、疑う対象を特定できない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.268
+    },
+    {
+      "player_id": "p7",
+      "role_awareness": "私は村人であり、他の参加者の役職や夜の結果は一切知らない。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰も発言していないため、誰の役職も分からない",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 4.076
+    },
+    {
+      "player_id": "p8",
+      "role_awareness": "私は村人であり、GMから特別な情報が通知されていません。",
+      "suspect": "unknown",
+      "confidence": 1,
+      "reason": "まだ誰も発言していないので、誰にも疑う根拠がありません。",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.301
+    }
+  ],
+  "discussion": {
+    "rounds": 3,
+    "stop_reason": "all_pass",
+    "limits": {
+      "max_rounds": 6,
+      "max_speeches": 40,
+      "max_total_chars": 6000,
+      "max_speech_chars": 200,
+      "max_consecutive_speeches": 2,
+      "stop_on_all_pass": true
+    },
+    "events": [
+      {
+        "order": 1,
+        "round": 1,
+        "poll_position": 1,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 3.218,
+        "speech_id": "e-20260830-010837-t003-c07-s001",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。まずは、それぞれの名前と年齢を教えていただけますか？ 誰が誰なのか、少しずつ把握していきたいです。",
+        "memo": "まずは参加者全員の名前と年齢を知ることで、会話の基礎を築きたい。",
+        "chars": 59,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 2,
+        "round": 1,
+        "poll_position": 2,
+        "player_id": "p6",
+        "attempts": 2,
+        "wait_seconds": 4.479,
+        "speech_id": "e-20260830-010837-t003-c07-s002",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私も名前と年齢を伝えます。p6です。52歳です。まずは、皆さんのことを少しずつ知っていければと思っています。",
+        "memo": "自己紹介をして、まずは会話を始めるため",
+        "chars": 64,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 3,
+        "round": 1,
+        "poll_position": 3,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 2.181,
+        "speech_id": "e-20260830-010837-t003-c07-s003",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "初めまして皆さん。私p2です。18歳です。皆さんと一緒にゲームを楽しみたいと思います。",
+        "memo": "挨拶として、自分の名前と年齢を伝えます。",
+        "chars": 43,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 4,
+        "round": 1,
+        "poll_position": 4,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 2.484,
+        "speech_id": "e-20260830-010837-t003-c07-s004",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、こんにちは。p5です。49歳です。まずは、皆さんと一緒にゲームを楽しみたいと思います。何か情報があれば、積極的に共有していきたいと考えています。",
+        "memo": "挨拶と、ゲームへの意欲を示すため",
+        "chars": 76,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 5,
+        "round": 1,
+        "poll_position": 5,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.217,
+        "speech_id": "e-20260830-010837-t003-c07-s005",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私はp3です。48歳です。怪盗として、このゲームを楽しみたいと思います。まずは皆さんのことをよく知りたいので、積極的に話を聞きます。",
+        "memo": "まずは挨拶と自己紹介をして、ゲームへの参加意欲を表明した。",
+        "chars": 76,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 6,
+        "round": 1,
+        "poll_position": 6,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 2.578,
+        "speech_id": "e-20260830-010837-t003-c07-s006",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私は占い師のp1です。まずは皆さんのことをよく知りたいので、積極的に質問をしたいと思います。",
+        "memo": "まずは皆さんのことを知るために、積極的に話しかける必要があると判断したため",
+        "chars": 56,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 7,
+        "round": 1,
+        "poll_position": 7,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.883,
+        "speech_id": "e-20260830-010837-t003-c07-s007",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私はp8です。63歳です。皆さんと一緒にゲームを進めていきたいと思っています。まずは、皆さんのことを少しずつ知っていければと思います。",
+        "memo": "挨拶と自己紹介をした。まずはゲームを進めたいという意思表示をした。",
+        "chars": 77,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 8,
+        "round": 1,
+        "poll_position": 8,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 3.01,
+        "speech_id": "e-20260830-010837-t003-c07-s008",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私はp4です。このゲームがどんなものか、まずは皆さんと少しずつコミュニケーションを取りながら、ゲームのルールや雰囲気を掴んでいきたいと思っています。",
+        "memo": "まずは皆に自分の存在をアピールし、ゲームへの参加意欲を示すため",
+        "chars": 84,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 9,
+        "round": 2,
+        "poll_position": 1,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.65,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まずは皆さんのことを知るために、それぞれの発言をよく聞いている。",
+        "parse_failed": false
+      },
+      {
+        "order": 10,
+        "round": 2,
+        "poll_position": 2,
+        "player_id": "p1",
+        "attempts": 1,
+        "wait_seconds": 3.184,
+        "speech_id": "e-20260830-010837-t003-c07-s009",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。占い師のp1です。夜の結果から、p5が人狼だと分かりました。p5は積極的に情報共有を望んでいるとのことですので、まずはp5の行動を注意深く観察したいと思います。",
+        "memo": "夜の結果を元に、p5の行動に注目する方針を明確にした。",
+        "chars": 90,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 11,
+        "round": 2,
+        "poll_position": 3,
+        "player_id": "p5",
+        "attempts": 1,
+        "wait_seconds": 3.25,
+        "speech_id": "e-20260830-010837-t003-c07-s010",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "p1さん、ありがとうございます。p1さんの観察眼は頼りになりますね。私もp1さんの動きを注意深く見守ります。まずは皆さんと協力して、人狼を見つけ出すことを目標にしたいと考えています。",
+        "memo": "p1さんの観察を意識し、警戒心を示すことで、信頼を得るための第一歩を踏む",
+        "chars": 91,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 12,
+        "round": 2,
+        "poll_position": 4,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 2.192,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まずは皆さんのことを少しずつ知りたいので、現状の把握に努めたいと思います。",
+        "parse_failed": false
+      },
+      {
+        "order": 13,
+        "round": 2,
+        "poll_position": 5,
+        "player_id": "p7",
+        "attempts": 1,
+        "wait_seconds": 3.05,
+        "speech_id": "e-20260830-010837-t003-c07-s011",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。私はp7です。64歳です。皆さんと協力して、人狼を見つけ出すために、積極的に議論に参加していきたいと思います。",
+        "memo": "まずは皆さんとコミュニケーションを取り、共通の認識を築きたいと考えています。",
+        "chars": 65,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 14,
+        "round": 2,
+        "poll_position": 6,
+        "player_id": "p4",
+        "attempts": 1,
+        "wait_seconds": 2.947,
+        "speech_id": "e-20260830-010837-t003-c07-s012",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。p4です。p5が人狼だと分かったので、p5の行動をよく観察していきたいと思います。特にp5が夜に何を見ていたのか、気になる点があります。",
+        "memo": "p5の行動を観察することで、人狼以外の可能性を検討するため",
+        "chars": 78,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 15,
+        "round": 2,
+        "poll_position": 7,
+        "player_id": "p2",
+        "attempts": 1,
+        "wait_seconds": 3.475,
+        "speech_id": "e-20260830-010837-t003-c07-s013",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "皆さん、初めまして。p2です。p5が人狼だと分かったので、少し警戒して行動したいと思います。特にp5の発言に注目して、何か不自然な点がないか確認していきたいと思います。",
+        "memo": "p5が人狼だと分かったので、警戒して行動する。",
+        "chars": 84,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 16,
+        "round": 2,
+        "poll_position": 8,
+        "player_id": "p3",
+        "attempts": 1,
+        "wait_seconds": 3.64,
+        "speech_id": "e-20260830-010837-t003-c07-s014",
+        "spoke": true,
+        "skipped": false,
+        "speech_text": "p4さん、p5の行動を観察するのは良い考えだと思います。私もp5の動向を注視していきたいと思います。特に、p5が夜に何を見ていたのか、その情報を集めることが重要だと感じています。",
+        "memo": "p5が人狼である可能性を考慮し、その行動を把握することで、自らの身を守るため",
+        "chars": 89,
+        "truncated": false,
+        "parse_failed": false
+      },
+      {
+        "order": 17,
+        "round": 3,
+        "poll_position": 1,
+        "player_id": "p8",
+        "attempts": 1,
+        "wait_seconds": 2.555,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰を疑うべきか、明確な判断材料がないため、現状維持で様子を見ます。",
+        "parse_failed": false
+      },
+      {
+        "order": 18,
+        "round": 3,
+        "poll_position": 2,
+        "player_id": "p6",
+        "attempts": 1,
+        "wait_seconds": 2.495,
+        "spoke": false,
+        "skipped": false,
+        "memo": "まだ誰が敵か分からないので、特に発言は控えます。",
+        "parse_failed": false
+      }
+    ]
+  },
+  "pre_vote_answers": [
+    {
+      "player_id": "p1",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 4.536
+    },
+    {
+      "player_id": "p2",
+      "suspect": "p5",
+      "confidence": 4,
+      "reason": "p5が人狼だと分かったため、警戒が必要",
+      "planned_vote": "p5",
+      "parse_failed": false,
+      "attempts": 2,
+      "wait_seconds": 3.672
+    },
+    {
+      "player_id": "p3",
+      "suspect": "p5",
+      "confidence": 4,
+      "reason": "p5が人狼だと分かったため、行動を注視する必要がある",
+      "planned_vote": "p5",
+      "parse_failed": false,
+      "attempts": 3,
+      "wait_seconds": 4.575
+    },
+    {
+      "player_id": "p4",
+      "suspect": null,
+      "confidence": null,
+      "reason": "",
+      "planned_vote": null,
+      "parse_failed": true,
+      "attempts": 3,
+      "wait_seconds": 4.301
+    },
+    {
+      "player_id": "p5",
+      "suspect": "p2",
+      "confidence": 4,
+      "reason": "p2がp5を警戒していることから、p5が人狼である可能性が高いと判断",
+      "planned_vote": "p2",
+      "parse_failed": false,
+      "attempts": 2,
+      "wait_seconds": 4.008
+    },
+    {
+      "player_id": "p6",
+      "suspect": "p5",
+      "confidence": 4,
+      "reason": "p5が人狼だと分かったため、警戒が必要",
+      "planned_vote": "p5",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.844
+    },
+    {
+      "player_id": "p7",
+      "suspect": "p5",
+      "confidence": 4,
+      "reason": "p5が積極的に情報共有を望んでいることと、p1が人狼だと特定したことから疑いがある。",
+      "planned_vote": "p5",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 3.07
+    },
+    {
+      "player_id": "p8",
+      "suspect": "p5",
+      "confidence": 4,
+      "reason": "p5が人狼だと分かったため、行動を注視する必要がある",
+      "planned_vote": "p5",
+      "parse_failed": false,
+      "attempts": 1,
+      "wait_seconds": 2.932
+    }
+  ],
+  "votes": [
+    {
+      "voter": "p1",
+      "target": "p5",
+      "memo": "夜の結果から人狼だと確信。警戒が必要",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.179
+    },
+    {
+      "voter": "p2",
+      "target": "p5",
+      "memo": "p5が人狼だと判断し、まずは排除を優先",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.243
+    },
+    {
+      "voter": "p3",
+      "target": "p5",
+      "memo": "p5が人狼だと判断し、追放を推奨します",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.242
+    },
+    {
+      "voter": "p4",
+      "target": "p2",
+      "memo": "p2の警戒心は、人狼の早期発見に繋がる可能性があるため",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.32
+    },
+    {
+      "voter": "p5",
+      "target": "p2",
+      "memo": "p2の警戒心は、発言内容から人狼の可能性が高い",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.284
+    },
+    {
+      "voter": "p6",
+      "target": "p5",
+      "memo": "p5が人狼だと認識し、疑念を表明するため",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.234
+    },
+    {
+      "voter": "p7",
+      "target": "p5",
+      "memo": "p5が人狼だと判断し、まずは疑ってかかる",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.198
+    },
+    {
+      "voter": "p8",
+      "target": "p5",
+      "memo": "p5が人狼だと認識し、疑念を抱く",
+      "abstained": false,
+      "attempts": 1,
+      "parse_failed": false,
+      "wait_seconds": 2.228
+    }
+  ],
+  "result": {
+    "vote_tally": {
+      "p2": 2,
+      "p5": 6
+    },
+    "valid_vote_count": 8,
+    "abstain_count": 0,
+    "top_vote_count": 6,
+    "executed": [
+      "p5"
+    ],
+    "executed_count": 1,
+    "executed_roles": [
+      {
+        "player_id": "p5",
+        "initial_role": "werewolf",
+        "final_role": "werewolf"
+      }
+    ],
+    "no_execution_reason": null,
+    "winner": "village",
+    "valid": true,
+    "invalid_reason": null
+  },
+  "timing": {
+    "started_at": "2026-08-30T04:11:31+09:00",
+    "ended_at": "2026-08-30T04:13:48+09:00",
+    "elapsed_seconds": 137.315,
+    "ai_wait_seconds": 137.286,
+    "inference_calls": 54,
+    "machine_name": ""
+  },
+  "failure": null
+}
