@@ -2,11 +2,11 @@
   "trial_id": "e-20260830-010837-t010",
   "experiment_id": "e-20260830-010837",
   "trial_index": 10,
-  "status": "running",
+  "status": "done",
   "case_total": 17,
-  "case_done": 2,
+  "case_done": 17,
   "case_failed": 0,
-  "case_pending": 15,
-  "complete": false,
-  "updated_at": "2026-08-30T14:14:19+09:00"
+  "case_pending": 0,
+  "complete": true,
+  "updated_at": "2026-08-30T15:47:20+09:00"
 }

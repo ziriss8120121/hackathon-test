@@ -113,94 +113,94 @@
       "case_id": "e-20260830-010837-t010-c02",
       "composition": "homogeneous",
       "homogeneous_type": "ISFJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c03",
       "composition": "homogeneous",
       "homogeneous_type": "INFJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c04",
       "composition": "homogeneous",
       "homogeneous_type": "INTJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c05",
       "composition": "homogeneous",
       "homogeneous_type": "ISTP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c06",
       "composition": "homogeneous",
       "homogeneous_type": "ISFP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c07",
       "composition": "homogeneous",
       "homogeneous_type": "INFP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c08",
       "composition": "homogeneous",
       "homogeneous_type": "INTP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c09",
       "composition": "homogeneous",
       "homogeneous_type": "ESTP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c10",
       "composition": "homogeneous",
       "homogeneous_type": "ESFP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c11",
       "composition": "homogeneous",
       "homogeneous_type": "ENFP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c12",
       "composition": "homogeneous",
       "homogeneous_type": "ENTP",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c13",
       "composition": "homogeneous",
       "homogeneous_type": "ESTJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c14",
       "composition": "homogeneous",
       "homogeneous_type": "ESFJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c15",
       "composition": "homogeneous",
       "homogeneous_type": "ENFJ",
-      "status": "pending"
+      "status": "done"
     },
     {
       "case_id": "e-20260830-010837-t010-c16",
       "composition": "homogeneous",
       "homogeneous_type": "ENTJ",
-      "status": "pending"
+      "status": "done"
     }
   ],
-  "complete": false,
+  "complete": true,
   "condition_check": {
     "passed": true,
     "checked_at": "2026-08-30T01:08:37",
