@@ -42,4 +42,7 @@ def test_pages_copies_analysis_html_and_lists_experiments(tmp_path, capsys):
     assert "実験の分析" in html
     assert exp_id in html
     assert "runs/{0}/experiment.html".format(exp_id) in html
+    assert "simulator.html" in html
+    assert (out / "simulator.html").is_file()
+    assert (out / "style.css").is_file()
     assert "push は人間が行う" in captured.out

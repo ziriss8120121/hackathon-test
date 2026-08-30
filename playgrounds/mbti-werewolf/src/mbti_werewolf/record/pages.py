@@ -54,6 +54,7 @@ def build_pages(
     (dest / ".nojekyll").write_text("", encoding="utf-8")
     (dest / "index.html").write_text(render_index(entries, experiments), encoding="utf-8")
     (dest / "404.html").write_text(_NOT_FOUND, encoding="utf-8")
+    _copy_look_preview(dest)
     return dest
 
 
@@ -68,6 +69,16 @@ def _copy_html_tree(source: Path, dest: Path) -> None:
         target = dest / "runs" / path.relative_to(source)
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, target)
+
+
+def _copy_look_preview(dest: Path) -> None:
+    """操作画面の見た目（実行できない静的ページ）をサイトへ載せる。"""
+
+    static = Path(__file__).resolve().parent.parent / "web" / "static"
+    for name in ("simulator.html", "style.css"):
+        src = static / name
+        if src.is_file():
+            shutil.copy2(src, dest / name)
 
 
 def collect_experiments(runs_dir: Path) -> List[Dict[str, Any]]:
@@ -371,7 +382,7 @@ a {{ color: var(--accent); }}
 <body>
 <main>
   <h1>MBTI人狼 実行結果</h1>
-  <p class="sub">開発環境なしで結果を見るための公開ページ。実験{experiment_count}件、ケース{case_count}件。実行はできない。<a href="runs/latest.html">最新の結果</a></p>
+  <p class="sub">開発環境なしで結果を見るための公開ページ。実験{experiment_count}件、ケース{case_count}件。実行はできない。<a href="runs/latest.html">最新の結果</a>　<a href="simulator.html">操作画面の見た目</a></p>
   <h2>実験の分析</h2>
   <div class="cards">
 {experiment_cards}
