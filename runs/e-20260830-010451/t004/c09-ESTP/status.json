@@ -1,0 +1,17 @@
+{
+  "case_id": "e-20260830-010451-t004-c09",
+  "trial_id": "e-20260830-010451-t004",
+  "experiment_id": "e-20260830-010451",
+  "composition": "homogeneous",
+  "homogeneous_type": "ESTP",
+  "status": "done",
+  "phase": "finished",
+  "round": 3,
+  "max_rounds": 6,
+  "speech_count": 14,
+  "inference_calls": 48,
+  "attempt": 1,
+  "started_at": "2026-08-30T07:23:25+09:00",
+  "updated_at": "2026-08-30T07:27:08+09:00",
+  "error": null
+}
