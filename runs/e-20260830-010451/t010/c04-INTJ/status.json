@@ -1,0 +1,20 @@
+{
+  "case_id": "e-20260830-010451-t010-c04",
+  "trial_id": "e-20260830-010451-t010",
+  "experiment_id": "e-20260830-010451",
+  "composition": "homogeneous",
+  "homogeneous_type": "INTJ",
+  "status": "failed",
+  "phase": null,
+  "round": null,
+  "max_rounds": 6,
+  "speech_count": null,
+  "inference_calls": null,
+  "attempt": 2,
+  "started_at": "2026-08-30T19:26:13+09:00",
+  "updated_at": "2026-08-30T19:26:13+09:00",
+  "error": {
+    "kind": "internal",
+    "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+  }
+}

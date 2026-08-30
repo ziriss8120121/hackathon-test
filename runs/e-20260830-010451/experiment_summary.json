@@ -1,0 +1,1432 @@
+{
+  "experiment_id": "e-20260830-010451",
+  "directory": "/Users/mayushiraishi/ai-work/hackathon/hackathon-test/runs/e-20260830-010451",
+  "resumed": false,
+  "case_count": 170,
+  "skipped_count": 0,
+  "done_count": 154,
+  "failed_count": 16,
+  "invalid_count": 0,
+  "trial_complete_count": 9,
+  "inference_calls": 10304,
+  "elapsed_seconds": 65251.475,
+  "ai_wait_seconds": 65246.046,
+  "seconds_per_call": 6.332,
+  "seconds_per_done_case": 423.711,
+  "output_bytes": 228348,
+  "case_output_bytes": 184863,
+  "bytes_per_done_case": 1200,
+  "discussion_stop_reasons": {
+    "all_pass": 1
+  },
+  "cases": [
+    {
+      "case_id": "e-20260830-010451-t001-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c02",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c04",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c05",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c06",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c08",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c09",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c12",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c13",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c14",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c15",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t001-c16",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c00",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c02",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c04",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c05",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c08",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c12",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c13",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c14",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c15",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t002-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c02",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c03",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c04",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c05",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c07",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c08",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c09",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c12",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c13",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t003-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c02",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c04",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c05",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c08",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c10",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c12",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c13",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t004-c16",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c02",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c03",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c04",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c05",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c08",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c11",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c12",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c13",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t005-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c02",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c04",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c05",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c08",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c10",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c12",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c13",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c14",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t006-c16",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c02",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c04",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c05",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c06",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c08",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c12",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c13",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c15",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t007-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c00",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c01",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c02",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c03",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c04",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c05",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c06",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c08",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c09",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c11",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c12",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c13",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t008-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c00",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c01",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c02",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c03",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c04",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c05",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c06",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c07",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c08",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c09",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c10",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c11",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c12",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c13",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c14",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c15",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t009-c16",
+      "status": "done",
+      "winner": "village",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c00",
+      "status": "done",
+      "winner": "werewolf",
+      "valid": true,
+      "attempt": 1,
+      "error": null
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c01",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c02",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c03",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c04",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c05",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c06",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c07",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c08",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c09",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c10",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c11",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c12",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c13",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c14",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c15",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    },
+    {
+      "case_id": "e-20260830-010451-t010-c16",
+      "status": "failed",
+      "winner": null,
+      "valid": false,
+      "attempt": 2,
+      "error": {
+        "kind": "internal",
+        "message": "プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2"
+      }
+    }
+  ]
+}

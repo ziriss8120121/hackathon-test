@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ケース e-20260830-010451-t010-c16（失敗）</title>
+<style>
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --line: #e2e5ea;
+  --text: #1f2328;
+  --muted: #667085;
+  --accent: #3b66d6;
+  --village: #1f9d55;
+  --werewolf: #d1373f;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0 0 64px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.7;
+}
+main { max-width: 960px; margin: 0 auto; padding: 20px 16px 0; }
+.site-header { background: #fff; border-bottom: 1px solid var(--line); }
+.site-header-inner { max-width: 960px; margin: 0 auto; padding: 14px 16px; display: flex;
+  align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { font-size: 17px; font-weight: 700; }
+.brand-accent { color: var(--accent); font-weight: 500; }
+.chip { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line);
+  color: var(--muted); font-family: ui-monospace, Menlo, monospace; }
+.chip.village { border-color: var(--village); color: var(--village); }
+.chip.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.site-nav { max-width: 960px; margin: 0 auto; display: flex; gap: 4px; overflow-x: auto;
+  padding: 0 16px 10px; }
+.site-nav a { flex-shrink: 0; font-size: 12px; color: var(--muted); text-decoration: none;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid transparent; }
+.site-nav a:hover { color: var(--text); border-color: var(--line); }
+h1 { font-size: 19px; margin: 0 0 4px; }
+h2 { font-size: 16px; margin: 36px 0 12px; padding-left: 10px; border-left: 3px solid var(--accent); }
+h3 { font-size: 13px; color: var(--muted); margin: 20px 0 8px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.card .label { color: var(--muted); font-size: 12px; }
+.card .value { font-size: 17px; margin-top: 4px; word-break: break-word; }
+.village { color: var(--village); }
+.werewolf { color: var(--werewolf); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+tbody tr:nth-child(even) { background: rgba(15, 23, 42, 0.025); }
+td.memo { color: var(--muted); font-size: 12px; }
+/* 項目名と値の2列だけの表。項目名を折り返させず、値側を伸ばす。 */
+table.kv th[scope="row"] { width: 1%; }
+table.kv td { overflow-wrap: anywhere; }
+td.quiet { color: var(--muted); }
+td.id { font-family: ui-monospace, Menlo, monospace; white-space: nowrap; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--muted); }
+.badge.village { border-color: var(--village); color: var(--village); }
+.badge.werewolf { border-color: var(--werewolf); color: var(--werewolf); }
+.alert { background: #fdecee; border: 1px solid #f3b4bb; border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 20px; }
+.note { color: var(--muted); font-size: 12px; margin-top: 36px; border-top: 1px solid var(--line);
+  padding-top: 16px; }
+.links { display: flex; gap: 12px; flex-wrap: wrap; font-size: 13px; margin: 0 0 8px; }
+
+/* 狭い画面では表を1行1ブロックへ折り返す。要求定義書がスマートフォンから結果を
+   開くことを重視項目に挙げており、横スクロールのままだとprivate memoの列が画面外
+   に出て読めない。各セルの見出しは data-label から出す。
+
+   table と tbody も display: block にする。display: table のままだと表のレイアウト
+   計算が働き、width: 100% より内容の最小幅が優先されて画面からはみ出す。 */
+@media (max-width: 640px) {
+  table.stack, table.stack tbody { display: block; width: 100%; }
+  table.stack thead { display: none; }
+  table.stack tr { display: block; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  table.stack tr:last-child { border-bottom: none; }
+  table.stack td { display: flex; gap: 10px; padding: 2px 0; border: none; white-space: normal; }
+  table.stack td::before {
+    content: attr(data-label);
+    flex: 0 0 6.5em;
+    color: var(--muted);
+    font-size: 11px;
+    padding-top: 2px;
+  }
+  table.stack td > span.grow { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  /* 中身が空のセルは行から消す。横並びの表では列を揃えるために必要だが、
+     縦に積むと項目名だけの行になって読みにくい。 */
+  table.stack td.blank { display: none; }
+  th, td { padding: 7px 8px; font-size: 12px; overflow-wrap: anywhere; }
+}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="site-header-inner">
+<div class="brand">MBTI人狼 <span class="brand-accent">ケース結果</span></div>
+<div class="chip werewolf">失敗</div>
+</div></header>
+<main>
+<h1>e-20260830-010451-t010-c16</h1>
+<p class="sub">同質構成（ENTJ）</p>
+<div class="alert"><strong>このケースは完走しなかった。</strong><br>種別: internal<br>内容: プロンプトのディレクトリがない: /Users/mayushiraishi/ai-work/hackathon/hackathon-test/playgrounds/mbti-werewolf/src/mbti_werewolf/agents/prompts/v2<br>試行回数: 2</div>
+<p class="note">再実行するには <code>--resume</code> を付けて同じ実験IDを指定する。完了済みのケースは実行されない。</p>
+</main>
+</body>
+</html>

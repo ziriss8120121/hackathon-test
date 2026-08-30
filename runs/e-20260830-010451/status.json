@@ -1,0 +1,17 @@
+{
+  "experiment_id": "e-20260830-010451",
+  "status": "done",
+  "trial_total": 10,
+  "trial_done": 10,
+  "trial_complete": 9,
+  "case_total": 170,
+  "case_done": 154,
+  "case_failed": 16,
+  "case_skipped": 0,
+  "case_pending": 0,
+  "current_trial_id": null,
+  "current_case_id": null,
+  "started_at": "2026-08-30T01:04:51+09:00",
+  "updated_at": "2026-08-30T19:26:13+09:00",
+  "error": null
+}
