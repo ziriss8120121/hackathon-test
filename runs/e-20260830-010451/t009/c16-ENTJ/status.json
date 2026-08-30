@@ -1,17 +1,17 @@
 {
-  "case_id": "e-20260830-010451-t009-c12",
+  "case_id": "e-20260830-010451-t009-c16",
   "trial_id": "e-20260830-010451-t009",
   "experiment_id": "e-20260830-010451",
   "composition": "homogeneous",
-  "homogeneous_type": "ENTP",
+  "homogeneous_type": "ENTJ",
   "status": "done",
   "phase": "finished",
   "round": 3,
   "max_rounds": 6,
-  "speech_count": 9,
-  "inference_calls": 52,
+  "speech_count": 8,
+  "inference_calls": 61,
   "attempt": 1,
-  "started_at": "2026-08-30T18:30:06+09:00",
-  "updated_at": "2026-08-30T18:35:41+09:00",
+  "started_at": "2026-08-30T18:59:18+09:00",
+  "updated_at": "2026-08-30T19:04:03+09:00",
   "error": null
 }
