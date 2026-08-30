@@ -1,0 +1,115 @@
+{
+  "schema_version": "2",
+  "case_id": "e-20260830-010837-t010-c03",
+  "judge_criteria_version": "v1",
+  "judge_brain": {
+    "provider": "claude-code",
+    "model": "sonnet",
+    "endpoint_kind": "subscription_cli",
+    "name": "claude-code:sonnet"
+  },
+  "judge_batch_size": 8,
+  "evaluated_at": "2026-08-30T21:14:41+09:00",
+  "speeches": [
+    {
+      "speech_id": "e-20260830-010837-t010-c03-s001",
+      "labels": [
+        "claim",
+        "hypothesis",
+        "intent"
+      ],
+      "mentions": [
+        "p1"
+      ],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010837-t010-c03-s002",
+      "labels": [
+        "claim",
+        "intent"
+      ],
+      "mentions": [
+        "p1"
+      ],
+      "stances": [],
+      "parse_failed": false
+    },
+    {
+      "speech_id": "e-20260830-010837-t010-c03-s003",
+      "labels": [
+        "claim",
+        "defend",
+        "intent"
+      ],
+      "mentions": [
+        "p3"
+      ],
+      "stances": [
+        {
+          "target": "p3",
+          "direction": "defend",
+          "strength": 2
+        }
+      ],
+      "parse_failed": false
+    }
+  ],
+  "stance_series": [
+    {
+      "at_speech_id": "e-20260830-010837-t010-c03-s001",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010837-t010-c03-s002",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": null,
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    },
+    {
+      "at_speech_id": "e-20260830-010837-t010-c03-s003",
+      "current_stances": {
+        "p1": null,
+        "p2": null,
+        "p3": null,
+        "p4": {
+          "target": "p3",
+          "direction": "defend",
+          "strength": 2
+        },
+        "p5": null,
+        "p6": null,
+        "p7": null,
+        "p8": null
+      },
+      "suspicion_distribution": {},
+      "entropy": 0.0
+    }
+  ],
+  "timing": {
+    "elapsed_seconds": 4.415,
+    "ai_wait_seconds": 4.414,
+    "inference_calls": 1
+  }
+}
