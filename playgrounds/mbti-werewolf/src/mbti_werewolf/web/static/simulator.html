@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBTI人狼 操作画面（見た目）</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .preview-banner {
+      background: #fff7e8;
+      border: 1px solid #efcc8a;
+      color: #7a4e00;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin: 0 0 16px;
+      font-size: 13px;
+    }
+    fieldset {
+      border: 0;
+      padding: 0;
+      margin: 0;
+      min-inline-size: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="brand">MBTI人狼 <span class="brand-accent">操作画面</span></div>
+      <nav>
+        <a href="./simulator.html">実行</a>
+        <a href="./">実験一覧</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <p class="preview-banner">
+      これは操作画面の見た目です。公開ページからは試合を開始できません。
+      実行するには、リポジトリを clone してローカルで
+      <code>python -m mbti_werewolf ui</code> を起動してください。
+      <a href="./">結果一覧へ戻る</a>
+    </p>
+    <h1>実験を実行する</h1>
+    <p class="sub">条件を選んで開始します。長い実行はコマンドの方が安全です。</p>
+    <form class="panel" id="run-form">
+      <fieldset disabled>
+        <div class="grid">
+          <label>人物プール
+            <select name="pool_id">
+              <option selected>pool-001</option>
+            </select>
+          </label>
+          <label>パターンセット
+            <select name="pattern_set_id">
+              <option selected>pattern-set-001</option>
+            </select>
+          </label>
+          <label>ルールセット
+            <select name="rule_set_id">
+              <option selected>onenight-8p-v0.7</option>
+            </select>
+          </label>
+          <label>Trial数
+            <input name="trial_count" type="number" value="1">
+          </label>
+          <label>Trial範囲（例 3-7）
+            <input name="trial_range" placeholder="空なら全部" value="">
+          </label>
+          <label>seed
+            <input name="base_seed" type="number" value="42">
+          </label>
+          <label>max_rounds
+            <input name="max_rounds" type="number" value="6">
+          </label>
+          <label>max_speeches
+            <input name="max_speeches" type="number" value="40">
+          </label>
+          <label>max_speech_chars
+            <input name="max_speech_chars" type="number" value="200">
+          </label>
+          <label>脳
+            <select name="brain_provider">
+              <option value="stub">stub</option>
+              <option value="ollama" selected>ollama</option>
+              <option value="gemini">gemini</option>
+            </select>
+          </label>
+          <label>モデル
+            <input name="brain_model" placeholder="省略可" value="gemma3:4b">
+          </label>
+          <label>人格プロンプト版
+            <input name="persona_prompt_version" value="v2">
+          </label>
+          <label>Judge基準版
+            <input name="judge_criteria_version" value="v1">
+          </label>
+          <label>ケース絞り込み
+            <input name="cases" placeholder="例: c00" value="c00">
+          </label>
+        </div>
+        <div class="actions">
+          <button type="button" disabled>実行する</button>
+        </div>
+        <p class="muted">公開ページでは実行できません。</p>
+      </fieldset>
+    </form>
+  </main>
+</body>
+</html>
